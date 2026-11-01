@@ -47,6 +47,8 @@ _prcb:
 .extern _bss_start
 .extern _bss_end
 
+.extern _uart_write
+
 copy_data:
 	lda _data_load, g0
 	lda _data_start, g1
@@ -111,21 +113,37 @@ _start:
 	modpc g0, g1, g2
 
 1:
-	ldconst 'b', g0
+	lda _letter, g3
+	ld (g3), g0
 	call _uart_write
 	b 1b
 
-.extern _uart_write
 timer_irq:
-	ldconst 'a', g0
-	call _uart_write
+	lda _letter, r4
+	ld (r4), r3
+
+	ldconst 'z', r5
+	cmpobe r3, r5, 1f
+	b 2f
+1:
+	ldconst '0', r3
+	b 3f
+2:
+	addo 1, r3, r3
+3:
+	st r3, (r4)
 	ret
 
 serial_irq:
 	ret
+
+.section .data
+_letter:
+	.word '0'
 
 .section .int
 _int:
 	.space 1028
 	.space 12
 _int_stack:
+	.space 512
