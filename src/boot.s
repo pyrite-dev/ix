@@ -34,8 +34,8 @@ _prcb:
 	.space	4
 	.word	0x0000027f
 	.word	0x0000027f
-	.word	0
-	.word	0
+	.word	0x00000000
+	.word	0x00000000
 	.space	32
 
 .section .text
@@ -44,21 +44,8 @@ _prcb:
 .extern _data_load
 .extern _data_start
 .extern _data_end
-
-init_irq:
-	lda timer_irq, g0
-	ldconst _int + (1 + 8) * 4, g1
-	st g0, (g1)
-
-	lda serial_irq, g0
-	ldconst _int + (1 + 9) * 4, g1
-	st g0, (g1)
-
-	ldconst 0xff090800, g0
-	ldconst 0xff000004, g1
-	synmov g0, g1
-
-	ret
+.extern _bss_start
+.extern _bss_end
 
 copy_data:
 	lda _data_load, g0
@@ -76,23 +63,56 @@ copy_data:
 1:
 	ret
 
+clear_bss:
+	lda _bss_start, g0
+	lda _bss_end, g1
+1:
+	cmpobge g0, g1, 1f
+	
+	mov 0, g2
+	st g2, (g0)
+
+	addo 4, g0, g0
+	b 1b
+1:
+	ret
+
+_icr:
+	.word 0xff090800
+
+init_irq:
+	lda timer_irq, g0
+	ldconst _int + (1 + 8) * 4, g1
+	st g0, (g1)
+
+	lda serial_irq, g0
+	ldconst _int + (1 + 9) * 4, g1
+	st g0, (g1)
+
+	lda _icr, g0
+	ldconst 0xff000004, g1
+	synmov g1, g0
+
+	ret
+
 _start:
 	ldconst 0x00180000, fp
 	ldconst 0x00180040, sp
 	mov 0, pfp
 
 	call copy_data
-
+	call clear_bss
 	call init_irq
+
 	call _kmain
 
-	ldconst 0, g0
-	shlo 16, g0, g0
-	ldconst 15, g1
-	shlo 16, g1, g1
+	shlo 16, 0, g0
+	shlo 16, 31, g1
 	modpc g0, g1, g2
 
 1:
+	ldconst 'b', g0
+	call _uart_write
 	b 1b
 
 .extern _uart_write

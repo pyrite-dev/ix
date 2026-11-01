@@ -22,20 +22,22 @@ SECTIONS {
 	} > FLASH
 
 	.data : {
-		. = . + 96;
+		. = . + 100;
 		. = ALIGN(4);
 		_data_start = .;
 		*(.data);
 		. = ALIGN(4);
 		_data_end = .;
 	} > RAM AT > FLASH
-	_data_load = LOADADDR(.data) + 96;
+	_data_load = LOADADDR(.data) + 100;
 
 	.prcb ORIGIN(RAM) - 80 : {
 		*(.prcb);
 	} > FLASH
 
 	.bss (NOLOAD) : {
+		. = ALIGN(4);
+		_bss_start = .;
 		*(.bss);
 		*(COMMON);
 	} > RAM
@@ -43,6 +45,8 @@ SECTIONS {
 	.int (NOLOAD) : {
 		. = ALIGN(4);
 		*(.int);
+		. = ALIGN(4);
+		_bss_end = .;
 	} > RAM
 }
 
