@@ -14,7 +14,7 @@ os.bin: src/os.out
 	$(OBJCOPY) -O binary --gap-fill 0xff src/os.out $@
 
 src/os.out: src/linker.ld $(OBJS)
-	$(LD) -ASA -T src/linker.ld -o $@ $(OBJS)
+	$(LD) -ASA -T src/linker.ld -o $@ $(OBJS) `$(CC) -print-libgcc-file-name`
 
 .s.o:
 	$(AS) -ASA -o $@ $<
