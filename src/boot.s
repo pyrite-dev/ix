@@ -16,7 +16,7 @@ _sat:
 	.word	0x00fc00fb
 	.space	8
 	.word	_sysproc
-	.word	0x304000fb
+	.word	0x304400fb
 
 .section .sysproc
 .global	 _sysproc
@@ -46,11 +46,11 @@ _prcb:
 .extern _data_end
 
 init_irq:
-	ldconst timer_irq, g0
+	lda timer_irq, g0
 	ldconst _int + (1 + 8) * 4, g1
 	st g0, (g1)
 
-	ldconst serial_irq, g0
+	lda serial_irq, g0
 	ldconst _int + (1 + 9) * 4, g1
 	st g0, (g1)
 
@@ -95,7 +95,10 @@ _start:
 1:
 	b 1b
 
+.extern _uart_write
 timer_irq:
+	ldconst 'a', g0
+	call _uart_write
 	ret
 
 serial_irq:
@@ -104,4 +107,5 @@ serial_irq:
 .section .int
 _int:
 	.space 1028
+	.space 12
 _int_stack:
