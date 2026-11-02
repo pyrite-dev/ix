@@ -40,7 +40,9 @@ _prcb:
 
 .section .text
 .global _start
+
 .extern _kmain
+
 .extern _data_load
 .extern _data_start
 .extern _data_end
@@ -48,6 +50,9 @@ _prcb:
 .extern _bss_end
 
 .extern _uart_write
+
+.extern _timer_irq
+.extern _serial_irq
 
 copy_data:
 	lda _data_load, g0
@@ -83,11 +88,11 @@ _icr:
 	.word 0xff090800
 
 init_irq:
-	lda timer_irq, g0
+	lda _timer_irq, g0
 	ldconst _int + (1 + 8) * 4, g1
 	st g0, (g1)
 
-	lda serial_irq, g0
+	lda _serial_irq, g0
 	ldconst _int + (1 + 9) * 4, g1
 	st g0, (g1)
 
@@ -118,30 +123,13 @@ _start:
 	call _uart_write
 	b 1b
 
-timer_irq:
-	lda _letter, r4
-	ld (r4), r3
-
-	ldconst 'z', r5
-	cmpobe r3, r5, 1f
-	b 2f
-1:
-	ldconst '0', r3
-	b 3f
-2:
-	addo 1, r3, r3
-3:
-	st r3, (r4)
-	ret
-
-serial_irq:
-	ret
-
 .section .data
+.global _letter
 _letter:
 	.word '0'
 
 .section .int
+.global _int
 _int:
 	.space 1028
 	.space 12

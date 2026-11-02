@@ -46,3 +46,15 @@ void kmain(void){
 	uart_init();
 	timer_init();
 }
+
+__attribute__((interrupt))
+void timer_irq(void* s){
+	extern unsigned int letter;
+
+	if(letter == 'z') letter = '0';
+	letter++;
+}
+
+__attribute__((interrupt))
+void serial_irq(void* s){
+}

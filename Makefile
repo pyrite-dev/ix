@@ -1,5 +1,5 @@
 AS = i960-unknown-coff-as
-CC = i960-unknown-coff-gcc
+CC = i960-unknown-coff-gcc -fPIC
 LD = i960-unknown-coff-ld
 OBJCOPY = i960-unknown-coff-objcopy
 
