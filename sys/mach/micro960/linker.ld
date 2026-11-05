@@ -40,6 +40,9 @@ SECTIONS {
 		_bss_start = .;
 		*(.bss);
 		*(COMMON);
+		. = ALIGN(4);
+		_kernel_stack = .;
+		. += 4096;
 	} > RAM
 
 	.int (NOLOAD) : {

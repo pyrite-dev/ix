@@ -1,0 +1,16 @@
+CC = i960-unknown-coff-gcc
+CFLAGS = -msa
+
+AS = i960-unknown-coff-as
+ASFLAGS = -ASA
+
+LD = i960-unknown-coff-ld
+LDFLAGS =
+
+OBJCOPY = i960-unknown-coff-objcopy
+OCFLAGS = -O binary
+
+CPP = i960-unknown-coff-cpp
+CPPFLAGS =
+
+KERNEL = kernel.bin

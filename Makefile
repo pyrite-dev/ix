@@ -1,26 +1,22 @@
-AS = i960-unknown-coff-as
-CC = i960-unknown-coff-gcc -fPIC
-LD = i960-unknown-coff-ld
-OBJCOPY = i960-unknown-coff-objcopy
+.PHONY: all depend clean
 
-OBJS = src/boot.o src/main.o
+MACH = micro960
+ARCH = i960
+CONFIG = GENERIC
+TOP = .
 
-.PHONY: all clean
-.SUFFIXES: .c .s .o
+include sys/mach/$(MACH)/config/$(CONFIG)
 
-all: os.bin
+all: compile
 
-os.bin: src/os.out
-	$(OBJCOPY) -O binary --gap-fill 0xff src/os.out $@
+compile: depend
+	cd $@ && $(MAKE) MACH=$(MACH) ARCH=$(ARCH) CONFIG=$(CONFIG) TOP=..
 
-src/os.out: src/linker.ld $(OBJS)
-	$(LD) -ASA -T src/linker.ld -o $@ $(OBJS) `$(CC) -print-libgcc-file-name`
-
-.s.o:
-	$(AS) -ASA -o $@ $<
-
-.c.o:
-	$(CC) -msa -c -o $@ $<
+depend:
+	mkdir -p compile
+	./tools/prelude.sh kernel $(KERNEL) > compile/Makefile
+	./tools/makedep.sh `find sys/mach/$(MACH) sys/arch/$(ARCH) sys/common -name "*.c" -or -name "*.s" -or -name "*.S"` >> compile/Makefile
+	cat sys/mach/$(MACH)/Makefile.in >> compile/Makefile
 
 clean:
-	rm -f os.bin src/*.out src/*.o
+	rm -rf compile
