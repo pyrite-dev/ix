@@ -1,0 +1,2 @@
+kernel: $(OBJS) $(KERNEL_OBJS)
+	$(LD) -T $(TOP)/sys/mach/$(MACH)/linker.ld -o $@ $(OBJS) $(KERNEL_OBJS)

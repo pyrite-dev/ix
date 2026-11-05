@@ -26,7 +26,7 @@ _sysproc:
 	.space	48
 
 .section .prcb
-.global _prcb
+.global  _prcb
 _prcb:
 	.space	4
 	.word	0x00000000

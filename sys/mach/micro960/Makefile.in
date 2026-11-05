@@ -1,5 +1,5 @@
+KERNEL_OBJS = 
+
 kernel.bin: kernel
 	$(OBJCOPY) $(OCFLAGS) kernel $@
 
-kernel: $(OBJS)
-	$(LD) -T $(TOP)/sys/mach/$(MACH)/linker.ld -o $@ $(OBJS)

@@ -1,4 +1,4 @@
-.PHONY: all depend clean
+.PHONY: all clean
 
 MACH = micro960
 ARCH = i960
@@ -7,16 +7,18 @@ TOP = .
 
 include sys/mach/$(MACH)/config/$(CONFIG)
 
-all: compile
+INHERIT = MACH=$(MACH) ARCH=$(ARCH) CONFIG=$(CONFIG) KERNEL=$(KERNEL) TOP=..
 
-compile: depend
-	cd $@ && $(MAKE) MACH=$(MACH) ARCH=$(ARCH) CONFIG=$(CONFIG) TOP=..
+all: world
 
-depend:
+world: compile
+	cd compile && $(INHERIT) $(MAKE)
+
+compile:
 	mkdir -p compile
-	./tools/prelude.sh kernel $(KERNEL) > compile/Makefile
-	./tools/makedep.sh `find sys/mach/$(MACH) sys/arch/$(ARCH) sys/common -name "*.c" -or -name "*.s" -or -name "*.S"` >> compile/Makefile
-	cat sys/mach/$(MACH)/Makefile.in >> compile/Makefile
+	mkdir -p compile/sys
+	$(INHERIT) ./tools/mkmake.sh all > compile/Makefile
+	$(INHERIT) ./tools/mkmake.sh kernel > compile/Makefile.kernel
 
 clean:
 	rm -rf compile

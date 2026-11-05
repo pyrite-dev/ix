@@ -41,11 +41,6 @@ clear_bss:
 1:
 	ret
 
-init_sections:
-	call copy_data
-	call clear_bss
-	ret
-
 _start:
 #ifdef __KERNEL__
 	mov 0, fp
@@ -53,7 +48,8 @@ _start:
 	lda _kernel_stack, pfp
 #endif
 
-	call init_sections
+	call copy_data
+	call clear_bss
 
 #ifdef __KERNEL__
 	call _kmain

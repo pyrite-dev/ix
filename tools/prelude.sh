@@ -1,5 +1,4 @@
 #!/bin/sh
-
 echo "include \$(TOP)/sys/mach/\$(MACH)/config/\$(CONFIG)"
 echo ""
 if [ "$1" = "kernel" ]; then
