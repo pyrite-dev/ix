@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 
+my @whitelist = ("CC", "CFLAGS", "AS", "ASFLAGS", "LD", "LDFLAGS", "OBJCOPY", "CPP", "CPPFLAGS", "KERNEL");
 my %options = (
 	"CC" => "cc",
 	"CFLAGS" => "",
@@ -47,7 +48,7 @@ while(my $l = <IN>){
 close(IN);
 
 open(MKCFG, ">", "compile/Makefile.config");
-foreach my $option (sort { $a cmp $b } keys(%options)){
+foreach my $option (@whitelist){
 	print(MKCFG "$option = $options{$option}\n");
 }
 close(MKCFG);
