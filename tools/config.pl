@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-my @whitelist = ("CC", "CFLAGS", "AS", "ASFLAGS", "LD", "LDFLAGS", "OBJCOPY", "CPP", "CPPFLAGS", "KERNEL");
+my @whitelist = ("CC", "CFLAGS", "AS", "ASFLAGS", "LD", "LDFLAGS", "OBJCOPY", "OCFLAGS", "CPP", "CPPFLAGS", "KERNEL");
 my %options = (
 	"CC" => "cc",
 	"CFLAGS" => "",
