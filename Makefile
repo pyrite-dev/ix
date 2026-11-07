@@ -5,9 +5,7 @@ ARCH = i960
 CONFIG = GENERIC
 TOP = .
 
-include sys/mach/$(MACH)/config/$(CONFIG)
-
-INHERIT = MACH=$(MACH) ARCH=$(ARCH) CONFIG=$(CONFIG) KERNEL=$(KERNEL) TOP=..
+INHERIT = MACH=$(MACH) ARCH=$(ARCH) CONFIG=$(CONFIG) TOP=..
 
 all: world
 
@@ -19,6 +17,7 @@ compile:
 	mkdir -p compile/sys
 	$(INHERIT) ./tools/mkmake.sh all > compile/Makefile
 	$(INHERIT) ./tools/mkmake.sh kernel > compile/Makefile.kernel
+	./tools/config.pl sys/mach/$(MACH)/config/$(CONFIG)
 
 clean:
 	rm -rf compile

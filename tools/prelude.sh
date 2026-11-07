@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "include \$(TOP)/sys/mach/\$(MACH)/config/\$(CONFIG)"
+echo "include Makefile.config"
 echo ""
 if [ "$1" = "kernel" ]; then
 	echo "CPPFLAGS += -D__KERNEL__"

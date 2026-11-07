@@ -1,16 +1,18 @@
-CC = i960-unknown-coff-gcc
-CFLAGS = -msa
+# GENERIC kernel for Micro960
 
-AS = i960-unknown-coff-as
-ASFLAGS = -ASA
+options CC="i960-unknown-coff-gcc"
+options CFLAGS="-msa"
 
-LD = i960-unknown-coff-ld
-LDFLAGS =
+options AS="i960-unknown-coff-as"
+options ASFLAGS="-ASA"
 
-OBJCOPY = i960-unknown-coff-objcopy
-OCFLAGS = -O binary
+options LD="i960-unknown-coff-ld"
+options LDFLAGS=""
 
-CPP = i960-unknown-coff-cpp
-CPPFLAGS =
+options OBJCOPY="i960-unknown-coff-objcopy"
+options OCFLAGS="-O binary"
 
-KERNEL = kernel.bin
+options CPP="i960-unknown-coff-cpp"
+options CPPFLAGS=""
+
+options KERNEL="kernel.bin"
