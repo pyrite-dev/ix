@@ -9,4 +9,6 @@
 #define __END_EXTERN_C__
 #endif
 
+#define __packed	__attribute__((__packed__))
+
 #endif
