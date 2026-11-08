@@ -1,9 +1,8 @@
 #!/bin/sh
 echo "include Makefile.config"
 echo ""
-if [ "$1" = "kernel" ]; then
-	echo "CPPFLAGS += -D__KERNEL__"
-	echo ""
+if [ -f "$1/Makefile.prelude" ]; then
+	cat $1/Makefile.prelude
 fi
 echo ".PHONY: all clean"
 echo ""

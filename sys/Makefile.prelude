@@ -1,0 +1,2 @@
+CPPFLAGS += -D__KERNEL__ -I$(TOP)/sys/include
+

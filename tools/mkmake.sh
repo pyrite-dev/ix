@@ -10,12 +10,12 @@ if [ "$1" = "all" ]; then
 	echo "clean:"
 	echo "	\$(MAKE) -f Makefile.kernel clean"
 elif [ "$1" = "kernel" ]; then
-	./tools/prelude.sh kernel "\$(KERNEL)"
+	./tools/prelude.sh sys "\$(KERNEL)"
 	(
 		MATCH='-name "*.c" -or -name "*.s" -or -name "*.S"'
 
 		eval find \
-			sys/mach/$MACH \
+			sys/mach/$MACH/$MACH \
 			sys/arch/$ARCH \
 			sys/common \
 			-maxdepth 1 $MATCH

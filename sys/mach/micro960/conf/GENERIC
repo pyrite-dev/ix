@@ -1,0 +1,18 @@
+# GENERIC kernel for Micro960
+
+makeoptions CC="i960-unknown-coff-gcc"
+makeoptions CFLAGS="-msa"
+
+makeoptions AS="i960-unknown-coff-as"
+makeoptions ASFLAGS="-ASA"
+
+makeoptions LD="i960-unknown-coff-ld"
+makeoptions LDFLAGS=""
+
+makeoptions OBJCOPY="i960-unknown-coff-objcopy"
+makeoptions OCFLAGS="-O binary"
+
+makeoptions CPP="i960-unknown-coff-cpp"
+makeoptions CPPFLAGS=""
+
+makeoptions KERNEL="kernel.bin"
