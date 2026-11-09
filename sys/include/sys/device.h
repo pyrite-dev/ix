@@ -3,10 +3,14 @@
 
 /* DO NOT REMOVE THE COMMENTS BELOW! */
 /* locator: addr */
+/* locator: align */
+/* locator: io */
 /* locator: irq */
 
 enum DEVICE_LOCATOR {
 	LOCATOR_ADDR = 0,
+	LOCATOR_ALIGN,
+	LOCATOR_IO,
 	LOCATOR_IRQ,
 	LOCATOR_COUNT
 };

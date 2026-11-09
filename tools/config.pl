@@ -79,10 +79,6 @@ sub parse_config {
 				}
 			}
 
-			use Data::Dumper;
-
-			print Dumper @dev_locators;
-
 			push(@devhashes, {
 				"dev" => $dev,
 				"unit" => $unit,
@@ -127,6 +123,7 @@ sub parse_config {
 
 parse_config("sys/conf/std");
 parse_config($ARGV[0]);
+parse_config("sys/conf/files.std");
 
 open(MKCFG, ">", "compile/Makefile.config");
 foreach my $makeoption (sort { $a cmp $b } keys(%makeoptions)){
