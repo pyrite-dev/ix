@@ -1,0 +1,2 @@
+lib/libc.a: $(OBJS)
+	$(AR) $(ARFLAGS) $@ $(OBJS)
