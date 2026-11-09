@@ -37,7 +37,7 @@ struct device_driver {
 	const char* name;
 
 	int (*match)(struct device* parent, struct device_attach_args* args);
-	int (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
+	void (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
 };
 
 struct device_config {

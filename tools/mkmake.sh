@@ -1,29 +1,42 @@
 #!/bin/sh
+MATCH='-name "*.c" -or -name "*.s" -or -name "*.S"'
+
 if [ "$1" = "all" ]; then
 	echo ".PHONY: all kernel clean"
 	echo ""
-	echo "all: kernel"
+	echo "all: kernel libc"
 	echo ""
-	echo "kernel:"
+	echo "kernel: libc"
 	echo "	\$(MAKE) -f Makefile.kernel"
+	echo ""
+	echo "libc:"
+	echo "	\$(MAKE) -f Makefile.libc"
 	echo ""
 	echo "clean:"
 	echo "	\$(MAKE) -f Makefile.kernel clean"
+	echo "	\$(MAKE) -f Makefile.libc clean"
 elif [ "$1" = "kernel" ]; then
 	./tools/prelude.sh sys "\$(KERNEL)"
 	(
-		MATCH='-name "*.c" -or -name "*.s" -or -name "*.S"'
-
 		eval find \
 			sys/mach/$MACH/$MACH \
 			sys/arch/$ARCH \
 			sys/common \
 			-maxdepth 1 $MATCH
 		ls -d lib/csu/arch/$ARCH/crt0.*
-		ls -d lib/libc/string/mem*.c
-		ls -d compile/sys/ioconf.c
+		ls -d compile/sys/*.c
 	) | ./tools/makedep.sh sys
 	cat compile/files.kernel
+	echo "OBJS += \$(TOP)/compile/lib/libc.a"
+	echo ""
 	cat sys/mach/$MACH/Makefile.in
 	cat sys/Makefile.in
+elif [ "$1" = "libc" ]; then
+	./tools/prelude.sh lib/libc "lib/libc.a"
+	(
+		eval find \
+			lib/libc \
+			$MATCH
+	) | ./tools/makedep.sh lib/libc
+	cat lib/libc/Makefile.in
 fi

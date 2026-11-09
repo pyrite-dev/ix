@@ -1,10 +1,10 @@
 #include <string.h>
 
-void* memcpy(void* dst, const void* src, size_t n) {
-	char*	    d = (char*)dst;
-	const char* s = (char*)src;
+void* memcpy(void* s1, const void* s2, size_t n) {
+	unsigned char*	     d = s1;
+	const unsigned char* s = s2;
 
 	while(n--) *d++ = *s++;
 
-	return dst;
+	return s1;
 }

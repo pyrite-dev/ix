@@ -11,6 +11,9 @@ makeoptions ASFLAGS="-ASA"
 makeoptions LD="i960-unknown-coff-ld"
 makeoptions LDFLAGS=""
 
+makeoptions AR="i960-unknown-coff-ar"
+makeoptions ARFLAGS="rcs"
+
 makeoptions OBJCOPY="i960-unknown-coff-objcopy"
 makeoptions OCFLAGS="-O binary"
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+use POSIX;
+
 my %makeoptions = {
 	"CC" => "cc",
 	"CFLAGS" => "",
@@ -7,6 +9,8 @@ my %makeoptions = {
 	"ASFLAGS" => "",
 	"LD" => "ld",
 	"LDFLAGS" => "",
+	"AR" => "ar",
+	"ARFLAGS" => "",
 	"OBJCOPY" => "objcopy",
 	"OCFLAGS" => "",
 	"STRIP" => "strip",
@@ -20,6 +24,10 @@ my @files = ();
 my @devices = ();
 my @devhashes = ();
 my @locators = ();
+my $ident = "";
+my $os_date = ctime(time());
+
+$os_date =~ s/\r?\n$//;
 
 open(IN, "<", "sys/include/sys/device.h");
 while(my $l = <IN>){
@@ -55,38 +63,7 @@ sub parse_config {
 		} @tokens;
 		map { s/#.+// } @tokens;
 
-		if($tokens[1] eq "at"){
-			my $dev = $tokens[0];
-
-			$dev =~ s/([0-9]+)$//;
-			my $unit = $1;
-
-			if(!(grep /^$dev$/, @devices)){
-				push(@devices, $dev);
-			}
-
-			my @dev_locators = ();
-
-			for(my $i = 0; $i < @locators; $i++){
-				push(@dev_locators, "0");
-			}
-
-			for(my $i = 3; $i < @tokens; $i++){
-				if(grep(/^$tokens[$i]$/, @locators)){
-					my ($index) = grep { $locators[$_] ~~ $tokens[$i] } 0 .. $#locators;
-					$dev_locators[$index] = $tokens[$i + 1];
-					$i++;
-					next;
-				}
-			}
-
-			push(@devhashes, {
-				"dev" => $dev,
-				"unit" => $unit,
-				"parent" => $tokens[2],
-				"locators" => \@dev_locators
-			});
-		}elsif(($tokens[0] eq "options") or ($tokens[0] eq "makeoptions")){
+		if(($tokens[0] eq "options") or ($tokens[0] eq "makeoptions")){
 			my $key = substr($tokens[1], 0, -1);
 			my $value = $tokens[2];
 	
@@ -116,6 +93,44 @@ sub parse_config {
 			if(!$tokens[2] or (grep /^$tokens[2]$/, @devices)){
 				push(@files, $path . "/" . $tokens[1]);
 			}
+		}elsif($tokens[0] eq "ident"){
+			$ident = $tokens[1];
+		}elsif($tokens[1] eq "at"){
+			my $dev = $tokens[0];
+
+			$dev =~ s/([0-9]+)$//;
+			my $unit = $1;
+
+			if(!(grep /^$dev$/, @devices)){
+				push(@devices, $dev);
+			}
+
+			my @dev_locators = ();
+
+			for(my $i = 0; $i < @locators; $i++){
+				push(@dev_locators, "0");
+			}
+
+			for(my $i = 3; $i < @tokens; $i++){
+				if(grep(/^$tokens[$i]$/, @locators)){
+					my $index = 0;
+					for(; $index < @locators; $index++){
+						if($locators[$index] eq $tokens[$i]){
+							last;
+						}
+					}
+					$dev_locators[$index] = $tokens[$i + 1];
+					$i++;
+					next;
+				}
+			}
+
+			push(@devhashes, {
+				"dev" => $dev,
+				"unit" => $unit,
+				"parent" => $tokens[2],
+				"locators" => \@dev_locators
+			});
 		}
 	};
 
@@ -125,6 +140,16 @@ sub parse_config {
 parse_config("sys/conf/std");
 parse_config($ARGV[0]);
 parse_config("sys/conf/files.std");
+
+if(!$ident){
+	print("ident is missing\n");
+	die;
+}
+
+if(!grep /^mainbus$/, @devices){
+	print("sure you do not need main bus?\n");
+	die;
+}
 
 open(MKCFG, ">", "compile/Makefile.config");
 foreach my $makeoption (sort { $a cmp $b } keys(%makeoptions)){
@@ -165,3 +190,11 @@ print(IOCONF "		NULL\n");
 print(IOCONF "	}\n");
 print(IOCONF "};\n");
 close(IOCONF);
+
+open(OSINFO, ">", "compile/sys/osinfo.c");
+print(OSINFO "#include <sys/osinfo.h>\n");
+print(OSINFO "\n");
+print(OSINFO "const char* os_ident = \"$ident\";\n");
+print(OSINFO "const char* os_date = \"$os_date\";\n");
+print(OSINFO "const char* os_version = OS_VERSION;\n");
+close(OSINFO);
