@@ -142,13 +142,16 @@ print(IOCONF "#include <sys/device.h>\n");
 print(IOCONF "#include <stddef.h>\n");
 print(IOCONF "\n");
 foreach my $device (@devices){
+	print(IOCONF "extern struct device_driver ${device}_driver;\n");
 }
+print(IOCONF "\n");
 print(IOCONF "struct device_config devices[] = {\n");
 foreach my $device (@devhashes){
 	print(IOCONF "	{\n");
 	print(IOCONF "		\"$device->{dev}\",\n");
 	print(IOCONF "		$device->{unit},\n");
 	print(IOCONF "		\"$device->{parent}\",\n");
+	print(IOCONF "		&$device->{dev}_driver,\n");
 	print(IOCONF "		{\n");
 	foreach my $locator (@{$device->{locators}}){
 		print(IOCONF "			$locator,\n");
