@@ -4,15 +4,15 @@
 #include <sys/cdefs.h>
 
 struct consdev {
-	void(*putc)(int c);
-	int(*getc)(void);
+	void (*putc)(int c);
+	int (*getc)(void);
 };
 
 __BEGIN_EXTERN_C__
 
 void cninit(struct consdev* cons);
 void cnputc(int c);
-int cngetc(void);
+int  cngetc(void);
 
 __END_EXTERN_C__
 

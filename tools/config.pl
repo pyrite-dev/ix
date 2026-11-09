@@ -11,7 +11,7 @@ my %makeoptions = (
 	"OCFLAGS" => "",
 	"CPP" => "cpp",
 	"CPPFLAGS" => "",
-	"KERNEL" => "kernel"
+	"KERNEL" => "kernel",
 );
 my %options = ();
 my @includes = ("REPLACED", ".", "sys");

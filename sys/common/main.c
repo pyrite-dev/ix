@@ -1,5 +1,5 @@
 #include <sys/cons.h>
 
-void kmain(void){
+void kmain(void) {
 	consinit();
 }

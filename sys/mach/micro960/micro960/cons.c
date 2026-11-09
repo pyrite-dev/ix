@@ -3,11 +3,11 @@
 
 static volatile unsigned char* uart = (unsigned char*)0x220000;
 
-static unsigned short baud_to_div(int baud){
-	return 10000000/(16 * baud);
+static unsigned short baud_to_div(int baud) {
+	return 10000000 / (16 * baud);
 }
 
-void consinit(void){
+void consinit(void) {
 	unsigned short div = baud_to_div(9600);
 
 	uart[IER * 2] = 0;
@@ -27,12 +27,12 @@ void consinit(void){
 	uart[MCR * 2] = MC_O2 | MC_O1 | MC_RTS | MC_DTR;
 }
 
-void consputc(int c){
+void consputc(int c) {
 	while(!(uart[LSR * 2] & LS_THRE));
 	uart[DR * 2] = c;
 }
 
-int consgetc(void){
+int consgetc(void) {
 	while(!(uart[LSR * 2] & LS_DR));
 	return uart[DR * 2];
 }
