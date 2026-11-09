@@ -14,6 +14,8 @@ makeoptions LDFLAGS=""
 makeoptions OBJCOPY="i960-unknown-coff-objcopy"
 makeoptions OCFLAGS="-O binary"
 
+makeoptions STRIP="i960-unknown-coff-strip"
+
 makeoptions CPP="i960-unknown-coff-cpp"
 makeoptions CPPFLAGS=""
 

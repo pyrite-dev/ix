@@ -9,6 +9,7 @@ my %makeoptions = {
 	"LDFLAGS" => "",
 	"OBJCOPY" => "objcopy",
 	"OCFLAGS" => "",
+	"STRIP" => "strip",
 	"CPP" => "cpp",
 	"CPPFLAGS" => "",
 	"KERNEL" => "kernel",
