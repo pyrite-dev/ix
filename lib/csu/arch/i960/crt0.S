@@ -43,9 +43,9 @@ clear_bss:
 
 _start:
 #ifdef __KERNEL__
-	mov 0, fp
 	mov 0, pfp
-	lda _kernel_stack, pfp
+	lda _kernel_stack, fp
+	lda _kernel_stack + 64, sp
 #endif
 
 	call copy_data

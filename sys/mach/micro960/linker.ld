@@ -40,7 +40,7 @@ SECTIONS {
 		_bss_start = .;
 		*(.bss);
 		*(COMMON);
-		. = ALIGN(4);
+		. = ALIGN(64);
 		_kernel_stack = .;
 		. += 4096;
 	} > RAM
@@ -51,6 +51,9 @@ SECTIONS {
 		. = ALIGN(4);
 		_bss_end = .;
 	} > RAM
+
+	_heap_start = .;
+	_heap_end = ORIGIN(RAM) + LENGTH(RAM);
 }
 
 _checksum = -(_sat + _prcb + _start);

@@ -1,7 +1,7 @@
 #include <sys/kmem.h>
 #include <string.h>
 
-typedef void*		 kmem_align_t;
+typedef uintptr_t	 kmem_align_t;
 typedef union kmem_block kmem_block_t;
 
 union kmem_block {

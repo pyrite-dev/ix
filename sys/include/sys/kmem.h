@@ -1,8 +1,9 @@
 #ifndef __SYS_KMEM_H__
 #define __SYS_KMEM_H__
 
-#include <sys/types.h>
 #include <sys/cdefs.h>
+
+#include <sys/types.h>
 #include <stddef.h>
 
 __BEGIN_EXTERN_C__
