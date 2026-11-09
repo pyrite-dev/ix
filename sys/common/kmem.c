@@ -69,8 +69,8 @@ static void kmem_insert(kmem_block_t* block) {
 void kmem_init(void* start, void* end) {
 	kmem_block_t* block;
 	size_t	      size;
-	uintptr_t s = (uintptr_t)start;
-	uintptr_t e = (uintptr_t)end;
+	uintptr_t     s = (uintptr_t)start;
+	uintptr_t     e = (uintptr_t)end;
 
 	s = (s + KMEM_ALIGN - 1) & ~(KMEM_ALIGN - 1);
 	e &= ~(KMEM_ALIGN - 1);

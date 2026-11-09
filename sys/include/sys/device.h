@@ -20,10 +20,10 @@ enum DEVICE_LOCATOR {
 struct device_driver;
 
 struct device {
-	const char* name;
+	const char*  name;
 	unsigned int unit;
 
-	struct device* parent;
+	struct device*	      parent;
 	struct device_driver* driver;
 
 	void* softc;
@@ -36,14 +36,14 @@ struct device_attach_args {
 struct device_driver {
 	const char* name;
 
-	int(*match)(struct device* parent, struct device_attach_args* args);
-	int(*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
+	int (*match)(struct device* parent, struct device_attach_args* args);
+	int (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
 };
 
 struct device_config {
-	const char* name;
+	const char*  name;
 	unsigned int unit;
-	const char* parent;
+	const char*  parent;
 
 	struct device_driver* driver;
 

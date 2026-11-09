@@ -6,55 +6,54 @@
 
 struct intr_entry {
 	intr_handler_t handler;
-	void* arg;
-	int enabled;
+	void*	       arg;
+	int	       enabled;
 };
 
 static struct intr_entry intr_table[NVEC];
 
-void intr_init(void){
+void intr_init(void) {
 	memset(intr_table, 0, sizeof(intr_table));
 	intr_arch_init();
 }
 
-int intr_register(unsigned int vector, intr_handler_t handler, void* arg){
+int intr_register(unsigned int vector, intr_handler_t handler, void* arg) {
 	if(vector >= NVEC) return -1;
-	if(handler == NULL){
+	if(handler == NULL) {
 		intr_unregister(vector);
 		return 0;
 	}
 
 	intr_table[vector].handler = handler;
-	intr_table[vector].arg = arg;
+	intr_table[vector].arg	   = arg;
 	intr_table[vector].enabled = 0;
 
 	return 0;
 }
 
-void intr_unregister(unsigned int vector){
+void intr_unregister(unsigned int vector) {
 	if(vector >= NVEC) return;
 
 	intr_table[vector].enabled = 0;
 	intr_table[vector].handler = NULL;
-	intr_table[vector].arg = NULL;
+	intr_table[vector].arg	   = NULL;
 }
 
-void intr_enable(unsigned int vector){
+void intr_enable(unsigned int vector) {
 	if(vector >= NVEC) return;
 	if(intr_table[vector].handler == NULL) return;
 
 	intr_table[vector].enabled = 1;
 }
 
-void intr_disable(unsigned int vector){
+void intr_disable(unsigned int vector) {
 	if(vector >= NVEC) return;
 	if(intr_table[vector].handler == NULL) return;
 
 	intr_table[vector].enabled = 0;
 }
 
-__attribute__((interrupt))
-void intr_dispatch(unsigned int vector){
+__attribute__((interrupt)) void intr_dispatch(unsigned int vector) {
 	struct intr_entry* entry;
 
 	if(vector >= NVEC) return;
