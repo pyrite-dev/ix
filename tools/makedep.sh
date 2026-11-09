@@ -1,6 +1,6 @@
 #!/bin/sh
 while read i; do
-	INPUT="../$i"
+	INPUT="\$(TOP)/$i"
 	OUTPUT="./$1/`echo "$i" | sed 's/\//_/g' | cut -d. -f1`.o"
 
 	echo "OBJS += $OUTPUT"

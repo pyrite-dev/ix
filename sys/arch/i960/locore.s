@@ -41,6 +41,7 @@ _prcb:
 	.space	32
 
 .section .int
+.global _int
 _int:
 	.space 1028
 	.space 12

@@ -1,5 +1,7 @@
 # GENERIC kernel for Micro960
 
+ident	GENERIC
+
 makeoptions CC="i960-unknown-coff-gcc"
 makeoptions CFLAGS="-msa"
 
@@ -16,3 +18,9 @@ makeoptions CPP="i960-unknown-coff-cpp"
 makeoptions CPPFLAGS=""
 
 makeoptions KERNEL="kernel.bin"
+
+mainbus0	at root
+timer0		at mainbus0 addr 0x200000 irq 1
+uart0		at mainbus0 addr 0x220000 irq 2
+
+include "files.std"

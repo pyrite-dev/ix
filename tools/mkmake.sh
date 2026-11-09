@@ -21,7 +21,9 @@ elif [ "$1" = "kernel" ]; then
 			-maxdepth 1 $MATCH
 		ls -d lib/csu/arch/$ARCH/crt0.*
 		ls -d lib/libc/string/mem*.c
-	) | ./tools/makedep.sh sys 2>/dev/null
+		ls -d compile/sys/ioconf.c
+	) | ./tools/makedep.sh sys
+	cat compile/files.kernel
 	cat sys/mach/$MACH/Makefile.in
 	cat sys/Makefile.in
 fi
