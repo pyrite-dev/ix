@@ -36,9 +36,15 @@
 #define EMLINK 31
 #define EPIPE 32
 
+/* Math software */
+#define EDOM 33
+#define ERANGE 34
+
 __BEGIN_EXTERN_C__
 
-extern int errno;
+extern int	   errno;
+extern const char* sys_errlist[];
+extern int	   sys_nerr;
 
 __END_EXTERN_C__
 

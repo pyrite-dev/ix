@@ -10,11 +10,11 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 	char	num[]  = "0123456789";
 	char	alp[]  = "abcdefghijklmnopqrstuvwxyz";
 	char	alpu[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	int d = 0;
+	int	d      = 0;
 
 	if(endptr != NULL) *endptr = (char*)nptr + strlen(nptr);
 
-	if(base < 2 || base > 36){
+	if(base < 2 || base > 36) {
 		errno = EINVAL;
 		return 0;
 	}

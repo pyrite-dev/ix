@@ -20,6 +20,8 @@ char*  strdup(const char* s);
 size_t strlen(const char* s);
 char*  strrchr(const char* s1, int c);
 
+char* strerror(int errnum);
+
 __END_EXTERN_C__
 
 #endif
