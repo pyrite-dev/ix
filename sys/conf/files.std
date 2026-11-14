@@ -1,2 +1,2 @@
-file dev/timer.c	timer
-file dev/uart.c		uart
+file dev/pit.c	pit
+file dev/ns.c	ns
