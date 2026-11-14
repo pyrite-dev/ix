@@ -10,17 +10,27 @@
 /* locator: irq */
 
 enum DEVICE_LOCATOR {
-	LOCATOR_ADDR = 0,
-	LOCATOR_ALIGN,
-	LOCATOR_IO,
-	LOCATOR_IRQ,
-	LOCATOR_COUNT
+	DEVICE_LOCATOR_ADDR = 0,
+	DEVICE_LOCATOR_ALIGN,
+	DEVICE_LOCATOR_IO,
+	DEVICE_LOCATOR_IRQ,
+	DEVICE_LOCATOR_COUNT
 };
+
+#define DEVICE_LOCATORS { \
+    "addr", "%lx", \
+    "align", "%ld", \
+    "io", "%lx", \
+    "irq", "%ld"}
+
+#define DEVICE_LOCATOR_UNSET (-1)
+
+#define DEVICE_UNIT_ANY (-1)
 
 struct device_driver;
 
 struct device {
-	const char*  name;
+	char*	     name;
 	unsigned int unit;
 
 	struct device* parent;
@@ -34,24 +44,26 @@ struct device {
 };
 
 struct device_attach_args {
-	long locators[LOCATOR_COUNT];
+	long locators[DEVICE_LOCATOR_COUNT];
 };
 
 struct device_driver {
 	const char* name;
 
 	int (*match)(struct device* parent, struct device_attach_args* args);
-	void (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
+	int (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
+	void (*detach)(struct device* self);
 };
 
 struct device_config {
-	const char*  name;
-	unsigned int unit;
-	const char*  parent;
+	const char* name;
+	int	    unit;
+	const char* parent;
+	int	    parent_unit;
 
 	struct device_driver* driver;
 
-	long locators[LOCATOR_COUNT];
+	long locators[DEVICE_LOCATOR_COUNT];
 };
 
 __BEGIN_EXTERN_C__

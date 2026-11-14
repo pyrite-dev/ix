@@ -10,7 +10,7 @@ void cons_putc(int c);
 int  cons_getc(void);
 
 /* platform independent funcitons follows */
-void cons_printf(const char* fmt, ...);
+void kprintf(const char* fmt, ...);
 
 __END_EXTERN_C__
 

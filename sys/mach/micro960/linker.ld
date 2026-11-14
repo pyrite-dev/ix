@@ -52,6 +52,12 @@ SECTIONS {
 		_bss_end = .;
 	} > RAM
 
+	/DISCARD/ : {
+		*(.stab);
+		*(.comment);
+		*(.stabstr);
+	}
+
 	_heap_start = .;
 	_heap_end = ORIGIN(RAM) + LENGTH(RAM);
 }

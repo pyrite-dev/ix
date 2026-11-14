@@ -100,9 +100,12 @@ sub parse_config {
 			$machine = $tokens[1];
 		}elsif($tokens[1] eq "at"){
 			my $dev = $tokens[0];
-
 			$dev =~ s/([0-9]+)$//;
 			my $unit = $1;
+
+			my $parent = $tokens[2];
+			$parent =~ s/([0-9]+)$//;
+			my $parent_unit = $1;
 
 			if(!(grep /^$dev$/, @devices)){
 				push(@devices, $dev);
@@ -111,7 +114,7 @@ sub parse_config {
 			my @dev_locators = ();
 
 			for(my $i = 0; $i < @locators; $i++){
-				push(@dev_locators, "0");
+				push(@dev_locators, "DEVICE_LOCATOR_UNSET");
 			}
 
 			for(my $i = 3; $i < @tokens; $i++){
@@ -131,7 +134,8 @@ sub parse_config {
 			push(@devhashes, {
 				"dev" => $dev,
 				"unit" => $unit,
-				"parent" => $tokens[2],
+				"parent" => $parent,
+				"parent_unit" => $parent_unit,
 				"locators" => \@dev_locators
 			});
 		}
@@ -185,6 +189,7 @@ foreach my $device (@devhashes){
 	print(IOCONF "		\"$device->{dev}\",\n");
 	print(IOCONF "		$device->{unit},\n");
 	print(IOCONF "		\"$device->{parent}\",\n");
+	print(IOCONF "		$device->{parent_unit},\n");
 	print(IOCONF "		&$device->{dev}_driver,\n");
 	print(IOCONF "		{\n");
 	foreach my $locator (@{$device->{locators}}){
