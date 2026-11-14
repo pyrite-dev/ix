@@ -8,6 +8,7 @@
 __BEGIN_EXTERN_C__
 
 extern const char* os_ident;
+extern const char* os_machine;
 extern const char* os_date;
 extern const char* os_version;
 

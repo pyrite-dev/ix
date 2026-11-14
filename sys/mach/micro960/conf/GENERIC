@@ -1,5 +1,6 @@
 # GENERIC kernel for Micro960
 
+machine	micro960
 ident	GENERIC
 
 makeoptions CC="i960-unknown-coff-gcc"

@@ -25,6 +25,7 @@ my @devices = ();
 my @devhashes = ();
 my @locators = ();
 my $ident = "";
+my $machine = "";
 my $os_date = ctime(time());
 
 $os_date =~ s/\r?\n$//;
@@ -95,6 +96,8 @@ sub parse_config {
 			}
 		}elsif($tokens[0] eq "ident"){
 			$ident = $tokens[1];
+		}elsif($tokens[0] eq "machine"){
+			$machine = $tokens[1];
 		}elsif($tokens[1] eq "at"){
 			my $dev = $tokens[0];
 
@@ -143,6 +146,11 @@ parse_config("sys/conf/files.std");
 
 if(!$ident){
 	print("ident is missing\n");
+	die;
+}
+
+if(!$machine){
+	print("machine is missing\n");
 	die;
 }
 
@@ -195,6 +203,7 @@ open(OSINFO, ">", "compile/sys/osinfo.c");
 print(OSINFO "#include <sys/osinfo.h>\n");
 print(OSINFO "\n");
 print(OSINFO "const char* os_ident = \"$ident\";\n");
+print(OSINFO "const char* os_machine = \"$machine\";\n");
 print(OSINFO "const char* os_date = \"$os_date\";\n");
 print(OSINFO "const char* os_version = OS_VERSION;\n");
 close(OSINFO);

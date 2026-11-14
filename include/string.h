@@ -16,6 +16,7 @@ char*  strcat(char* s1, const char* s2);
 char*  strchr(const char* s1, int c);
 int    strcmp(const char* s1, const char* s2);
 char*  strcpy(char* s1, const char* s2);
+char*  strdup(const char* s);
 size_t strlen(const char* s);
 char*  strrchr(const char* s1, int c);
 

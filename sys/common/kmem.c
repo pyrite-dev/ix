@@ -1,4 +1,5 @@
 #include <sys/kmem.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef uintptr_t	 kmem_align_t;
@@ -85,6 +86,10 @@ void kmem_init(void* start, void* end) {
 	block->s.prev = NULL;
 
 	kmem_free_list = block;
+
+	libc_malloc  = kmalloc;
+	libc_realloc = krealloc;
+	libc_free    = kfree;
 }
 
 void* kmalloc(size_t size) {

@@ -7,7 +7,7 @@ static unsigned short baud_to_div(int baud) {
 	return 10000000 / (16 * baud);
 }
 
-void consinit(void) {
+void cons_init(void) {
 	unsigned short div = baud_to_div(9600);
 
 	uart[IER] = 0;
@@ -27,12 +27,12 @@ void consinit(void) {
 	uart[MCR] = MC_O2 | MC_O1 | MC_RTS | MC_DTR;
 }
 
-void consputc(int c) {
+void cons_putc(int c) {
 	while(!(uart[LSR] & LS_THRE));
 	uart[DR] = c;
 }
 
-int consgetc(void) {
+int cons_getc(void) {
 	while(!(uart[LSR] & LS_DR));
 	return uart[DR];
 }

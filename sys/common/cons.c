@@ -2,7 +2,7 @@
 #include <stdarg.h>
 
 /* bare minimal */
-void consprintf(const char* fmt, ...) {
+void cons_printf(const char* fmt, ...) {
 	va_list va;
 	int	i;
 
@@ -14,11 +14,11 @@ void consprintf(const char* fmt, ...) {
 			{
 				char* s = va_arg(va, char*);
 
-				while(*s) consputc(*s++);
+				while(*s) cons_putc(*s++);
 			}
 			}
 		} else {
-			consputc(fmt[i]);
+			cons_putc(fmt[i]);
 		}
 	}
 	va_end(va);

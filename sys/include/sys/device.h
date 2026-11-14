@@ -23,7 +23,11 @@ struct device {
 	const char*  name;
 	unsigned int unit;
 
-	struct device*	      parent;
+	struct device* parent;
+	struct device* prev;
+	struct device* next;
+	struct device* first_child;
+
 	struct device_driver* driver;
 
 	void* softc;
@@ -53,6 +57,8 @@ struct device_config {
 __BEGIN_EXTERN_C__
 
 extern struct device_config devices[];
+
+void device_init(void);
 
 __END_EXTERN_C__
 

@@ -3,18 +3,13 @@
 #include <sys/interrupt.h>
 #include <sys/osinfo.h>
 #include <sys/device.h>
-#include <stddef.h>
 
 void kmain(void) {
-	int i;
-
 	machdep_init();
-	consinit();
+	cons_init();
 	intr_init();
 
-	consprintf("*** IX Kernel Version %s (%s: %s) ***\r\n", os_version, os_ident, os_date);
+	cons_printf("*** IX/%s Version %s (%s: %s) ***\r\n", os_machine, os_version, os_ident, os_date);
 
-	for(i = 0; devices[i].name != NULL; i++) {
-		consprintf("%s\r\n", devices[i].name);
-	}
+	device_init();
 }

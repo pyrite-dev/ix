@@ -5,12 +5,12 @@
 
 __BEGIN_EXTERN_C__
 
-void consinit(void);
-void consputc(int c);
-int  consgetc(void);
+void cons_init(void);
+void cons_putc(int c);
+int  cons_getc(void);
 
 /* platform independent funcitons follows */
-void consprintf(const char* fmt, ...);
+void cons_printf(const char* fmt, ...);
 
 __END_EXTERN_C__
 
