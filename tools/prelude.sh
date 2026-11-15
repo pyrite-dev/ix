@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "include Makefile.config"
+echo "include \$(TOP)/compile/Makefile.config"
 echo ""
 if [ -f "$1/Makefile.prelude" ]; then
 	cat $1/Makefile.prelude
