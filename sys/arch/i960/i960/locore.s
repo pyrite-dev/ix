@@ -1,4 +1,6 @@
 .extern _start
+.extern _int
+.extern _int_stack
 
 .section .boot
 	.word	_sat
@@ -39,11 +41,3 @@ _prcb:
 	.word	0x00000000
 	.word	0x00000000
 	.space	32
-
-.section .int
-.global _int
-_int:
-	.space 1028
-	.space 12
-_int_stack:
-	.space 4096

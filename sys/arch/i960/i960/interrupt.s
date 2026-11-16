@@ -1,11 +1,11 @@
-.section .text
-.extern _int
+.altmacro
+
 .extern _intr_dispatch
+
+.section .text
 .global __intr_init
 .global __intr_save
 .global __intr_restore
-
-.altmacro
 
 .macro INTR_STUB n
 intr_\n:
@@ -51,3 +51,12 @@ __intr_restore:
 	shlo 16, 31, r3
 	modpc g0, r3, r3
 	ret
+
+.section .int
+.global _int
+.global _int_stack
+_int:
+	.space 1028
+	.space 12
+_int_stack:
+	.space 4096
