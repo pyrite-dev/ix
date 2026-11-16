@@ -177,6 +177,8 @@ foreach my $file (@files){
 
 open(IOCONF, ">", "compile/sys/ioconf.c");
 print(IOCONF "#include <sys/device.h>\n");
+print(IOCONF "#include <sys/types.h>\n");
+print(IOCONF "\n");
 print(IOCONF "#include <stddef.h>\n");
 print(IOCONF "\n");
 foreach my $device (@devices){
@@ -193,7 +195,11 @@ foreach my $device (@devhashes){
 	print(IOCONF "		&$device->{dev}_driver,\n");
 	print(IOCONF "		{\n");
 	foreach my $locator (@{$device->{locators}}){
-		print(IOCONF "			$locator,\n");
+		if($locator eq "DEVICE_LOCATOR_UNSET"){
+			print(IOCONF "			$locator,\n");
+		}else{
+			print(IOCONF "			PADDR_C($locator),\n");
+		}
 	}
 	print(IOCONF "		}\n");
 	print(IOCONF "	},\n");

@@ -2,28 +2,29 @@
 #define __SYS_DEVICE_H__
 
 #include <sys/cdefs.h>
+#include <sys/types.h>
 
 /* DO NOT REMOVE THE COMMENTS BELOW! */
 /* locator: addr */
-/* locator: align */
-/* locator: io */
+/* locator: port */
 /* locator: irq */
+/* locator: stride */
 
 enum DEVICE_LOCATOR {
 	DEVICE_LOCATOR_ADDR = 0,
-	DEVICE_LOCATOR_ALIGN,
-	DEVICE_LOCATOR_IO,
+	DEVICE_LOCATOR_PORT,
 	DEVICE_LOCATOR_IRQ,
+	DEVICE_LOCATOR_STRIDE,
 	DEVICE_LOCATOR_COUNT
 };
 
 #define DEVICE_LOCATORS { \
     "addr", "%lx", \
-    "align", "%ld", \
-    "io", "%lx", \
-    "irq", "%ld"}
+    "port", "%lx", \
+    "irq", "%ld", \
+    "stride", "%ld"}
 
-#define DEVICE_LOCATOR_UNSET (-1)
+#define DEVICE_LOCATOR_UNSET ((paddr_t) - 1)
 
 #define DEVICE_UNIT_ANY (-1)
 
@@ -44,7 +45,7 @@ struct device {
 };
 
 struct device_attach_args {
-	long locators[DEVICE_LOCATOR_COUNT];
+	paddr_t locators[DEVICE_LOCATOR_COUNT];
 };
 
 struct device_driver {
@@ -63,7 +64,7 @@ struct device_config {
 
 	struct device_driver* driver;
 
-	long locators[DEVICE_LOCATOR_COUNT];
+	paddr_t locators[DEVICE_LOCATOR_COUNT];
 };
 
 __BEGIN_EXTERN_C__

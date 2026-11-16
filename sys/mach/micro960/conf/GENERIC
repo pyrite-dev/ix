@@ -26,7 +26,7 @@ makeoptions CPPFLAGS=""
 makeoptions KERNEL="kernel.bin"
 
 mainbus0	at root
-pit0		at mainbus0 addr 0x200000 align 2 irq 1
-ns0		at mainbus0 addr 0x220000 align 2 irq 2
+pit0		at mainbus0 addr 0x200000 stride 2 irq 1
+ns0		at mainbus0 addr 0x220000 stride 2 irq 2
 
 include "files.std"

@@ -1,11 +1,17 @@
 #include <sys/kmem.h>
+#include <sys/types.h>
 
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 
-typedef uintptr_t	 kmem_align_t;
+typedef union kmem_align kmem_align_t;
 typedef union kmem_block kmem_block_t;
+
+union kmem_align {
+	vaddr_t a;
+	long	b;
+	double	c;
+};
 
 union kmem_block {
 	struct {
@@ -21,6 +27,8 @@ union kmem_block {
 #define KMEM_HEADER (sizeof(kmem_block_t))
 
 static kmem_block_t* kmem_free_list = NULL;
+
+vaddr_t kmem_avail;
 
 static size_t kmem_round(size_t size) {
 	size_t rem;
@@ -52,7 +60,7 @@ static void kmem_insert(kmem_block_t* block) {
 	prev = NULL;
 	cur  = kmem_free_list;
 
-	while(cur != NULL && (uintptr_t)cur < (uintptr_t)block) {
+	while(cur != NULL && (vaddr_t)cur < (vaddr_t)block) {
 		prev = cur;
 		cur  = cur->s.next;
 	}
@@ -72,8 +80,8 @@ static void kmem_insert(kmem_block_t* block) {
 void kmem_init(void* start, void* end) {
 	kmem_block_t* block;
 	size_t	      size;
-	uintptr_t     s = (uintptr_t)start;
-	uintptr_t     e = (uintptr_t)end;
+	vaddr_t	      s = (vaddr_t)start;
+	vaddr_t	      e = (vaddr_t)end;
 
 	s = (s + KMEM_ALIGN - 1) & ~(KMEM_ALIGN - 1);
 	e &= ~(KMEM_ALIGN - 1);
@@ -86,6 +94,8 @@ void kmem_init(void* start, void* end) {
 	block->s.size = size;
 	block->s.next = NULL;
 	block->s.prev = NULL;
+
+	kmem_avail = size;
 
 	kmem_free_list = block;
 
@@ -105,6 +115,8 @@ void* kmalloc(size_t size) {
 
 	size  = kmem_round(size);
 	total = KMEM_HEADER + size;
+
+	kmem_avail -= total;
 
 	for(block = kmem_free_list; block != NULL; block = block->s.next) {
 		if(block->s.size < total) continue;
@@ -146,6 +158,9 @@ void* krealloc(void* ptr, size_t size) {
 
 	old_size = block->s.size - KMEM_HEADER;
 
+	kmem_avail += block->s.size;
+	kmem_avail -= KMEM_HEADER + size;
+
 	newptr = kmalloc(size);
 
 	if(newptr == NULL) return NULL;
@@ -167,6 +182,7 @@ void kfree(void* ptr) {
 	if(ptr == NULL) return;
 
 	block = ((kmem_block_t*)ptr) - 1;
+	kmem_avail += block->s.size;
 
 	kmem_insert(block);
 
