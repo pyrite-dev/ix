@@ -1,6 +1,5 @@
 #include <sys/spinlock.h>
-#include <machine/spinlock.h>
-#include <machine/interrupt.h>
+#include <sys/interrupt.h>
 
 struct spinlock {
 	volatile unsigned int lock;
@@ -16,7 +15,7 @@ void spinlock_lock(spinlock_t* lock) {
 	/* TODO: Disable preemption */
 
 	while(!_spinlock_trylock(&lock->lock)) {
-		while(lock->lock != 0){
+		while(lock->lock != 0) {
 			BARRIER();
 		}
 	}
@@ -37,7 +36,7 @@ void spinlock_unlock(spinlock_t* lock) {
 int spinlock_trylock(spinlock_t* lock) {
 	/* TODO: Disable preemption */
 
-	if(!_spinlock_trylock(&lock->lock)){
+	if(!_spinlock_trylock(&lock->lock)) {
 		/* TODO: Enable preemption */
 		return 0;
 	}

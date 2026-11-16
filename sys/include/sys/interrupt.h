@@ -2,6 +2,7 @@
 #define __SYS_INTERRUPT_H__
 
 #include <sys/cdefs.h>
+#include <machine/interrupt.h>
 
 typedef void (*intr_handler_t)(unsigned int vector, void* arg);
 
@@ -11,6 +12,11 @@ void intr_init(void);
 int  intr_register(unsigned int vector, intr_handler_t handler, void* arg);
 void intr_unregister(unsigned int vector);
 void intr_dispatch(unsigned int vector);
+
+void	     _intr_init(void);
+intr_flags_t _intr_save(void);
+intr_flags_t _intr_restore(intr_flags_t flags);
+int	     _intr_vector(unsigned int irq);
 
 __END_EXTERN_C__
 
