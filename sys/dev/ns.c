@@ -6,7 +6,7 @@ static int ns_match(struct device* parent, struct device_attach_args* args) {
 	return 1;
 }
 
-static void ns_intr(unsigned int vector, void* arg) {
+static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {
 }
 
 static int ns_attach(struct device* parent, struct device* self, struct device_attach_args* args) {

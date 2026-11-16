@@ -9,9 +9,49 @@
 
 .macro INTR_STUB n
 intr_\n:
+	st g0, (sp)
+	st g1, 4(sp)
+	st g2, 8(sp)
+	st g3, 12(sp)
+	st g4, 16(sp)
+	st g5, 20(sp)
+	st g6, 24(sp)
+	st g7, 28(sp)
+	st g8, 32(sp)
+	st g9, 36(sp)
+	st g10, 40(sp)
+	st g11, 44(sp)
+	st g12, 48(sp)
+	st g13, 52(sp)
+	st g14, 56(sp)
+	st fp, 60(sp)
+
+	modac 0, 0, r3
+	st r3, 64(sp)
+
+	st rip, 68(sp)
+
+	modpc 0, 0, r3
+	st r3, 72(sp)
+
+	modtc 0, 0, r3
+	st r3, 76(sp)
+
 	mov g0, r3
 	ldconst \n, g0
+
+	mov g1, r4
+	mov sp, g1
+
+	ldconst 84, r3
+	addo r3, sp, sp
+
 	call _intr_dispatch
+
+	ldconst 84, r3
+	subo r3, sp, sp
+
+	mov r4, g1
 	mov r3, g0
 	ret
 .endm

@@ -54,7 +54,7 @@ void intr_disable(unsigned int vector) {
 	intr_table[vector].enabled = 0;
 }
 
-__attribute__((interrupt)) void intr_dispatch(unsigned int vector) {
+__attribute__((interrupt)) void intr_dispatch(unsigned int vector, struct iregs* iregs) {
 	struct intr_entry* entry;
 
 	if(vector >= NVEC) return;
@@ -63,5 +63,5 @@ __attribute__((interrupt)) void intr_dispatch(unsigned int vector) {
 
 	if(entry->handler == NULL || !entry->enabled) return;
 
-	entry->handler(vector, entry->arg);
+	entry->handler(vector, iregs, entry->arg);
 }
