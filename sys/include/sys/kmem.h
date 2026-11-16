@@ -3,7 +3,6 @@
 
 #include <sys/cdefs.h>
 
-#include <sys/types.h>
 #include <stddef.h>
 
 __BEGIN_EXTERN_C__

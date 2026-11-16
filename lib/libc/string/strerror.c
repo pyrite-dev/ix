@@ -1,8 +1,10 @@
 #include <string.h>
 #include <errno.h>
 
-char* strerror(int errnum) {
-	if(errnum >= sys_nerr) return "Unknown error";
+static const char* unknown = "Unknown error";
 
-	return sys_errlist[errnum];
+char* strerror(int errnum) {
+	if(errnum >= sys_nerr) return (char*)unknown;
+
+	return (char*)sys_errlist[errnum];
 }

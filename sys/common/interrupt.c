@@ -1,4 +1,5 @@
 #include <sys/interrupt.h>
+#include <machine/interrupt.h>
 
 #include <string.h>
 
@@ -14,7 +15,7 @@ static struct intr_entry intr_table[NVEC];
 
 void intr_init(void) {
 	memset(intr_table, 0, sizeof(intr_table));
-	intr_arch_init();
+	_intr_init();
 }
 
 int intr_register(unsigned int vector, intr_handler_t handler, void* arg) {

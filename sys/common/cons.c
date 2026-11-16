@@ -1,4 +1,5 @@
 #include <sys/cons.h>
+
 #include <stdarg.h>
 
 static void kputc(char c) {

@@ -20,7 +20,7 @@ elif [ "$1" = "kernel" ]; then
 	(
 		eval find \
 			sys/mach/$MACH/$MACH \
-			sys/arch/$ARCH \
+			sys/arch/$ARCH/$ARCH \
 			sys/common \
 			-maxdepth 1 $MATCH
 		ls -d lib/csu/arch/$ARCH/crt0.*

@@ -2,9 +2,11 @@
 #include <sys/osinfo.h>
 #include <sys/cons.h>
 
-void panic(const char* str){
-	kprintf("**** PANIC! IX/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
-	kprintf("** Message: %s\r\n", str);
+void panic(const char* str) {
+	kprintf("******* %s\r\n", str);
+	kprintf("*** IX/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
+	kprintf("*** A system crash haso ccurred. (See the above messages for details.)\r\n");
+	kprintf("*** System halted.\r\n");
 
 	while(1);
 }

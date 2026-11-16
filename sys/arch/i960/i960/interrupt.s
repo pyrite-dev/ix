@@ -1,7 +1,9 @@
 .section .text
 .extern _int
 .extern _intr_dispatch
-.global _intr_arch_init
+.global __intr_init
+.global __intr_save
+.global __intr_restore
 
 .altmacro
 
@@ -26,7 +28,7 @@ INTR_STUB %vec
 	st r3, (r4)
 .endm
 
-_intr_arch_init:
+__intr_init:
 .set vec, 8
 .rept (256-8)
 INTR_REG %vec
@@ -35,4 +37,17 @@ INTR_REG %vec
 	shlo 16, 0, r3
 	shlo 16, 31, r4
 	modpc r3, r4, r5
+	ret
+
+__intr_save:
+	modpc g0, 0, g0
+
+	shlo 16, 31, r3
+	modpc r3, r3, r3
+
+	ret
+
+__intr_restore:
+	shlo 16, 31, r3
+	modpc g0, r3, r3
 	ret

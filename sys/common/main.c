@@ -12,6 +12,4 @@ void kmain(void) {
 	kprintf("IX/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
 
 	device_init();
-
-	panic("Test panic");
 }
