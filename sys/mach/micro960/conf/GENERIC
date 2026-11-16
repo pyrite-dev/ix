@@ -29,4 +29,4 @@ mainbus0	at root
 pit0		at mainbus0 addr 0x200000 stride 2 irq 1
 ns0		at mainbus0 addr 0x220000 stride 2 irq 2
 
-include "files.std"
+include "mach/micro960/conf/files.micro960"

@@ -19,7 +19,6 @@ my %makeoptions = {
 	"KERNEL" => "kernel",
 };
 my %options = {};
-my @includes = ("REPLACED", ".", "sys");
 my @files = ();
 my @devices = ();
 my @devhashes = ();
@@ -74,25 +73,13 @@ sub parse_config {
 				$makeoptions{$key} = $value;
 			}
 		}elsif($tokens[0] eq "include"){
-			my $path = $tokens[1];
-
-			$includes[0] = $_[0];
-			$includes[0] =~ s/\/[^\/]+$//;
-
-			foreach my $include (@includes){
-				if(-f $include . "/" . $path){
-					parse_config($include . "/" . $path);
-					last;
-				}
+			if(-f "sys/" . $tokens[1]){
+				parse_config("sys/" . $tokens[1]);
+				last;
 			}
 		}elsif($tokens[0] eq "file"){
-			my $path = $_[0];
-
-			$path =~ s/\/[^\/]+$//;
-			$path =~ s/\/[^\/]+$//;
-
 			if(!$tokens[2] or (grep /^$tokens[2]$/, @devices)){
-				push(@files, $path . "/" . $tokens[1]);
+				push(@files, "sys/" . $tokens[1]);
 			}
 		}elsif($tokens[0] eq "ident"){
 			$ident = $tokens[1];
@@ -144,9 +131,8 @@ sub parse_config {
 	close($fh);
 }
 
-parse_config("sys/conf/std");
 parse_config($ARGV[0]);
-parse_config("sys/conf/files.std");
+parse_config("sys/dev/files.dev");
 
 if(!$ident){
 	print("ident is missing\n");
