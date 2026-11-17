@@ -5,7 +5,10 @@
 #include <machine/interrupt.h>
 
 typedef struct spinlock spinlock_t;
-struct spinlock;
+
+struct spinlock {
+	volatile unsigned int lock;
+};
 
 __BEGIN_EXTERN_C__
 

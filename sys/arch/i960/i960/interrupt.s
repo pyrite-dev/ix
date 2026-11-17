@@ -9,50 +9,56 @@
 
 .macro INTR_STUB n
 intr_\n:
-	st g0, (sp)
-	st g1, 4(sp)
-	st g2, 8(sp)
-	st g3, 12(sp)
-	st g4, 16(sp)
-	st g5, 20(sp)
-	st g6, 24(sp)
-	st g7, 28(sp)
-	st g8, 32(sp)
-	st g9, 36(sp)
-	st g10, 40(sp)
-	st g11, 44(sp)
-	st g12, 48(sp)
-	st g13, 52(sp)
-	st g14, 56(sp)
-	st fp, 60(sp)
+	mov sp, r6
+	ldconst 80, r5
+	addo r5, sp, sp
 
-	modac 0, 0, r3
-	st r3, 64(sp)
+	st g0, (r6)
+	st g1, 4(r6)
+	st g2, 8(r6)
+	st g3, 12(r6)
+	st g4, 16(r6)
+	st g5, 20(r6)
+	st g6, 24(r6)
+	st g7, 28(r6)
+	st g8, 32(r6)
+	st g9, 36(r6)
+	st g10, 40(r6)
+	st g11, 44(r6)
+	st g12, 48(r6)
+	st g13, 52(r6)
+	st g14, 56(r6)
+	st pfp, 60(r6)
 
-	st rip, 68(sp)
+	ld -12(fp), r3
+	st r3, 64(r6)
 
-	modpc 0, 0, r3
-	st r3, 72(sp)
+	ldconst 0xfffffff0, r3
+	and r3, pfp, r3
+	addo 8, r3, r3
+
+	flushreg
+
+	ld (r3), r3
+	st r3, 68(r6)
+
+	ld -16(fp), r3
+	st r3, 72(r6)
 
 	modtc 0, 0, r3
-	st r3, 76(sp)
+	st r3, 76(r6)
 
-	mov g0, r3
 	ldconst \n, g0
-
-	mov g1, r4
-	mov sp, g1
-
-	ldconst 84, r3
-	addo r3, sp, sp
+	mov r6, g1
 
 	call _intr_dispatch
 
-	ldconst 84, r3
-	subo r3, sp, sp
+	ldconst 80, r5
+	subo r5, sp, r6
+	ld (r6), g0
+	ld 4(r6), g1
+	mov r6, sp
 
-	mov r4, g1
-	mov r3, g0
 	ret
 .endm
 
@@ -76,7 +82,7 @@ INTR_REG %vec
 .endr
 	shlo 16, 0, r3
 	shlo 16, 31, r4
-	modpc r3, r4, r5
+	modpc r3, r4, r3
 	ret
 
 __intr_save:
@@ -84,7 +90,6 @@ __intr_save:
 
 	shlo 16, 31, r3
 	modpc r3, r3, r3
-
 	ret
 
 __intr_restore:

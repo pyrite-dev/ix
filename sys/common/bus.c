@@ -4,18 +4,10 @@
 /* TODO: These functions do not care about which byte to pick when stride is not default */
 /* TODO: Add I/O */
 
-bus_space_t* bus_space_new(paddr_t locators[DEVICE_LOCATOR_COUNT]) {
-	bus_space_t* space = malloc(sizeof(*space));
-
+void bus_space_init(bus_space_t* space, paddr_t locators[DEVICE_LOCATOR_COUNT]) {
 	space->port   = locators[DEVICE_LOCATOR_PORT];
 	space->addr   = locators[DEVICE_LOCATOR_ADDR];
 	space->stride = locators[DEVICE_LOCATOR_STRIDE];
-
-	return space;
-}
-
-void bus_space_free(bus_space_t* space) {
-	free(space);
 }
 
 static int bus_space_stride(bus_space_t* space, int def) {

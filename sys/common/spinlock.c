@@ -1,10 +1,6 @@
 #include <sys/spinlock.h>
 #include <sys/interrupt.h>
 
-struct spinlock {
-	volatile unsigned int lock;
-};
-
 #define BARRIER() __asm__ __volatile__("" ::: "memory");
 
 void spinlock_init(spinlock_t* lock) {

@@ -17,7 +17,7 @@ struct iregs {
 	unsigned int g12;
 	unsigned int g13;
 	unsigned int g14;
-	unsigned int fp;
+	unsigned int pfp;
 
 	unsigned int ac;
 	unsigned int rip;

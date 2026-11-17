@@ -15,8 +15,7 @@ struct bus_space {
 
 __BEGIN_EXTERN_C__
 
-bus_space_t* bus_space_new(paddr_t locators[DEVICE_LOCATOR_COUNT]);
-void	     bus_space_free(bus_space_t* space);
+void bus_space_init(bus_space_t* space, paddr_t locators[DEVICE_LOCATOR_COUNT]);
 
 unsigned char  bus_space_read8(bus_space_t* space, paddr_t offset);
 void	       bus_space_write8(bus_space_t* space, paddr_t offset, unsigned char value);
