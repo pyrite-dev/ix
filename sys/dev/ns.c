@@ -1,8 +1,9 @@
 #include <sys/device.h>
-#include <sys/interrupt.h>
 #include <sys/dev/ns.h>
+#include <sys/interrupt.h>
 #include <sys/bus.h>
 #include <sys/spinlock.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,8 +24,8 @@ struct ns_softc {
 	struct ns_ring tx;
 };
 
-static unsigned short baud_to_div(int baud) {
-	return 10000000 / (16 * baud);
+static unsigned short baud_to_div(int clock, int baud) {
+	return clock / (16 * baud);
 }
 
 static int ns_match(struct device* parent, struct device_attach_args* args) {
@@ -95,7 +96,7 @@ static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {
 }
 
 static int ns_attach(struct device* parent, struct device* self, struct device_attach_args* args) {
-	unsigned short	 div = baud_to_div(9600);
+	unsigned short	 div = baud_to_div(DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_CLOCK], 115200), DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_BAUD], 9600));
 	struct ns_softc* softc;
 
 	self->softc = softc = malloc(sizeof(*softc));

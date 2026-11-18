@@ -10,18 +10,29 @@ enum DEVICE_LOCATOR {
 	DEVICE_LOCATOR_PORT,
 	DEVICE_LOCATOR_IRQ,
 	DEVICE_LOCATOR_STRIDE,
+	DEVICE_LOCATOR_CLOCK,
+	DEVICE_LOCATOR_SPEED,
+	DEVICE_LOCATOR_BAUD,
 	DEVICE_LOCATOR_COUNT
 };
 
 #define DEVICE_LOCATORS { \
-    "addr", "%lx", \
-    "port", "%lx", \
-    "irq", "%ld", \
-    "stride", "%ld"}
+    "addr", "%llx", \
+    "port", "%llx", \
+    "irq", "%lld", \
+    "stride", "%lld", \
+    "clock", "%lld", \
+    "speed", "%lld", \
+    "baud", "%lld"}
 
 #define DEVICE_LOCATOR_UNSET ((paddr_t) - 1)
+#define DEVICE_LOCATOR_DEFAULT(loc, def) ((loc) == DEVICE_LOCATOR_UNSET ? (def) : (loc))
 
 #define DEVICE_UNIT_ANY (-1)
+
+#define MAJOR(dev) (((dev) >> 16) & 0xffff)
+#define MINOR(dev) (((dev) >> 0) & 0xffff)
+#define MAKEDEV(major, minor) ((((dev_t)(major) & 0xffff) << 16) | ((dev_t)(minor) & 0xffff))
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -31,6 +42,9 @@ enum DEVICE_LOCATOR {
 /* locator: port */
 /* locator: irq */
 /* locator: stride */
+/* locator: clock */
+/* locator: speed */
+/* locator: baud */
 
 struct device {
 	char*	     name;

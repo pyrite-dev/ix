@@ -7,4 +7,6 @@ typedef unsigned int vaddr_t;
 #define PADDR_C(value) value
 #define VADDR_C(value) value
 
+typedef unsigned int off_t;
+
 #endif

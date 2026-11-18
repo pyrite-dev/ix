@@ -81,24 +81,28 @@ __intr_init:
 INTR_REG %vec
 .set vec, vec + 1
 .endr
-	shlo 16, 0, r3
-	shlo 16, 31, r4
+	mov 0, r3
+	ldconst 0x1f0000, r4
 	modpc r4, r4, r3
 	ret
 
 __intr_save:
 	modpc 0, 0, g0
 
-	shlo 16, 31, r3
+	ldconst 0x1f0000, r3
 	modpc r3, r3, r3
 	ret
 
 __intr_restore:
-	shlo 16, 31, r3
+	ldconst 0x1f0000, r3
 	modpc r3, r3, g0
 	ret
 
 __intr_set:
+	modpc 0, 0, r5
+	ldconst 0x1f0000, r6
+	modpc r6, r6, r6
+
 	mov g0, r3
 	addo 1, r3, r3
 	mulo 4, r3, r3
@@ -106,6 +110,9 @@ __intr_set:
 	addo r4, r3, r3
 
 	st g1, (r3)
+
+	ldconst 0x1f0000, r6
+	modpc r6, r6, r5
 
 	ret
 

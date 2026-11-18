@@ -133,7 +133,7 @@ static int device_attach(struct device* parent, struct device_config* config) {
 	for(i = 0; i < DEVICE_LOCATOR_COUNT; i++) {
 		if(args.locators[i] == DEVICE_LOCATOR_UNSET) continue;
 		kprintf(" %s ", locators[i * 2 + 0]);
-		kprintf(locators[i * 2 + 1], args.locators[i]);
+		kprintf(locators[i * 2 + 1], (long long)args.locators[i]);
 	}
 	kprintf("\r\n");
 
