@@ -30,15 +30,15 @@ int _thread_init(thread_t* thread) {
 
 	fp = (base + 63) & ~63;
 
-	if(fp < base || fp + 128UL > limit) {
+	if(fp < base || fp > limit || limit - fp < THREAD_FRAME_SIZE) {
 		return -1;
 	}
 
 	frame = (unsigned int*)fp;
 
-	memset(frame, 0, 128);
-	frame[0] = 0;
-	frame[1] = fp + 128;
+	memset(frame, 0, THREAD_FRAME_SIZE);
+	frame[0] = fp;
+	frame[1] = fp + THREAD_FRAME_SIZE;
 	frame[2] = (unsigned int)thread_start;
 
 	thread->context.g0  = (unsigned int)thread;

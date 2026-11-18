@@ -32,6 +32,7 @@ int thread_init(thread_t* thread, void* stack, size_t stack_size, void (*entry)(
 	thread->entry = entry;
 	thread->arg   = arg;
 
+	thread->preempt = 0;
 	thread->quantum = SCHED_QUANTUM;
 
 	memset(&thread->context, 0, sizeof(thread->context));
@@ -102,6 +103,7 @@ void sched_init(thread_t* idle) {
 
 	idle->state	 = THREAD_READY;
 	idle->quantum	 = SCHED_QUANTUM;
+	idle->preempt	 = 0;
 	idle->sched_prev = NULL;
 	idle->sched_next = NULL;
 }
@@ -165,7 +167,12 @@ void sched_tick(void) {
 
 	thread = current_thread;
 
-	if(thread == NULL || thread == idle_thread) return;
+	if(thread == NULL) return;
+
+	if(thread == idle_thread) {
+		if(ready_head != NULL) resched_pending = 1;
+		return;
+	}
 
 	if(thread->quantum > 0) thread->quantum--;
 
@@ -181,19 +188,25 @@ void sched_preempt(thread_context_t* context) {
 	if(old == NULL) {
 		next = sched_choose();
 
-		next->state    = THREAD_RUNNING;
-		current_thread = next;
+		next->state   = THREAD_RUNNING;
+		next->quantum = SCHED_QUANTUM;
+
+		current_thread	= next;
+		resched_pending = 0;
 
 		*context = next->context;
 		return;
 	}
+
+	if(old->preempt != 0) return;
 
 	if(!resched_pending) return;
 
 	_sched_save(&old->context, context);
 
 	if(old->state == THREAD_RUNNING) {
-		old->state = THREAD_READY;
+		old->state   = THREAD_READY;
+		old->quantum = SCHED_QUANTUM;
 
 		if(old != idle_thread) ready_insert(old);
 	}
@@ -202,11 +215,13 @@ void sched_preempt(thread_context_t* context) {
 
 	if(next == old) {
 		old->state	= THREAD_RUNNING;
+		old->quantum	= SCHED_QUANTUM;
 		resched_pending = 0;
 		return;
 	}
 
 	next->state	= THREAD_RUNNING;
+	next->quantum	= SCHED_QUANTUM;
 	current_thread	= next;
 	resched_pending = 0;
 
@@ -229,4 +244,22 @@ void sched_wakeup(thread_t* thread) {
 	}
 
 	_intr_restore(flags);
+}
+
+void sched_preempt_disable(void) {
+	thread_t* thread;
+
+	thread = current_thread;
+
+	if(thread != NULL) thread->preempt++;
+}
+
+void sched_preempt_enable(void) {
+	thread_t* thread;
+
+	thread = current_thread;
+
+	if(thread == NULL) return;
+
+	if(thread->preempt > 0) thread->preempt--;
 }

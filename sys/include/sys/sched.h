@@ -24,6 +24,9 @@ void _sched_intr(void);
 void _sched_save(thread_context_t* dest, thread_context_t* src);
 void _sched_restore(thread_context_t* dest, thread_context_t* src);
 
+void sched_preempt_disable(void);
+void sched_preempt_enable(void);
+
 __END_EXTERN_C__
 
 #endif

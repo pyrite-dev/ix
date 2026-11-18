@@ -8,7 +8,7 @@ void spinlock_init(spinlock_t* lock) {
 }
 
 void spinlock_lock(spinlock_t* lock) {
-	/* TODO: Disable preemption */
+	sched_preempt_disable();
 
 	while(!_spinlock_trylock(&lock->lock)) {
 		while(lock->lock != 0) {
@@ -26,14 +26,14 @@ void spinlock_unlock(spinlock_t* lock) {
 
 	BARRIER();
 
-	/* TODO: Enable preemption */
+	sched_preempt_enable();
 }
 
 int spinlock_trylock(spinlock_t* lock) {
-	/* TODO: Disable preemption */
+	sched_preempt_disable();
 
 	if(!_spinlock_trylock(&lock->lock)) {
-		/* TODO: Enable preemption */
+		sched_preempt_enable();
 		return 0;
 	}
 

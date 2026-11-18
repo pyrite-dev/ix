@@ -34,6 +34,7 @@ struct thread {
 	void (*entry)(void*);
 	void* arg;
 
+	unsigned int preempt;
 	unsigned int quantum;
 
 	thread_context_t context;

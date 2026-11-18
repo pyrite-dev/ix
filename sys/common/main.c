@@ -17,10 +17,10 @@ static void idle_entry(void* arg) {
 }
 
 static thread_t thread1;
-static char	stack1[256];
+static char	stack1[2048];
 
 static thread_t thread2;
-static char	stack2[256];
+static char	stack2[2048];
 
 static spinlock_t lock;
 
