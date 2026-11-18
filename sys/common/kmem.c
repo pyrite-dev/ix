@@ -1,6 +1,6 @@
 #include <sys/kmem.h>
 #include <sys/types.h>
-#include <sys/mutex.h>
+#include <sys/spinlock.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -9,9 +9,9 @@ typedef union kmem_align kmem_align_t;
 typedef union kmem_block kmem_block_t;
 
 union kmem_align {
-	vaddr_t a;
-	long	b;
-	double	c;
+	size_t a;
+	long   b;
+	double c;
 };
 
 union kmem_block {
@@ -28,8 +28,8 @@ union kmem_block {
 #define KMEM_HEADER (sizeof(kmem_block_t))
 
 static kmem_block_t* kmem_free_list = NULL;
-static mutex_t	     kmem_mutex;
-static int	     kmem_mutex_enabled;
+static spinlock_t    kmem_spinlock;
+static int	     kmem_spinlock_enabled;
 
 vaddr_t kmem_avail;
 
@@ -106,20 +106,21 @@ void kmem_init(void* start, void* end) {
 	libc_realloc = krealloc;
 	libc_free    = kfree;
 
-	mutex_init(&kmem_mutex);
-	kmem_mutex_enabled = 0;
+	spinlock_init(&kmem_spinlock);
+	kmem_spinlock_enabled = 0;
 }
 
-void kmem_use_mutex(void) {
-	kmem_mutex_enabled = 1;
+void kmem_use_spinlock(void) {
+	kmem_spinlock_enabled = 1;
 }
 
-static void kmem_lock(void) {
-	if(kmem_mutex_enabled) mutex_lock(&kmem_mutex);
+static intr_flags_t kmem_lock(void) {
+	if(kmem_spinlock_enabled) return spinlock_lock_irqsave(&kmem_spinlock);
+	return 0;
 }
 
-static void kmem_unlock(void) {
-	if(kmem_mutex_enabled) mutex_unlock(&kmem_mutex);
+static void kmem_unlock(intr_flags_t flags) {
+	if(kmem_spinlock_enabled) spinlock_unlock_irqrestore(&kmem_spinlock, flags);
 }
 
 void* kmalloc(size_t size) {
@@ -127,15 +128,17 @@ void* kmalloc(size_t size) {
 	kmem_block_t* split;
 	size_t	      total;
 	size_t	      used;
+	intr_flags_t  flags;
 
 	if(size == 0) return NULL;
 
 	if(size > (size_t)-1 - KMEM_HEADER - KMEM_ALIGN) return NULL;
 
-	size  = kmem_round(size);
+	size = kmem_round(size);
+
 	total = KMEM_HEADER + size;
 
-	kmem_lock();
+	flags = kmem_lock();
 	for(block = kmem_free_list; block != NULL; block = block->s.next) {
 		if(block->s.size < total) continue;
 
@@ -157,12 +160,12 @@ void* kmalloc(size_t size) {
 			used = total;
 		}
 
-		kmem_avail -= total;
+		kmem_avail -= used;
 
-		kmem_unlock();
+		kmem_unlock(flags);
 		return (void*)(block + 1);
 	}
-	kmem_unlock();
+	kmem_unlock(flags);
 
 	return NULL;
 }
@@ -201,10 +204,11 @@ void kfree(void* ptr) {
 	kmem_block_t* block;
 	kmem_block_t* prev;
 	kmem_block_t* next;
+	intr_flags_t  flags;
 
 	if(ptr == NULL) return;
 
-	kmem_lock();
+	flags = kmem_lock();
 
 	block = ((kmem_block_t*)ptr) - 1;
 	kmem_avail += block->s.size;
@@ -228,5 +232,5 @@ void kfree(void* ptr) {
 		kmem_remove(next);
 	}
 
-	kmem_unlock();
+	kmem_unlock(flags);
 }

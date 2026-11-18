@@ -11,7 +11,7 @@ __BEGIN_EXTERN_C__
 extern vaddr_t kmem_avail;
 
 void kmem_init(void* start, void* end);
-void kmem_use_mutex(void);
+void kmem_use_spinlock(void);
 
 void* kmalloc(size_t size);
 void* krealloc(void* ptr, size_t size);

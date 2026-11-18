@@ -35,6 +35,8 @@ static void test(void* arg) {
 }
 
 void kmain(void) {
+	intr_flags_t flags;
+
 	machdep_init();
 	cons_init();
 	intr_init();
@@ -56,6 +58,9 @@ void kmain(void) {
 	sched_add(&thread1);
 	sched_add(&thread2);
 
-	kmem_use_mutex();
+	flags = _intr_save();
+	kmem_use_spinlock();
+	_intr_restore(flags);
+
 	sched_start();
 }
