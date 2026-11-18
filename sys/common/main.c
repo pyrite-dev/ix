@@ -56,5 +56,6 @@ void kmain(void) {
 	sched_add(&thread1);
 	sched_add(&thread2);
 
+	kmem_use_mutex();
 	sched_start();
 }
