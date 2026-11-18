@@ -235,7 +235,7 @@ void sched_block(intr_flags_t flags) {
 
 	_intr_restore(flags);
 
-	while(thread->state != THREAD_RUNNING) BARRIER();
+	while(thread->state != THREAD_RUNNING) __BARRIER__();
 }
 
 void sched_wakeup(thread_t* thread) {

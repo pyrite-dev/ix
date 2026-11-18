@@ -10,19 +10,19 @@ void spinlock_lock(spinlock_t* lock) {
 
 	while(!_spinlock_trylock(&lock->lock)) {
 		while(lock->lock != 0) {
-			BARRIER();
+			__BARRIER__();
 		}
 	}
 
-	BARRIER();
+	__BARRIER__();
 }
 
 void spinlock_unlock(spinlock_t* lock) {
-	BARRIER();
+	__BARRIER__();
 
 	_spinlock_unlock(&lock->lock);
 
-	BARRIER();
+	__BARRIER__();
 
 	sched_preempt_enable();
 }
@@ -35,7 +35,7 @@ int spinlock_trylock(spinlock_t* lock) {
 		return 0;
 	}
 
-	BARRIER();
+	__BARRIER__();
 
 	return 1;
 }
