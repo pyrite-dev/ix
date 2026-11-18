@@ -52,16 +52,19 @@ void kprintf(const char* fmt, ...) {
 				s = n < 0 ? 1 : 0;
 
 				if(s) n = -n;
-				out[sizeof(out) - 1] = 0;
 
-				do {
-					out[p--] = num[n % b];
-					n /= b;
-				} while(n > 0);
+				if(n >= 0) {
+					out[sizeof(out) - 1] = 0;
 
-				if(s) kputc('-');
-				if(fmt[i] == 'x') kprintf("0x");
-				kprintf("%s", out + p + 1);
+					do {
+						out[p--] = num[n % b];
+						n /= b;
+					} while(n > 0);
+
+					if(s) kputc('-');
+					if(fmt[i] == 'x') kprintf("0x");
+					kprintf("%s", out + p + 1);
+				}
 
 				break;
 			}

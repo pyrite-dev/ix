@@ -1,5 +1,6 @@
 #include <sys/kmem.h>
 #include <sys/types.h>
+#include <sys/mutex.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -108,6 +109,7 @@ void* kmalloc(size_t size) {
 	kmem_block_t* block;
 	kmem_block_t* split;
 	size_t	      total;
+	size_t	      used;
 
 	if(size == 0) return NULL;
 
@@ -116,12 +118,12 @@ void* kmalloc(size_t size) {
 	size  = kmem_round(size);
 	total = KMEM_HEADER + size;
 
-	kmem_avail -= total;
-
 	for(block = kmem_free_list; block != NULL; block = block->s.next) {
 		if(block->s.size < total) continue;
 
 		kmem_remove(block);
+
+		used = block->s.size;
 
 		if(block->s.size >= total + KMEM_HEADER + KMEM_ALIGN) {
 			split = (kmem_block_t*)((char*)block + total);
@@ -133,7 +135,11 @@ void* kmalloc(size_t size) {
 			block->s.size = total;
 
 			kmem_insert(split);
+
+			used = total;
 		}
+
+		kmem_avail -= total;
 
 		return (void*)(block + 1);
 	}
@@ -157,9 +163,6 @@ void* krealloc(void* ptr, size_t size) {
 	block = ((kmem_block_t*)ptr) - 1;
 
 	old_size = block->s.size - KMEM_HEADER;
-
-	kmem_avail += block->s.size;
-	kmem_avail -= KMEM_HEADER + size;
 
 	newptr = kmalloc(size);
 

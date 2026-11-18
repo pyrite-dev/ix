@@ -40,9 +40,6 @@ SECTIONS {
 		_bss_start = .;
 		*(.bss);
 		*(COMMON);
-		. = ALIGN(64);
-		_kernel_stack = .;
-		. += 4096;
 	} > RAM
 
 	.int (NOLOAD) : {
@@ -51,6 +48,12 @@ SECTIONS {
 		. = ALIGN(4);
 		_bss_end = .;
 	} > RAM
+
+	.bss (NOLOAD) : {
+		. = ALIGN(64);
+		_kernel_stack = .;
+		. += 4096;
+	}
 
 	/DISCARD/ : {
 		*(.stab);

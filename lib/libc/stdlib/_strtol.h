@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 /* TODO: Check if we should do ERANGE */
 RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
@@ -19,7 +20,14 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 		return 0;
 	}
 
-	for(i = 0; i < strlen(nptr); i++) {
+	for(i = 0; nptr[i] != 0; i++) {
+		if(!isspace(nptr[i])) break;
+	}
+
+	if(base == 2 && strlen(nptr) > 2 && nptr[0] == '0' && (nptr[1] == 'b' || nptr[1] == 'B')) i += 2;
+	if(base == 16 && strlen(nptr) > 2 && nptr[0] == '0' && (nptr[1] == 'x' || nptr[1] == 'X')) i += 2;
+
+	for(; nptr[i] != 0; i++) {
 		int n = -1;
 
 		if('0' <= nptr[i] && nptr[i] <= num[(base > 10 ? 10 : base) - 1]) {
