@@ -8,6 +8,7 @@ struct waiter;
 #include <sys/cdefs.h>
 #include <sys/spinlock.h>
 #include <sys/thread.h>
+#include <sys/interrupt.h>
 
 struct waiter {
 	spinlock_t lock;
@@ -20,7 +21,7 @@ __BEGIN_EXTERN_C__
 
 void waiter_init(waiter_t* waiter);
 
-void waiter_sleep(waiter_t* waiter);
+void waiter_sleep(waiter_t* waiter, spinlock_t* lock, intr_flags_t flags);
 
 void waiter_wakeup(waiter_t* waiter);
 void waiter_wakeup_one(waiter_t* waiter);

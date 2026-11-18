@@ -1,8 +1,6 @@
 #include <sys/spinlock.h>
 #include <sys/interrupt.h>
 
-#define BARRIER() __asm__ __volatile__("" ::: "memory");
-
 void spinlock_init(spinlock_t* lock) {
 	lock->lock = 0;
 }

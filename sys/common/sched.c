@@ -228,6 +228,16 @@ void sched_preempt(thread_context_t* context) {
 	_sched_restore(context, &next->context);
 }
 
+void sched_block(intr_flags_t flags) {
+	thread_t* thread = current_thread;
+
+	resched_pending = 1;
+
+	_intr_restore(flags);
+
+	while(thread->state != THREAD_RUNNING) BARRIER();
+}
+
 void sched_wakeup(thread_t* thread) {
 	intr_flags_t flags;
 

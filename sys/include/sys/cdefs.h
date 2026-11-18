@@ -11,4 +11,6 @@
 
 #define __packed __attribute__((__packed__))
 
+#define __BARRIER__() __asm__ __volatile__("" ::: "memory");
+
 #endif
