@@ -6,6 +6,7 @@
 .global __intr_init
 .global __intr_save
 .global __intr_restore
+.global __intr_set
 
 .macro INTR_STUB n
 intr_\n:
@@ -82,11 +83,11 @@ INTR_REG %vec
 .endr
 	shlo 16, 0, r3
 	shlo 16, 31, r4
-	modpc r3, r4, r3
+	modpc r4, r4, r3
 	ret
 
 __intr_save:
-	modpc g0, 0, g0
+	modpc 0, 0, g0
 
 	shlo 16, 31, r3
 	modpc r3, r3, r3
@@ -94,7 +95,18 @@ __intr_save:
 
 __intr_restore:
 	shlo 16, 31, r3
-	modpc g0, r3, r3
+	modpc r3, r3, g0
+	ret
+
+__intr_set:
+	mov g0, r3
+	addo 1, r3, r3
+	mulo 4, r3, r3
+	lda _int, r4
+	addo r4, r3, r3
+
+	st g1, (r3)
+
 	ret
 
 .section .int

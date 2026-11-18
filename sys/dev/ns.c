@@ -53,7 +53,7 @@ static void ns_rx_intr(struct ns_softc* softc) {
 	}
 	spinlock_unlock_irqrestore(&softc->lock, flags);
 
-	/* wake up writer */
+	/* TODO: wake up rx */
 }
 
 static void ns_tx_intr(struct ns_softc* softc) {
@@ -75,7 +75,7 @@ static void ns_tx_intr(struct ns_softc* softc) {
 
 	spinlock_unlock_irqrestore(&softc->lock, flags);
 
-	/* wake up reader */
+	/* TODO: wake up tx */
 }
 
 static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {

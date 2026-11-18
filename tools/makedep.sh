@@ -1,7 +1,7 @@
 #!/bin/sh
 while read i; do
 	INPUT="\$(TOP)/$i"
-	OUTPUT="./$1/`echo "$i" | sed 's/\//_/g' | cut -d. -f1`.o"
+	OUTPUT="./$1/`echo "$i" | sed 's/\//_/g' | sed 's/\./_/g'`.o"
 
 	echo "OBJS += $OUTPUT"
 	echo "$OUTPUT: $INPUT"

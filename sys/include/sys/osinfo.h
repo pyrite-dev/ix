@@ -1,9 +1,9 @@
 #ifndef __SYS_OSINFO_H__
 #define __SYS_OSINFO_H__
 
-#include <sys/cdefs.h>
-
 #define OS_VERSION "1.0"
+
+#include <sys/cdefs.h>
 
 __BEGIN_EXTERN_C__
 

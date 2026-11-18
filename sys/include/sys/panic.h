@@ -3,8 +3,6 @@
 
 #include <sys/cdefs.h>
 
-#include <stddef.h>
-
 __BEGIN_EXTERN_C__
 
 void panic(const char* str);

@@ -1,10 +1,12 @@
 #ifndef __SYS_SPINLOCK_H__
 #define __SYS_SPINLOCK_H__
 
+typedef struct spinlock spinlock_t;
+
+struct spinlock;
+
 #include <sys/cdefs.h>
 #include <machine/interrupt.h>
-
-typedef struct spinlock spinlock_t;
 
 struct spinlock {
 	volatile unsigned int lock;

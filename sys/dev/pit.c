@@ -1,10 +1,14 @@
 #include <sys/device.h>
+#include <sys/sched.h>
+#include <sys/interrupt.h>
 
 static int pit_match(struct device* parent, struct device_attach_args* args) {
 	return 1;
 }
 
 static int pit_attach(struct device* parent, struct device* self, struct device_attach_args* args) {
+	_intr_set(_intr_vector(args->locators[DEVICE_LOCATOR_IRQ]), _sched_intr);
+
 	return 0;
 }
 

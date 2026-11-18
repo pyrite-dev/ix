@@ -1,14 +1,9 @@
 #ifndef __SYS_DEVICE_H__
 #define __SYS_DEVICE_H__
 
-#include <sys/cdefs.h>
-#include <sys/types.h>
-
-/* DO NOT REMOVE THE COMMENTS BELOW! */
-/* locator: addr */
-/* locator: port */
-/* locator: irq */
-/* locator: stride */
+struct device;
+struct device_attach_args;
+struct device_driver;
 
 enum DEVICE_LOCATOR {
 	DEVICE_LOCATOR_ADDR = 0,
@@ -28,7 +23,14 @@ enum DEVICE_LOCATOR {
 
 #define DEVICE_UNIT_ANY (-1)
 
-struct device_driver;
+#include <sys/cdefs.h>
+#include <sys/types.h>
+
+/* DO NOT REMOVE THE COMMENTS BELOW! */
+/* locator: addr */
+/* locator: port */
+/* locator: irq */
+/* locator: stride */
 
 struct device {
 	char*	     name;

@@ -1,11 +1,13 @@
 #ifndef __SYS_BUS_H__
 #define __SYS_BUS_H__
 
+typedef struct bus_space bus_space_t;
+
+struct bus_space;
+
 #include <sys/cdefs.h>
 #include <sys/device.h>
 #include <sys/types.h>
-
-typedef struct bus_space bus_space_t;
 
 struct bus_space {
 	paddr_t port;

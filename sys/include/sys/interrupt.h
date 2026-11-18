@@ -6,6 +6,7 @@
 #include <machine/regs.h>
 
 typedef void (*intr_handler_t)(unsigned int vector, struct iregs* iregs, void* arg);
+typedef void (*intr_raw_handler_t)(void);
 
 __BEGIN_EXTERN_C__
 
@@ -18,6 +19,7 @@ void	     _intr_init(void);
 intr_flags_t _intr_save(void);
 intr_flags_t _intr_restore(intr_flags_t flags);
 int	     _intr_vector(unsigned int irq);
+void	     _intr_set(unsigned int irq, intr_raw_handler_t handler);
 
 __END_EXTERN_C__
 
