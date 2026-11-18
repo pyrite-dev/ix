@@ -5,8 +5,7 @@
 #include <sys/kmem.h>
 #include <sys/device.h>
 #include <sys/sched.h>
-#include <sys/waiter.h>
-#include <sys/thread.h>
+#include <sys/mutex.h>
 
 static thread_t idle_thread;
 static char	idle_stack[256];
@@ -23,24 +22,15 @@ static char	stack1[2048];
 static thread_t thread2;
 static char	stack2[2048];
 
-static spinlock_t lock;
-static waiter_t	  waiter;
+static mutex_t mutex;
 
 static void test(void* arg) {
 	int n = (int)arg;
 
 	while(1) {
-		if(n == 1) {
-			intr_flags_t flags = spinlock_lock_irqsave(&lock);
-			waiter_sleep(&waiter, &lock, flags);
-			spinlock_unlock_irqrestore(&lock, flags);
-
-			kprintf("hi\r\n");
-		} else if(n == 2) {
-			intr_flags_t flags = spinlock_lock_irqsave(&lock);
-			waiter_wakeup(&waiter);
-			spinlock_unlock_irqrestore(&lock, flags);
-		}
+		mutex_lock(&mutex);
+		kprintf("%d", n);
+		mutex_unlock(&mutex);
 	}
 }
 
@@ -58,8 +48,7 @@ void kmain(void) {
 	sched_init(&idle_thread);
 	device_init();
 
-	spinlock_init(&lock);
-	waiter_init(&waiter);
+	mutex_init(&mutex);
 
 	thread_init(&thread1, stack1, sizeof(stack1), test, (void*)1);
 	thread_init(&thread2, stack2, sizeof(stack2), test, (void*)2);
