@@ -270,11 +270,6 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 		return -1;
 	}
 
-	if(self->unit >= NS_MAX_UNITS) {
-		free(softc);
-		return -1;
-	}
-
 	softc->vector = _intr_vector(args->locators[DEVICE_LOCATOR_IRQ]);
 
 	intr_register(softc->vector, ns_intr, self);
