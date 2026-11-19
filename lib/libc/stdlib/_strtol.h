@@ -33,8 +33,16 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 		nptr++;
 	}
 
-	if(base == 2 && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'b' || nptr[i + 1] == 'B')) i += 2;
-	if(base == 16 && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'x' || nptr[i + 1] == 'X')) i += 2;
+	if((base == 0 || base == 2) && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'b' || nptr[i + 1] == 'B')){
+		base = 2;
+		i += 2;
+	}else if((base == 0 || base == 16) && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'x' || nptr[i + 1] == 'X')){
+		base = 16;
+		i += 2;
+	}else if((base == 0 || base == 8) && strlen(nptr) > 1 && nptr[i] == '0'){
+		base = 8;
+		i += 1;
+	}
 
 	for(; nptr[i] != 0; i++) {
 		int n = -1;
