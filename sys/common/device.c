@@ -88,8 +88,6 @@ static int device_alloc_unit(const char* name) {
 	for(unit = 0;; unit++) {
 		if(!device_unit_used(root, name, unit)) return unit;
 	}
-
-	return 0;
 }
 
 static int device_parent_match(struct device* parent, struct device_config* config) {
@@ -171,7 +169,34 @@ void device_init(void) {
 
 	root = device_new("root", 0); /* root needs to be unit 0 as config.pl takes missing unit number as 0 */
 
+	if(root == NULL) {
+		panic("Cannot allocate root device");
+		return;
+	}
+
 	for(i = 0; devices[i].name != NULL; i++) {
 		device_configure(root, &devices[i]);
 	}
+}
+
+static struct device* device_find(struct device* node, dev_t dev) {
+	struct device* child;
+
+	/* TODO: make a device name to major translator */
+	if(dev == MAKEDEV(0, node->unit)) return node;
+
+	child = node->first_child;
+	while(child != NULL) {
+		struct device* result = device_find(child, dev);
+
+		if(result != NULL) return result;
+
+		child = child->next;
+	}
+
+	return NULL;
+}
+
+struct device* device_lookup(dev_t dev) {
+	return device_find(root, dev);
 }

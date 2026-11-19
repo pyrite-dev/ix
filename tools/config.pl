@@ -1,8 +1,10 @@
 #!/usr/bin/env perl
 
 use POSIX;
+use warnings;
+use strict;
 
-my %makeoptions = {
+my %makeoptions = (
 	"CC" => "cc",
 	"CFLAGS" => "",
 	"AS" => "as",
@@ -17,8 +19,8 @@ my %makeoptions = {
 	"CPP" => "cpp",
 	"CPPFLAGS" => "",
 	"KERNEL" => "kernel",
-};
-my %options = {};
+	);
+my %options = ();
 my @files = ();
 my @devices = ();
 my @devhashes = ();
@@ -62,6 +64,10 @@ sub parse_config {
 			}
 		} @tokens;
 		map { s/#.+// } @tokens;
+
+		if(@tokens == 0){
+			next;
+		}
 
 		if(($tokens[0] eq "options") or ($tokens[0] eq "makeoptions")){
 			my $key = substr($tokens[1], 0, -1);

@@ -24,8 +24,17 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 		if(!isspace(nptr[i])) break;
 	}
 
-	if(base == 2 && strlen(nptr) > 2 && nptr[0] == '0' && (nptr[1] == 'b' || nptr[1] == 'B')) i += 2;
-	if(base == 16 && strlen(nptr) > 2 && nptr[0] == '0' && (nptr[1] == 'x' || nptr[1] == 'X')) i += 2;
+	if(
+#ifndef UNSIGNED
+	    nptr[i] == '-' ||
+#endif
+	    nptr[i] == '+') {
+		if(nptr[i] == '-') s = -1;
+		nptr++;
+	}
+
+	if(base == 2 && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'b' || nptr[i + 1] == 'B')) i += 2;
+	if(base == 16 && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'x' || nptr[i + 1] == 'X')) i += 2;
 
 	for(; nptr[i] != 0; i++) {
 		int n = -1;
@@ -39,12 +48,6 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 		} else if(base > 10 && 'A' <= nptr[i] && nptr[i] <= alpu[base - 11]) {
 			n = nptr[i] - 'A' + 10;
 			d = 1;
-#ifndef UNSIGNED
-		} else if(i == 0 && nptr[i] == '-') {
-			s = -1;
-			continue;
-#endif
-		} else if(i == 0 && nptr[i] == '+') {
 		} else {
 			if(endptr != NULL) *endptr = (char*)&nptr[i];
 			break;

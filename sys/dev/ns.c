@@ -28,8 +28,6 @@ struct ns_softc {
 	unsigned int vector;
 };
 
-static struct ns_softc* ns_units[NS_MAX_UNITS];
-
 static unsigned short baud_to_div(int clock, int baud) {
 	return clock / (16 * baud);
 }
@@ -38,69 +36,59 @@ static int ns_match(struct device* parent, struct device_attach_args* args) {
 	return 1;
 }
 
-static struct ns_softc* ns_lookup(dev_t dev) {
-	unsigned int unit;
+static int ttydev_open(dev_t dev, int flags, int mode) {
+	struct device* device;
 
-	unit = MINOR(dev);
+	device = device_lookup(dev);
+	if(device == NULL) return ENXIO;
 
-	if(unit >= NS_MAX_UNITS) return NULL;
-
-	return ns_units[unit];
+	return tty_open(device->softc, flags, mode);
 }
 
-static int ns_open(dev_t dev, int flags, int mode) {
-	struct ns_softc* softc;
+static int ttydev_close(dev_t dev, int flags, int mode) {
+	struct device* device;
 
-	softc = ns_lookup(dev);
-	if(softc == NULL) return ENXIO;
+	device = device_lookup(dev);
+	if(device == NULL) return ENXIO;
 
-	return tty_open(&softc->tty, flags, mode);
-}
-
-static int ns_close(dev_t dev, int flags, int mode) {
-	struct ns_softc* softc;
-
-	softc = ns_lookup(dev);
-	if(softc == NULL) return ENXIO;
-
-	tty_close(&softc->tty);
+	tty_close(device->softc);
 
 	return 0;
 }
 
-static int ns_read(dev_t dev, struct uio* uio, int flags) {
-	struct ns_softc* softc;
+static int ttydev_read(dev_t dev, struct uio* uio, int flags) {
+	struct device* device;
 
-	softc = ns_lookup(dev);
-	if(softc == NULL) return ENXIO;
+	device = device_lookup(dev);
+	if(device == NULL) return ENXIO;
 
-	return tty_read(&softc->tty, uio, flags);
+	return tty_read(device->softc, uio, flags);
 }
 
-static int ns_write(dev_t dev, struct uio* uio, int flags) {
-	struct ns_softc* softc;
+static int ttydev_write(dev_t dev, struct uio* uio, int flags) {
+	struct device* device;
 
-	softc = ns_lookup(dev);
-	if(softc == NULL) return ENXIO;
+	device = device_lookup(dev);
+	if(device == NULL) return ENXIO;
 
-	return tty_write(&softc->tty, uio, flags);
+	return tty_write(device->softc, uio, flags);
 }
 
-static int ns_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
-	struct ns_softc* softc;
+static int ttydev_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
+	struct device* device;
 
-	softc = ns_lookup(dev);
-	if(softc == NULL) return ENXIO;
+	device = device_lookup(dev);
+	if(device == NULL) return ENXIO;
 
-	return tty_ioctl(&softc->tty, cmd, data, flags);
+	return tty_ioctl(device->softc, cmd, data, flags);
 }
 
-struct cdevsw ns_cdevsw = {
-    ns_open,
-    ns_close,
-    ns_read,
-    ns_write,
-    ns_ioctl};
+struct cdevsw ttydev_cdevsw = {
+    ttydev_open,
+    ttydev_close,
+    ttydev_read,
+    ttydev_write,
+    ttydev_ioctl};
 
 static void ns_start(struct tty* tty) {
 	struct ns_softc* softc;
@@ -232,8 +220,18 @@ static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {
 static int ns_attach(struct device* parent, struct device* self, struct device_attach_args* args) {
 	unsigned int	 clock = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_CLOCK], 115200);
 	unsigned int	 baud  = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_BAUD], 9600);
-	unsigned short	 div   = baud_to_div(clock, baud);
+	unsigned short	 div;
 	struct ns_softc* softc;
+
+	if(baud == 0) {
+		return -1;
+	}
+
+	div = baud_to_div(clock, baud);
+
+	if(div > 65535) {
+		return -1;
+	}
 
 	self->softc = softc = malloc(sizeof(*softc));
 	if(softc == NULL) return -1;
@@ -278,7 +276,6 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 		free(softc);
 		return -1;
 	}
-	ns_units[self->unit] = softc;
 
 	softc->vector = _intr_vector(args->locators[DEVICE_LOCATOR_IRQ]);
 

@@ -1,6 +1,7 @@
 #include <sys/cons.h>
 
 #include <stdarg.h>
+#include <stdlib.h>
 
 static void kputc(char c) {
 	cons_putc(c);
@@ -23,6 +24,8 @@ void kprintf(const char* fmt, ...) {
 			{
 				char* s = va_arg(va, char*);
 
+				if(s == NULL) s = "(null)";
+
 				while(*s) kputc(*s++);
 				break;
 			}
@@ -40,10 +43,11 @@ void kprintf(const char* fmt, ...) {
 			case 'x':
 			{
 				long long n;
-				char	  out[200];
-				int	  p = sizeof(out) - 2;
+				char*	  out = malloc(256);
+				int	  p   = 256 - 2;
 				int	  s;
 				int	  b = fmt[i] == 'x' ? 16 : 10;
+				int	  j;
 
 				if(inttype == 0) n = va_arg(va, int);
 				if(inttype == 'l') n = va_arg(va, long);
@@ -62,10 +66,22 @@ void kprintf(const char* fmt, ...) {
 					} while(n > 0);
 
 					if(s) kputc('-');
-					if(fmt[i] == 'x') kprintf("0x");
-					kprintf("%s", out + p + 1);
+
+					if(fmt[i] == 'x') {
+						kputc('0');
+						kputc('x');
+					}
+
+					for(j = p + 1; out[j] != 0; j++) kprintf("%s", out[j]);
 				}
 
+				free(out);
+
+				break;
+			}
+			case '%':
+			{
+				kputc('%');
 				break;
 			}
 			}

@@ -87,7 +87,8 @@ __BEGIN_EXTERN_C__
 
 extern struct device_config devices[];
 
-void device_init(void);
+void	       device_init(void);
+struct device* device_lookup(dev_t dev);
 
 __END_EXTERN_C__
 

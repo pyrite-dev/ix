@@ -18,7 +18,7 @@ unsigned char bus_space_read8(bus_space_t* space, paddr_t offset) {
 	int stride = bus_space_stride(space, 1);
 
 	if(stride <= 1) {
-		volatile unsigned char* ptr = (volatile unsigned char*)space->addr + offset;
+		volatile unsigned char* ptr = (volatile unsigned char*)(space->addr + offset * stride);
 
 		return *ptr;
 	} else if(stride == 2) {
@@ -34,7 +34,7 @@ void bus_space_write8(bus_space_t* space, paddr_t offset, unsigned char value) {
 	int stride = bus_space_stride(space, 1);
 
 	if(stride <= 1) {
-		volatile unsigned char* ptr = (volatile unsigned char*)space->addr + offset;
+		volatile unsigned char* ptr = (volatile unsigned char*)(space->addr + offset * stride);
 
 		*ptr = value;
 	} else if(stride == 2) {

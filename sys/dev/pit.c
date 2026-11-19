@@ -18,7 +18,14 @@ static int pit_match(struct device* parent, struct device_attach_args* args) {
 
 static int pit_attach(struct device* parent, struct device* self, struct device_attach_args* args) {
 	struct pit_softc* softc;
-	int		  div = args->locators[DEVICE_LOCATOR_CLOCK] / args->locators[DEVICE_LOCATOR_SPEED];
+	int		  clock = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_CLOCK], 1931816);
+	int		  speed = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_SPEED], 10);
+	int		  div;
+
+	if(speed == 0) {
+	}
+
+	div = clock / speed;
 
 	self->softc = softc = malloc(sizeof(*softc));
 	if(softc == NULL) return -1;
