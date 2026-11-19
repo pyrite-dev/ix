@@ -1,5 +1,6 @@
 #include <sys/cons.h>
-#include <sys/dev/ns.h>
+
+#include "../../../dev/ns.h"
 
 static volatile unsigned short* uart = (unsigned short*)0x220000;
 
