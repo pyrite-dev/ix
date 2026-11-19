@@ -12,8 +12,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NS_MAX_UNITS 4
-
 struct ns_softc {
 	struct tty tty;
 
@@ -28,7 +26,7 @@ struct ns_softc {
 	unsigned int vector;
 };
 
-static unsigned short baud_to_div(int clock, int baud) {
+static unsigned int baud_to_div(int clock, int baud) {
 	return clock / (16 * baud);
 }
 
@@ -295,6 +293,7 @@ static void ns_detach(struct device* self) {
 
 	intr_unregister(softc->vector);
 
+	self->softc = NULL;
 	free(softc);
 }
 

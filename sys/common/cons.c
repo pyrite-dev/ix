@@ -49,6 +49,8 @@ void kprintf(const char* fmt, ...) {
 				int	  b = fmt[i] == 'x' ? 16 : 10;
 				int	  j;
 
+				if(out == NULL) break;
+
 				if(inttype == 0) n = va_arg(va, int);
 				if(inttype == 'l') n = va_arg(va, long);
 				if(inttype == 'L') n = va_arg(va, long long);
@@ -58,7 +60,7 @@ void kprintf(const char* fmt, ...) {
 				if(s) n = -n;
 
 				if(n >= 0) {
-					out[sizeof(out) - 1] = 0;
+					out[256 - 1] = 0;
 
 					do {
 						out[p--] = num[n % b];
@@ -72,7 +74,7 @@ void kprintf(const char* fmt, ...) {
 						kputc('x');
 					}
 
-					for(j = p + 1; out[j] != 0; j++) kprintf("%s", out[j]);
+					for(j = p + 1; out[j] != 0; j++) kputc(out[j]);
 				}
 
 				free(out);

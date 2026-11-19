@@ -1,4 +1,6 @@
 #include <sys/device.h>
+#include <sys/panic.h>
+#include <sys/cons.h>
 
 #include <stddef.h>
 #include <string.h>

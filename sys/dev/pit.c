@@ -23,6 +23,7 @@ static int pit_attach(struct device* parent, struct device* self, struct device_
 	int		  div;
 
 	if(speed == 0) {
+		return -1;
 	}
 
 	div = clock / speed;

@@ -6,7 +6,7 @@ void tty_init(struct tty* tty, const struct ttydev_ops* ops, void* devdata) {
 }
 
 int tty_open(struct tty* tty, int flags, int mode) {
-	return -1;
+	return 0;
 }
 
 void tty_close(struct tty* tty) {
@@ -21,7 +21,7 @@ int tty_write(struct tty* tty, struct uio* uio, int flags) {
 }
 
 int tty_ioctl(struct tty* tty, unsigned long cmd, void* data, int flags) {
-	return 01;
+	return 0;
 }
 
 void tty_start(struct tty* tty) {
