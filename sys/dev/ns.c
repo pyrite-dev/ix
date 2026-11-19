@@ -3,6 +3,7 @@
 #include <sys/bus.h>
 #include <sys/spinlock.h>
 #include <sys/tty.h>
+#include <sys/ttydev.h>
 #include <sys/errno.h>
 #include <sys/cdev.h>
 
@@ -14,6 +15,8 @@
 #define NS_MAX_UNITS 4
 
 struct ns_softc {
+	struct tty tty;
+
 	bus_space_t space;
 
 	spinlock_t lock;
@@ -23,8 +26,6 @@ struct ns_softc {
 
 	unsigned int clock;
 	unsigned int vector;
-
-	struct tty tty;
 };
 
 static struct ns_softc* ns_units[NS_MAX_UNITS];
@@ -178,7 +179,7 @@ static void ns_rx_intr(struct ns_softc* softc) {
 		unsigned char lsr;
 		unsigned char data;
 
-		if(!((lsr = bus_space_read8(&softc->space, NS_LSR)) & NS_LS_DR)){
+		if(!((lsr = bus_space_read8(&softc->space, NS_LSR)) & NS_LS_DR)) {
 			spinlock_unlock_irqrestore(&softc->lock, flags);
 			break;
 		}
@@ -268,21 +269,16 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 
 	bus_space_write8(&softc->space, NS_MCR, softc->mcr);
 
-	tty_init(&softc->tty, &ns_tty_ops, softc);
+	if(ttydev_init(&softc, &ns_tty_ops, baud) != 0) {
+		free(softc);
+		return -1;
+	}
 
-	if(self->unit >= NS_MAX_UNITS){
+	if(self->unit >= NS_MAX_UNITS) {
 		free(softc);
 		return -1;
 	}
 	ns_units[self->unit] = softc;
-
-	softc->tty.t_termios.c_ispeed = baud;
-	softc->tty.t_termios.c_ospeed = baud;
-
-	if(tty_param(&softc->tty, &softc->tty.t_termios) != 0){
-		free(softc);
-		return -1;
-	}
 
 	softc->vector = _intr_vector(args->locators[DEVICE_LOCATOR_IRQ]);
 
