@@ -1,17 +1,13 @@
 #include <sys/device.h>
-#include <sys/dev/ns.h>
 #include <sys/interrupt.h>
 #include <sys/bus.h>
 #include <sys/spinlock.h>
+#include <sys/tty.h>
+
+#include "ns.h"
 
 #include <stdlib.h>
 #include <string.h>
-
-struct ns_ring {
-	unsigned char data[NS_BUFSZ];
-	unsigned int  head;
-	unsigned int  tail;
-};
 
 struct ns_softc {
 	bus_space_t space;
@@ -20,8 +16,7 @@ struct ns_softc {
 
 	unsigned char ier;
 
-	struct ns_ring rx;
-	struct ns_ring tx;
+	struct tty tty;
 };
 
 static unsigned short baud_to_div(int clock, int baud) {
@@ -37,24 +32,14 @@ static void ns_rx_intr(struct ns_softc* softc) {
 	while(1) {
 		unsigned char lsr;
 		unsigned char data;
-		unsigned int  next;
 
 		if(!((lsr = bus_space_read8(&softc->space, NS_LSR)) & NS_LS_DR)) break;
 
 		data = bus_space_read8(&softc->space, NS_DR);
-		next = (softc->rx.head + 1) % NS_BUFSZ;
 
-		if(next == softc->rx.tail) {
-			/* overrun */
-			continue;
-		}
-
-		softc->rx.data[softc->rx.head] = data;
-		softc->rx.head		       = next;
+		tty_input(&softc->tty, data, 0);
 	}
 	spinlock_unlock_irqrestore(&softc->lock, flags);
-
-	/* TODO: wake up rx */
 }
 
 static void ns_tx_intr(struct ns_softc* softc) {
@@ -63,20 +48,19 @@ static void ns_tx_intr(struct ns_softc* softc) {
 
 	/* TODO: Get FIFO size */
 	for(i = 0; i < 1; i++) {
-		if(softc->tx.head == softc->tx.tail) break;
+		unsigned char data;
 
-		bus_space_write8(&softc->space, NS_DR, softc->tx.data[softc->tx.tail]);
-		softc->tx.tail = (softc->tx.tail + 1) % NS_BUFSZ;
+		if(!tty_output_getc(&softc->tty, &data)) break;
+
+		bus_space_write8(&softc->space, NS_DR, data);
 	}
 
-	if(softc->tx.head == softc->tx.tail) {
+	if(i == 0) {
 		softc->ier &= ~NS_IE_THRE;
 		bus_space_write8(&softc->space, NS_IER, softc->ier);
 	}
 
 	spinlock_unlock_irqrestore(&softc->lock, flags);
-
-	/* TODO: wake up tx */
 }
 
 static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {

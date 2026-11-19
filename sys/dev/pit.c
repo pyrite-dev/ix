@@ -1,8 +1,9 @@
 #include <sys/device.h>
-#include <sys/dev/pit.h>
 #include <sys/interrupt.h>
 #include <sys/bus.h>
 #include <sys/sched.h>
+
+#include "pit.h"
 
 #include <stdlib.h>
 #include <string.h>
