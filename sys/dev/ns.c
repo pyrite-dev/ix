@@ -293,7 +293,6 @@ static void ns_detach(struct device* self) {
 
 	intr_unregister(softc->vector);
 
-	self->softc = NULL;
 	free(softc);
 }
 
