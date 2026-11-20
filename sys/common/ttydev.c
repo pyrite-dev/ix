@@ -59,15 +59,6 @@ static struct cdevsw ttydev_cdevsw = {
     ttydev_write,
     ttydev_ioctl};
 
-struct tty* ttydev_lookup(dev_t dev) {
-        struct device* device;
-
-        device = device_lookup(dev);
-        if(device == NULL) return NULL;
-
-        return (struct tty*)device->softc;
-}
-
 int ttydev_init(void* softc, const struct ttydev_ops* ops, speed_t baud) {
 	struct tty* tty = softc;
 
@@ -77,4 +68,13 @@ int ttydev_init(void* softc, const struct ttydev_ops* ops, speed_t baud) {
 	tty->t_termios.c_ospeed = baud;
 
 	return tty_param(tty, &tty->t_termios);
+}
+
+struct tty* ttydev_lookup(dev_t dev) {
+        struct device* device;
+
+        device = device_lookup(dev);
+        if(device == NULL) return NULL;
+
+        return (struct tty*)device->softc;
 }
