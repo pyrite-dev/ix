@@ -3,9 +3,9 @@
 #include <errno.h>
 #include <ctype.h>
 
-/* TODO: Check if we should do ERANGE */
 RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
-	RETTYPE r = 0;
+	unsigned long long ur = 0, limit, cutoff;
+	int		   cutlim, overflow = 0;
 	int	i;
 	RETTYPE s      = 1;
 	char	num[]  = "0123456789";
@@ -15,7 +15,7 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 
 	if(endptr != NULL) *endptr = (char*)nptr + strlen(nptr);
 
-	if(base < 2 || base > 36) {
+	if(base < 0 || base == 1 || base > 36) {
 		errno = EINVAL;
 		return 0;
 	}
@@ -30,19 +30,28 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 #endif
 	    nptr[i] == '+') {
 		if(nptr[i] == '-') s = -1;
-		nptr++;
+		i++;
 	}
 
-	if((base == 0 || base == 2) && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'b' || nptr[i + 1] == 'B')){
+	if((base == 0 || base == 2) && nptr[i] == '0' && (nptr[i + 1] == 'b' || nptr[i + 1] == 'B') && nptr[i + 2] != 0) {
 		base = 2;
 		i += 2;
-	}else if((base == 0 || base == 16) && strlen(nptr) > 2 && nptr[i] == '0' && (nptr[i + 1] == 'x' || nptr[i + 1] == 'X')){
+	} else if((base == 0 || base == 16) && nptr[i] == '0' && (nptr[i + 1] == 'x' || nptr[i + 1] == 'X') && nptr[i + 2] != 0) {
 		base = 16;
 		i += 2;
-	}else if((base == 0 || base == 8) && strlen(nptr) > 1 && nptr[i] == '0'){
+	} else if((base == 0 || base == 8) && nptr[i] == '0') {
 		base = 8;
-		i += 1;
 	}
+	if(base == 0) base = 10;
+
+#ifdef UNSIGNED
+	limit = (unsigned long long)(RETTYPE)~0ULL;
+#else
+	limit = (1ULL << (sizeof(RETTYPE) * 8 - 1)) - 1;
+	if(s < 0) limit += 1;
+#endif
+	cutoff = limit / (unsigned)base;
+	cutlim = (int)(limit % (unsigned)base);
 
 	for(; nptr[i] != 0; i++) {
 		int n = -1;
@@ -61,11 +70,33 @@ RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 			break;
 		}
 
-		r = r * base;
-		r = r + n;
+		if(!overflow) {
+			if(ur > cutoff || (ur == cutoff && n > cutlim))
+				overflow = 1;
+			else
+				ur = ur * base + n;
+		}
 	}
 
 	if(!d) errno = EINVAL;
 
-	return r * s;
+	if(overflow) {
+		errno = ERANGE;
+#ifdef UNSIGNED
+		return (RETTYPE)~0ULL;
+#else
+		if(s < 0) return (RETTYPE)(-(RETTYPE)(limit - 1) - 1);
+		return (RETTYPE)limit;
+#endif
+	}
+
+#ifdef UNSIGNED
+	return (RETTYPE)ur;
+#else
+	if(s < 0) {
+		if(ur == limit) return (RETTYPE)(-(RETTYPE)(limit - 1) - 1);
+		return (RETTYPE)(-(RETTYPE)ur);
+	}
+	return (RETTYPE)ur;
+#endif
 }

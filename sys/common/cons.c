@@ -1,7 +1,7 @@
 #include <sys/cons.h>
 
 #include <stdarg.h>
-#include <stdlib.h>
+#include <stddef.h> /* NULL; no heap dependency */
 
 static void kputc(char c) {
 	cons_putc(c);
@@ -43,50 +43,31 @@ void kprintf(const char* fmt, ...) {
 			case 'u':
 			case 'x':
 			{
-				long long n;
-				unsigned long long n2;
-				int uns = 0;
-				char*	  out = malloc(256);
-				int	  p   = 256 - 2;
-				int	  s = 0;
-				int	  b = fmt[i] == 'x' ? 16 : 10;
-				int	  j;
+				long long	   n = 0;
+				unsigned long long mag;
+				unsigned long long div;
+				int		   s = 0;
+				int		   b = fmt[i] == 'x' ? 16 : 10;
 
-				if(out == NULL) break;
-
-				if(fmt[i] == 'u'){
-					if(inttype == 0) n2 = va_arg(va, unsigned int);
-					if(inttype == 'l') n2 = va_arg(va, unsigned long);
-					if(inttype == 'L') n2 = va_arg(va, unsigned long long);
-
-					uns = 1;
-				}else{
+				if(fmt[i] == 'u') {
+					if(inttype == 0) mag = va_arg(va, unsigned int);
+					if(inttype == 'l') mag = va_arg(va, unsigned long);
+					if(inttype == 'L') mag = va_arg(va, unsigned long long);
+				} else {
 					if(inttype == 0) n = va_arg(va, int);
 					if(inttype == 'l') n = va_arg(va, long);
 					if(inttype == 'L') n = va_arg(va, long long);
-				}
 
-				if(!uns){
 					s = n < 0 ? 1 : 0;
-					if(s){
-						n2 = -n;
-						n = -n;
-					}else{
-						n2 = n;
-					}
 
-					if(n < 0){
-						free(out);
-						break;
-					}
+					mag = s ? (unsigned long long)(-(n + 1)) + 1
+						: (unsigned long long)n;
 				}
 
-				out[256 - 1] = 0;
+				div = 1;
 
-				do {
-					out[p--] = num[n2 % b];
-					n2 /= b;
-				} while(n2 > 0);
+				while(mag / div >= (unsigned long long)b)
+					div *= b;
 
 				if(s) kputc('-');
 
@@ -95,9 +76,11 @@ void kprintf(const char* fmt, ...) {
 					kputc('x');
 				}
 
-				for(j = p + 1; out[j] != 0; j++) kputc(out[j]);
-
-				free(out);
+				while(div > 0) {
+					kputc(num[mag / div]);
+					mag %= div;
+					div /= b;
+				}
 
 				break;
 			}
