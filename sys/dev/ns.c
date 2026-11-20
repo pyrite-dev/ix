@@ -218,7 +218,7 @@ static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {
 static int ns_attach(struct device* parent, struct device* self, struct device_attach_args* args) {
 	unsigned int	 clock = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_CLOCK], 115200);
 	unsigned int	 baud  = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_BAUD], 9600);
-	unsigned short	 div;
+	unsigned int	 div;
 	struct ns_softc* softc;
 
 	if(baud == 0) {
@@ -227,7 +227,7 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 
 	div = baud_to_div(clock, baud);
 
-	if(div > 65535) {
+	if(div == 0 || div > 65535) {
 		return -1;
 	}
 
