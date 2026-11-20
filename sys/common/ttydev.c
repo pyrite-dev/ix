@@ -1,6 +1,72 @@
 #include <sys/ttydev.h>
 #include <sys/tty.h>
 #include <sys/termios.h>
+#include <sys/errno.h>
+#include <sys/cdev.h>
+#include <sys/device.h>
+
+static int ttydev_open(dev_t dev, int flags, int mode) {
+	struct tty* tty;
+
+	tty = ttydev_lookup(dev);
+	if(tty == NULL) return ENXIO;
+
+	return tty_open(tty, flags, mode);
+}
+
+static int ttydev_close(dev_t dev, int flags, int mode) {
+	struct tty* tty;
+
+	tty = ttydev_lookup(dev);
+	if(tty == NULL) return ENXIO;
+
+	tty_close(tty);
+
+	return 0;
+}
+
+static int ttydev_read(dev_t dev, struct uio* uio, int flags) {
+	struct tty* tty;
+
+	tty = ttydev_lookup(dev);
+	if(tty == NULL) return ENXIO;
+
+	return tty_read(tty, uio, flags);
+}
+
+static int ttydev_write(dev_t dev, struct uio* uio, int flags) {
+	struct tty* tty;
+
+	tty = ttydev_lookup(dev);
+	if(tty == NULL) return ENXIO;
+
+	return tty_write(tty, uio, flags);
+}
+
+static int ttydev_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
+	struct tty* tty;
+
+	tty = ttydev_lookup(dev);
+	if(tty == NULL) return ENXIO;
+
+	return tty_ioctl(tty, cmd, data, flags);
+}
+
+static struct cdevsw ttydev_cdevsw = {
+    ttydev_open,
+    ttydev_close,
+    ttydev_read,
+    ttydev_write,
+    ttydev_ioctl};
+
+struct tty* ttydev_lookup(dev_t dev) {
+        struct device* device;
+
+        device = device_lookup(dev);
+        if(device == NULL) return NULL;
+
+        return (struct tty*)device->softc;
+}
 
 int ttydev_init(void* softc, const struct ttydev_ops* ops, speed_t baud) {
 	struct tty* tty = softc;

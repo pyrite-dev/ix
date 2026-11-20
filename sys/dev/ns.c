@@ -5,7 +5,6 @@
 #include <sys/tty.h>
 #include <sys/ttydev.h>
 #include <sys/errno.h>
-#include <sys/cdev.h>
 
 #include "ns.h"
 
@@ -33,60 +32,6 @@ static unsigned int baud_to_div(int clock, int baud) {
 static int ns_match(struct device* parent, struct device_attach_args* args) {
 	return 1;
 }
-
-static int ttydev_open(dev_t dev, int flags, int mode) {
-	struct device* device;
-
-	device = device_lookup(dev);
-	if(device == NULL) return ENXIO;
-
-	return tty_open(device->softc, flags, mode);
-}
-
-static int ttydev_close(dev_t dev, int flags, int mode) {
-	struct device* device;
-
-	device = device_lookup(dev);
-	if(device == NULL) return ENXIO;
-
-	tty_close(device->softc);
-
-	return 0;
-}
-
-static int ttydev_read(dev_t dev, struct uio* uio, int flags) {
-	struct device* device;
-
-	device = device_lookup(dev);
-	if(device == NULL) return ENXIO;
-
-	return tty_read(device->softc, uio, flags);
-}
-
-static int ttydev_write(dev_t dev, struct uio* uio, int flags) {
-	struct device* device;
-
-	device = device_lookup(dev);
-	if(device == NULL) return ENXIO;
-
-	return tty_write(device->softc, uio, flags);
-}
-
-static int ttydev_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
-	struct device* device;
-
-	device = device_lookup(dev);
-	if(device == NULL) return ENXIO;
-
-	return tty_ioctl(device->softc, cmd, data, flags);
-}
-
-struct cdevsw ttydev_cdevsw = {
-    ttydev_open,
-    ttydev_close,
-    ttydev_read,
-    ttydev_write,
-    ttydev_ioctl};
 
 static void ns_start(struct tty* tty) {
 	struct ns_softc* softc;
