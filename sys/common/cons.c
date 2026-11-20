@@ -60,8 +60,7 @@ void kprintf(const char* fmt, ...) {
 
 					s = n < 0 ? 1 : 0;
 
-					mag = s ? (unsigned long long)(-(n + 1)) + 1
-						: (unsigned long long)n;
+					mag = s ? (unsigned long long)(-(n + 1)) + 1 : (unsigned long long)n;
 				}
 
 				div = 1;
