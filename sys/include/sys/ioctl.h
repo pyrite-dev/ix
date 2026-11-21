@@ -30,10 +30,10 @@
 #define _IOW(group, num, type) _IOC(IOC_IN, group, num, sizeof(type))
 #define _IOWR(group, num, type) _IOC(IOC_INOUT, group, num, sizeof(type))
 
-#define TIOCGETA        _IOR('t', 1, struct termios)
-#define TIOCSETA        _IOW('t', 2, struct termios)
-#define TIOCSETAW       _IOW('t', 3, struct termios)
-#define TIOCSETAF       _IOW('t', 4, struct termios)
+#define TIOCGETA _IOR('t', 1, struct termios)
+#define TIOCSETA _IOW('t', 2, struct termios)
+#define TIOCSETAW _IOW('t', 3, struct termios)
+#define TIOCSETAF _IOW('t', 4, struct termios)
 
 #include <sys/termios.h>
 

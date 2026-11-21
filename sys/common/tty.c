@@ -82,7 +82,7 @@ int tty_open(struct tty* tty, int flags, int mode) {
 
 	irq = spinlock_lock_irqsave(&tty->t_lock);
 
-	if(tty->t_open_count) tty->t_state |= TS_ISOPEN;
+	if(tty->t_open_count == 0) tty->t_state |= TS_ISOPEN;
 
 	tty->t_open_count++;
 	spinlock_unlock_irqrestore(&tty->t_lock, irq);

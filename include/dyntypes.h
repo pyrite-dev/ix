@@ -1,5 +1,5 @@
-#ifndef __DYNTAPES_H__
-#define __DYNTAPES_H__
+#ifndef __DYNTYPES_H__
+#define __DYNTYPES_H__
 
 #include <stddef.h>
 #include <string.h>

@@ -30,7 +30,7 @@ void cdev_init(void) {
 }
 
 int cdev_register(unsigned int major, struct cdevsw* cdevsw) {
-	if(shgeti(cdevsw_map, major) != -1) return -1;
+	if(hmgeti(cdevsw_map, major) != -1) return -1;
 
 	hmput(cdevsw_map, major, cdevsw);
 
@@ -54,7 +54,7 @@ dev_t cdev_register_device(dev_t dev, struct device* device) {
 			minor++;
 		} while(minor != DEVICE_MINOR_ANY && shgeti(device_map, dev) != -1);
 
-		if(minor == DEVICE_MINOR_ANY) return DEVICE_ERROR;
+		if(shgeti(device_map, dev) != -1) return DEVICE_ERROR;
 	}
 
 	hmput(device_map, dev, device);
