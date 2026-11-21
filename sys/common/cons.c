@@ -1,7 +1,7 @@
 #include <sys/cons.h>
 
 #include <stdarg.h>
-#include <stddef.h> /* NULL; no heap dependency */
+#include <stddef.h>
 
 static void kputc(char c) {
 	cons_putc(c);

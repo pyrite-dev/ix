@@ -6,6 +6,7 @@ struct cdevsw;
 #include <sys/cdefs.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <sys/device.h>
 
 struct cdevsw {
 	int (*open)(dev_t dev, int flags, int mode);
@@ -19,10 +20,15 @@ __BEGIN_EXTERN_C__
 
 void cdev_init(void);
 
-int  cdev_register(unsigned int major, const struct cdevsw* cdevsw);
+int  cdev_register(unsigned int major, struct cdevsw* cdevsw);
 void cdev_unregister(unsigned int major);
 
-const struct cdevsw* cdev_lookup(dev_t dev);
+struct cdevsw* cdev_lookup(unsigned int dev);
+
+dev_t cdev_register_device(dev_t dev, struct device* device);
+void  cdev_unregister_device(dev_t dev);
+
+struct device* cdev_lookup_device(dev_t dev);
 
 __END_EXTERN_C__
 

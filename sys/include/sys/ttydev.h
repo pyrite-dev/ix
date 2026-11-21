@@ -20,9 +20,7 @@ __BEGIN_EXTERN_C__
 
 extern struct cdevsw tty_cdevsw;
 
-int ttydev_init(void* softc, const struct ttydev_ops* ops, speed_t baud);
-
-struct tty* ttydev_lookup(dev_t dev);
+int ttydev_init(struct device* device, const struct ttydev_ops* ops, speed_t baud);
 
 __END_EXTERN_C__
 

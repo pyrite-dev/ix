@@ -4,6 +4,16 @@
 #include <sys/errno.h>
 #include <sys/cdev.h>
 #include <sys/device.h>
+#include <sys/major.h>
+
+static struct tty* ttydev_lookup(dev_t dev) {
+	struct device* device;
+
+	device = cdev_lookup_device(dev);
+	if(device == NULL) return NULL;
+
+	return (struct tty*)device->softc;
+}
 
 static int ttydev_open(dev_t dev, int flags, int mode) {
 	struct tty* tty;
@@ -59,22 +69,17 @@ struct cdevsw tty_cdevsw = {
     ttydev_write,
     ttydev_ioctl};
 
-int ttydev_init(void* softc, const struct ttydev_ops* ops, speed_t baud) {
-	struct tty* tty = softc;
+int ttydev_init(struct device* device, const struct ttydev_ops* ops, speed_t baud) {
+	struct tty* tty = device->softc;
+	int	    st;
 
-	tty_init(tty, ops, softc);
+	tty_init(tty, ops, device->softc);
 
 	tty->t_termios.c_ispeed = baud;
 	tty->t_termios.c_ospeed = baud;
 
-	return tty_param(tty, &tty->t_termios);
-}
+	if((st = tty_param(tty, &tty->t_termios)) != 0) return st;
+	if(cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device) == DEVICE_ERROR) return -1;
 
-struct tty* ttydev_lookup(dev_t dev) {
-	struct device* device;
-
-	device = device_lookup(dev);
-	if(device == NULL) return NULL;
-
-	return (struct tty*)device->softc;
+	return 0;
 }

@@ -35,6 +35,7 @@ enum DEVICE_LOCATOR {
 #define DEVICE_MINOR(dev) (((dev) >> 0) & 0xffff)
 #define DEVICE_MAKE(major, minor) ((((dev_t)(major) & 0xffff) << 16) | ((dev_t)(minor) & 0xffff))
 #define DEVICE_MINOR_ANY (0xffff)
+#define DEVICE_ERROR ((dev_t)(-1))
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -89,10 +90,7 @@ __BEGIN_EXTERN_C__
 
 extern struct device_config devices[];
 
-void	       device_init(void);
-
-struct device* device_lookup(dev_t dev);
-dev_t device_register(dev_t dev, struct device* device);
+void device_init(void);
 
 __END_EXTERN_C__
 

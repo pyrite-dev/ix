@@ -1,20 +1,14 @@
 #include <sys/device.h>
 #include <sys/panic.h>
 #include <sys/cons.h>
+#include <sys/cdev.h>
 
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dyntypes.h>
-
-struct device_map {
-	dev_t key;
-	struct device* value;
-};
 
 static struct device* root;
 static const char*    locators[] = DEVICE_LOCATORS;
-static struct device_map* device_map = NULL;
 
 static struct device* device_new(const char* name, int unit) {
 	struct device* dev = malloc(sizeof(*dev));
@@ -176,10 +170,9 @@ static int device_configure(struct device* node, struct device_config* config) {
 void device_init(void) {
 	int i;
 
-	root = device_new("root", 0); /* root needs to be unit 0 as config.pl takes missing unit number as 0 */
+	cdev_init();
 
-	device_map = NULL;
-	hmdefault(device_map, NULL);
+	root = device_new("root", 0); /* root needs to be unit 0 as config.pl takes missing unit number as 0 */
 
 	if(root == NULL) {
 		panic("Cannot allocate root device");
@@ -189,25 +182,4 @@ void device_init(void) {
 	for(i = 0; devices[i].name != NULL; i++) {
 		device_configure(root, &devices[i]);
 	}
-}
-
-struct device* device_lookup(dev_t dev) {
-	return shget(device_map, dev);
-}
-
-dev_t device_register(dev_t dev, struct device* device){
-	if(DEVICE_MINOR(dev) == DEVICE_MINOR_ANY){
-		dev_t minor = 0;
-
-		do{
-			dev = DEVICE_MAKE(DEVICE_MAJOR(dev), minor);
-			minor++;
-		}while(minor != DEVICE_MINOR_ANY && shgeti(device_map, dev) != -1);
-
-		if(minor == DEVICE_MINOR_ANY) return (dev_t)(-1);
-	}
-
-	shput(device_map, dev, device);
-
-	return dev;
 }

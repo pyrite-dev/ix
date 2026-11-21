@@ -47,6 +47,8 @@ struct tty {
 	int t_open_count;
 };
 
+__BEGIN_EXTERN_C__
+
 void tty_init(struct tty* tty, const struct ttydev_ops* ops, void* devdata);
 
 int  tty_open(struct tty* tty, int flags, int mode);
@@ -65,5 +67,7 @@ int  tty_output_getc(struct tty* tty, unsigned char* data);
 void tty_flush(struct tty* tty, int flags);
 
 int tty_param(struct tty* tty, const struct termios* termios);
+
+__END_EXTERN_C__
 
 #endif
