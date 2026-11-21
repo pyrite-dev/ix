@@ -9,6 +9,9 @@ struct tty;
 #define TS_ISOPEN (1 << 0)
 #define TS_TTSTOP (1 << 1)
 
+#define TTY_FLUSH_INPUT 0x01
+#define TTY_FLUSH_OUTPUT 0x02
+
 #include <sys/cdefs.h>
 #include <sys/termios.h>
 #include <sys/ttydev.h>
@@ -42,9 +45,12 @@ struct tty {
 
 	mutex_t t_read_mutex;
 	mutex_t t_write_mutex;
+	mutex_t t_param_mutex;
 
-	int t_state;
-	int t_open_count;
+	unsigned int t_state;
+	unsigned int t_open_count;
+
+	unsigned int t_out_reserved;
 };
 
 __BEGIN_EXTERN_C__
