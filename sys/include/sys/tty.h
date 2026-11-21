@@ -2,6 +2,8 @@
 #define __SYS_TTY_H__
 
 struct tty_queue;
+struct tty_canrec;
+struct tty_canrec_queue;
 struct tty;
 
 #define TTYQ_SIZE 1024
@@ -28,10 +30,18 @@ struct tty_queue {
 	unsigned int count;
 };
 
+struct tty_canrec_queue {
+	unsigned int data[TTYQ_SIZE];
+	unsigned int head;
+	unsigned int tail;
+	unsigned int count;
+};
+
 struct tty {
-	struct tty_queue t_rawq;
-	struct tty_queue t_canq;
-	struct tty_queue t_outq;
+	struct tty_queue	t_rawq;
+	struct tty_queue	t_canq;
+	struct tty_canrec_queue t_canrecq;
+	struct tty_queue	t_outq;
 
 	struct termios t_termios;
 

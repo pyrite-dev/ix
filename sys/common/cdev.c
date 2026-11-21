@@ -52,9 +52,9 @@ dev_t cdev_register_device(dev_t dev, struct device* device) {
 		do {
 			dev = DEVICE_MAKE(DEVICE_MAJOR(dev), minor);
 			minor++;
-		} while(minor != DEVICE_MINOR_ANY && shgeti(device_map, dev) != -1);
+		} while(minor != DEVICE_MINOR_ANY && hmgeti(device_map, dev) != -1);
 
-		if(shgeti(device_map, dev) != -1) return DEVICE_ERROR;
+		if(hmgeti(device_map, dev) != -1) return DEVICE_ERROR;
 	}
 
 	hmput(device_map, dev, device);

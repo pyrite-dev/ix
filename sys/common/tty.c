@@ -6,6 +6,8 @@
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
 
+#include <unistd.h>
+
 static int ttyq_put(struct tty_queue* q, unsigned char data) {
 	if(q->count >= TTYQ_SIZE) return 0;
 
@@ -43,6 +45,54 @@ static void ttyq_clear(struct tty_queue* q) {
 
 static unsigned int ttyq_space(struct tty_queue* q) {
 	return TTYQ_SIZE - q->count;
+}
+
+static int ttyrec_put(struct tty_canrec_queue* q, unsigned int length) {
+	if(q->count >= TTYQ_SIZE) return 0;
+
+	q->data[q->tail] = length;
+	q->tail		 = (q->tail + 1) % TTYQ_SIZE;
+	q->count++;
+
+	return 1;
+}
+
+static void ttyrec_consume(struct tty_canrec_queue* q) {
+	if(q->count == 0) return;
+
+	if(--q->data[q->head] == 0) {
+		q->head = (q->head + 1) % TTYQ_SIZE;
+		q->count--;
+	}
+}
+
+static void ttyrec_discard(struct tty_canrec_queue* q) {
+	if(q->count == 0) return;
+
+	q->head = (q->head + 1) % TTYQ_SIZE;
+	q->count--;
+}
+
+static int tty_commit_raw(struct tty* tty, int eof) {
+	unsigned int  length;
+	unsigned char c;
+
+	length = tty->t_rawq.count;
+
+	if(length == 0) {
+		if(eof) return ttyrec_put(&tty->t_canrecq, 0);
+		return 0;
+	}
+
+	if(ttyq_space(&tty->t_canq) < length || tty->t_canrecq.count >= TTYQ_SIZE) {
+		ttyq_clear(&tty->t_rawq);
+		return 0;
+	}
+
+	while(ttyq_get(&tty->t_rawq, &c)) ttyq_put(&tty->t_canq, c);
+
+	ttyrec_put(&tty->t_canrecq, length);
+	return 1;
 }
 
 void tty_init(struct tty* tty, const struct ttydev_ops* ops, void* devdata) {
@@ -109,6 +159,7 @@ int tty_read(struct tty* tty, struct uio* uio, int flags) {
 	struct tty_queue* q;
 	unsigned char	  c;
 	size_t		  initial, limit, minimum;
+	unsigned int	  record_length;
 	int		  st, canonical, vmin, vtime;
 
 	st	= 0;
@@ -123,7 +174,7 @@ int tty_read(struct tty* tty, struct uio* uio, int flags) {
 
 		if(canonical) {
 			q	= &tty->t_canq;
-			minimum = 1;
+			minimum = 0;
 		} else {
 			q = &tty->t_rawq;
 
@@ -140,14 +191,14 @@ int tty_read(struct tty* tty, struct uio* uio, int flags) {
 			if(minimum > uio->uio_resid) minimum = uio->uio_resid;
 		}
 
-		while(q->count < minimum) {
-			if((flags & O_NONBLOCK) && q->count == 0) {
+		while(canonical ? tty->t_canrecq.count == 0 : q->count < minimum) {
+			if((flags & O_NONBLOCK) && (canonical ? tty->t_canrecq.count == 0 : q->count == 0)) {
 				spinlock_unlock_irqrestore(&tty->t_lock, irq);
 				st = EWOULDBLOCK;
 				goto done;
 			}
 
-			if((flags & O_NONBLOCK) || minimum == 0) break;
+			if((flags & O_NONBLOCK) || (!canonical && minimum == 0)) break;
 
 			waiter_sleep(&tty->t_rwait, &tty->t_lock, irq);
 
@@ -155,16 +206,36 @@ int tty_read(struct tty* tty, struct uio* uio, int flags) {
 			q	  = canonical ? &tty->t_canq : &tty->t_rawq;
 
 			if(!canonical) {
-				vmin	= tty->t_termios.c_cc[VMIN];
-				minimum = (size_t)vmin;
+				vmin  = tty->t_termios.c_cc[VMIN];
+				vtime = tty->t_termios.c_cc[VTIME];
 
+				if(vtime != 0) {
+					spinlock_unlock_irqrestore(&tty->t_lock, irq);
+					st = EOPNOTSUPP;
+					goto done;
+				}
+
+				minimum = (size_t)vmin;
 				if(minimum > uio->uio_resid) minimum = uio->uio_resid;
 			} else {
-				minimum = 1;
+				minimum = 0;
 			}
 		}
 
-		limit = q->count;
+		if(canonical) {
+			record_length = tty->t_canrecq.data[tty->t_canrecq.head];
+
+			if(record_length == 0) {
+				ttyrec_discard(&tty->t_canrecq);
+				spinlock_unlock_irqrestore(&tty->t_lock, irq);
+				break;
+			}
+
+			limit = (size_t)record_length;
+		} else {
+			limit = q->count;
+		}
+
 		if(limit > uio->uio_resid) limit = uio->uio_resid;
 
 		spinlock_unlock_irqrestore(&tty->t_lock, irq);
@@ -177,14 +248,14 @@ int tty_read(struct tty* tty, struct uio* uio, int flags) {
 				break;
 			}
 
+			if(canonical) ttyrec_consume(&tty->t_canrecq);
+
 			spinlock_unlock_irqrestore(&tty->t_lock, irq);
 
 			st = uiomove(&c, 1, uio);
 			if(st != 0) goto done;
 
 			limit--;
-
-			if(canonical && c == '\n') break;
 		}
 
 		if(canonical) break;
@@ -380,6 +451,14 @@ void tty_input(struct tty* tty, unsigned char data, unsigned int flags) {
 		}
 	}
 
+	if(canonical && c == tty->t_termios.c_cc[VEOF] && tty->t_termios.c_cc[VEOF] != _POSIX_VDISABLE) {
+		wakeup = tty_commit_raw(tty, 1);
+		spinlock_unlock_irqrestore(&tty->t_lock, irq);
+
+		if(wakeup) waiter_wakeup(&tty->t_rwait);
+		return;
+	}
+
 	if(canonical) {
 		if(c == tty->t_termios.c_cc[VERASE]) {
 			if(ttyq_unput(&tty->t_rawq) && (lflag & ECHO) && (lflag & ECHOE)) {
@@ -418,18 +497,7 @@ void tty_input(struct tty* tty, unsigned char data, unsigned int flags) {
 	delimiter = c == '\n';
 
 	if(canonical && delimiter) {
-		if(ttyq_space(&tty->t_canq) >= tty->t_rawq.count) {
-			while(tty->t_rawq.count != 0) {
-				unsigned char ch;
-
-				ttyq_get(&tty->t_rawq, &ch);
-				ttyq_put(&tty->t_canq, ch);
-			}
-
-			wakeup = 1;
-		} else {
-			ttyq_clear(&tty->t_rawq);
-		}
+		wakeup = tty_commit_raw(tty, 0);
 	} else if(!canonical) {
 		wakeup = 1;
 	}
@@ -472,6 +540,9 @@ void tty_flush(struct tty* tty, int flags) {
 	if(flags & TTY_FLUSH_INPUT) {
 		ttyq_clear(&tty->t_rawq);
 		ttyq_clear(&tty->t_canq);
+		tty->t_canrecq.head  = 0;
+		tty->t_canrecq.tail  = 0;
+		tty->t_canrecq.count = 0;
 	}
 
 	if(flags & TTY_FLUSH_OUTPUT) ttyq_clear(&tty->t_outq);
