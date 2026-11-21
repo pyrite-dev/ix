@@ -52,7 +52,7 @@ static int ttydev_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
 	return tty_ioctl(tty, cmd, data, flags);
 }
 
-static struct cdevsw ttydev_cdevsw = {
+struct cdevsw tty_cdevsw = {
     ttydev_open,
     ttydev_close,
     ttydev_read,
@@ -71,10 +71,10 @@ int ttydev_init(void* softc, const struct ttydev_ops* ops, speed_t baud) {
 }
 
 struct tty* ttydev_lookup(dev_t dev) {
-        struct device* device;
+	struct device* device;
 
-        device = device_lookup(dev);
-        if(device == NULL) return NULL;
+	device = device_lookup(dev);
+	if(device == NULL) return NULL;
 
-        return (struct tty*)device->softc;
+	return (struct tty*)device->softc;
 }

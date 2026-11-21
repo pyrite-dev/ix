@@ -6,12 +6,12 @@
 RETTYPE FUNCNAME(const char* nptr, char** endptr, int base) {
 	unsigned long long ur = 0, limit, cutoff;
 	int		   cutlim, overflow = 0;
-	int	i;
-	RETTYPE s      = 1;
-	char	num[]  = "0123456789";
-	char	alp[]  = "abcdefghijklmnopqrstuvwxyz";
-	char	alpu[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	int	d      = 0;
+	int		   i;
+	RETTYPE		   s	  = 1;
+	char		   num[]  = "0123456789";
+	char		   alp[]  = "abcdefghijklmnopqrstuvwxyz";
+	char		   alpu[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	int		   d	  = 0;
 
 	if(endptr != NULL) *endptr = (char*)nptr + strlen(nptr);
 

@@ -28,7 +28,7 @@ static int pit_attach(struct device* parent, struct device* self, struct device_
 
 	div = clock / speed;
 
-	if(div == 0 || div > 65535){
+	if(div == 0 || div > 65535) {
 		return -1;
 	}
 

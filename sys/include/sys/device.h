@@ -1,6 +1,7 @@
 #ifndef __SYS_DEVICE_H__
 #define __SYS_DEVICE_H__
 
+struct device_tty;
 struct device;
 struct device_attach_args;
 struct device_driver;
@@ -30,9 +31,10 @@ enum DEVICE_LOCATOR {
 
 #define DEVICE_UNIT_ANY (-1)
 
-#define MAJOR(dev) (((dev) >> 16) & 0xffff)
-#define MINOR(dev) (((dev) >> 0) & 0xffff)
-#define MAKEDEV(major, minor) ((((dev_t)(major) & 0xffff) << 16) | ((dev_t)(minor) & 0xffff))
+#define DEVICE_MAJOR(dev) (((dev) >> 16) & 0xffff)
+#define DEVICE_MINOR(dev) (((dev) >> 0) & 0xffff)
+#define DEVICE_MAKE(major, minor) ((((dev_t)(major) & 0xffff) << 16) | ((dev_t)(minor) & 0xffff))
+#define DEVICE_MINOR_ANY (0xffff)
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -88,7 +90,9 @@ __BEGIN_EXTERN_C__
 extern struct device_config devices[];
 
 void	       device_init(void);
+
 struct device* device_lookup(dev_t dev);
+dev_t device_register(dev_t dev, struct device* device);
 
 __END_EXTERN_C__
 

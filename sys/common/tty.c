@@ -1,6 +1,7 @@
 #include <sys/tty.h>
 #include <sys/ttydev.h>
 #include <sys/termios.h>
+#include <sys/device.h>
 
 void tty_init(struct tty* tty, const struct ttydev_ops* ops, void* devdata) {
 }
