@@ -9,6 +9,7 @@
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 extern int sched_started;
 
 void sched_init(thread_t* idle);
@@ -27,6 +28,7 @@ void sched_preempt_enable(void);
 void _sched_intr(void);
 void _sched_save(thread_context_t* dest, thread_context_t* src);
 void _sched_restore(thread_context_t* dest, thread_context_t* src);
+#endif
 
 __END_EXTERN_C__
 

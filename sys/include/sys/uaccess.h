@@ -7,8 +7,10 @@
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 int copyin(void* kaddr, const void* uaddr, size_t len);
 int copyout(void* uaddr, const void* kaddr, size_t len);
+#endif
 
 __END_EXTERN_C__
 

@@ -17,6 +17,7 @@ struct bus_space {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void bus_space_init(bus_space_t* space, paddr_t locators[DEVICE_LOCATOR_COUNT]);
 
 unsigned char  bus_space_read8(bus_space_t* space, paddr_t offset);
@@ -25,6 +26,7 @@ unsigned short bus_space_read16(bus_space_t* space, paddr_t offset);
 void	       bus_space_write16(bus_space_t* space, paddr_t offset, unsigned short value);
 unsigned int   bus_space_read32(bus_space_t* space, paddr_t offset);
 void	       bus_space_write32(bus_space_t* space, paddr_t offset, unsigned int value);
+#endif
 
 __END_EXTERN_C__
 

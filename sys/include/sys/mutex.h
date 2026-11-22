@@ -18,10 +18,12 @@ struct mutex {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void mutex_init(mutex_t* mutex);
 
 void mutex_lock(mutex_t* mutex);
 void mutex_unlock(mutex_t* mutex);
+#endif
 
 __END_EXTERN_C__
 

@@ -10,6 +10,7 @@ typedef void (*intr_raw_handler_t)(void);
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void intr_init(void);
 
 int  intr_register(unsigned int vector, intr_handler_t handler, void* arg);
@@ -25,6 +26,7 @@ intr_flags_t _intr_save(void);
 intr_flags_t _intr_restore(intr_flags_t flags);
 int	     _intr_vector(unsigned int irq);
 void	     _intr_set(unsigned int irq, intr_raw_handler_t handler);
+#endif
 
 __END_EXTERN_C__
 

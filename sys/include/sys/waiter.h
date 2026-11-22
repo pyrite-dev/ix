@@ -19,12 +19,14 @@ struct waiter {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void waiter_init(waiter_t* waiter);
 
 void waiter_sleep(waiter_t* waiter, spinlock_t* lock, intr_flags_t flags);
 
 void waiter_wakeup(waiter_t* waiter);
 void waiter_wakeup_one(waiter_t* waiter);
+#endif
 
 __END_EXTERN_C__
 

@@ -41,9 +41,11 @@ struct uio {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 int uio_init(struct uio* uio, struct iovec* iov, int iovcnt, off_t offset, int rw, int seg);
 
 int uiomove(void* buffer, size_t n, struct uio* uio);
+#endif
 
 __END_EXTERN_C__
 

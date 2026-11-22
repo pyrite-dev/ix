@@ -88,9 +88,11 @@ struct device_config {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 extern struct device_config devices[];
 
 void device_init(void);
+#endif
 
 __END_EXTERN_C__
 

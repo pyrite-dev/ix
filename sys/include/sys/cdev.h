@@ -18,6 +18,7 @@ struct cdevsw {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void cdev_init(void);
 
 int  cdev_register(unsigned int major, struct cdevsw* cdevsw);
@@ -29,6 +30,7 @@ dev_t cdev_register_device(dev_t dev, struct device* device);
 void  cdev_unregister_device(dev_t dev);
 
 struct device* cdev_lookup_device(dev_t dev);
+#endif
 
 __END_EXTERN_C__
 

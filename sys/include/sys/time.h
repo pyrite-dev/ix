@@ -18,12 +18,14 @@ struct timespec {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 extern int hz;
 
 extern volatile unsigned long ticks;
 
 void	      microtime(struct timeval* tv);
 unsigned long ticktime(unsigned int ms);
+#endif
 
 __END_EXTERN_C__
 

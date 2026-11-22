@@ -42,6 +42,7 @@ struct thread {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 thread_t* thread_current(void);
 
 int thread_init(thread_t* thread, void* stack, size_t stack_size, void (*entry)(void*), void* arg);
@@ -49,6 +50,7 @@ int thread_init(thread_t* thread, void* stack, size_t stack_size, void (*entry)(
 void thread_exit(void);
 
 int _thread_init(thread_t* thread);
+#endif
 
 __END_EXTERN_C__
 

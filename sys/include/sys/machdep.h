@@ -5,7 +5,9 @@
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void machdep_init(void);
+#endif
 
 __END_EXTERN_C__
 

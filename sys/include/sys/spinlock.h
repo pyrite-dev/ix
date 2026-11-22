@@ -14,6 +14,7 @@ struct spinlock {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 void spinlock_init(spinlock_t* lock);
 
 void spinlock_lock(spinlock_t* lock);
@@ -25,6 +26,7 @@ void	     spinlock_unlock_irqrestore(spinlock_t* lock, intr_flags_t flags);
 
 unsigned int _spinlock_trylock(volatile unsigned int* lock);
 void	     _spinlock_unlock(volatile unsigned int* lock);
+#endif
 
 __END_EXTERN_C__
 

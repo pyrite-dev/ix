@@ -18,9 +18,11 @@ struct ttydev_ops {
 
 __BEGIN_EXTERN_C__
 
+#ifdef __KERNEL__
 extern struct cdevsw tty_cdevsw;
 
 int ttydev_init(struct device* device, const struct ttydev_ops* ops, speed_t baud);
+#endif
 
 __END_EXTERN_C__
 
