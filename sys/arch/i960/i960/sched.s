@@ -17,6 +17,15 @@ __sched_intr:
 	ld _sched_started, r3
 	cmpobe 0, r3, 3f
 
+	lda _int_stack, r4
+	mov pfp, r5
+	andnot 7, r5, r5
+	subo r4, r5, r5
+	ldconst 4096, r6
+	cmpobge r5, r6, 4f
+	ret
+
+4:
 	mov sp, r3
 	ldconst 72, r4
 	addo r4, r3, sp
