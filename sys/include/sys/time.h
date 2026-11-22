@@ -22,7 +22,7 @@ extern int hz;
 
 extern volatile unsigned long ticks;
 
-void microtime(struct timeval* tv);
+void	      microtime(struct timeval* tv);
 unsigned long ticktime(unsigned int ms);
 
 __END_EXTERN_C__

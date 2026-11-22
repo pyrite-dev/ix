@@ -5,7 +5,7 @@
 #include <sys/kmem.h>
 #include <sys/device.h>
 #include <sys/sched.h>
-#include <sys/mutex.h>
+#include <sys/thread.h>
 
 static thread_t idle_thread;
 static char	idle_stack[256];
@@ -16,22 +16,10 @@ static void idle_entry(void* arg) {
 	while(1);
 }
 
-static thread_t thread1;
-static char	stack1[2048];
+static thread_t thread;
+static char	stack[2048];
 
-static thread_t thread2;
-static char	stack2[2048];
-
-static mutex_t mutex;
-
-static void test(void* arg) {
-	int n = (int)arg;
-
-	while(1) {
-		mutex_lock(&mutex);
-		kprintf("%d", n);
-		mutex_unlock(&mutex);
-	}
+static void thread_main(void* arg) {
 }
 
 void kmain(void) {
@@ -50,13 +38,8 @@ void kmain(void) {
 	sched_init(&idle_thread);
 	device_init();
 
-	mutex_init(&mutex);
-
-	thread_init(&thread1, stack1, sizeof(stack1), test, (void*)1);
-	thread_init(&thread2, stack2, sizeof(stack2), test, (void*)2);
-
-	sched_add(&thread1);
-	sched_add(&thread2);
+	thread_init(&thread, stack, sizeof(stack), thread_main, NULL);
+	sched_add(&thread);
 
 	flags = _intr_save();
 	kmem_use_spinlock();
