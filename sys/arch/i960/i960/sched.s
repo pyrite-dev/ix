@@ -72,11 +72,17 @@ __sched_intr:
 	ldt 48(r3), g12
 
 	ld 68(r3), r4
+	ld 8(r4), r5
+	mov r5, rip
+
+	ldconst 7, r5
+	or r4, r5, r4
 	mov r4, pfp
 
-	ldconst 0x001f2002, r5
 	ld 60(r3), r4
-	modpc r5, r5, r4
+	st r4, -16(fp)
+	ld 64(r3), r4
+	st r4, -12(fp)
 
 	ret
 
