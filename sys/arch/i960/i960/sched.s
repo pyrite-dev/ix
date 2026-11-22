@@ -1,6 +1,7 @@
 .extern _sched_started
 .extern _sched_tick
 .extern _sched_preempt
+.extern _ticks
 
 .section .text
 .global __sched_intr
@@ -8,6 +9,10 @@
 __sched_intr:
 	ldconst 0x001f0000, r4
 	modpc r4, r4, r4
+
+	ld _ticks, r3
+	addo 1, r3, r3
+	st r3, _ticks
 
 	ld _sched_started, r3
 	cmpobe 0, r3, 3f

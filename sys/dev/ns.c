@@ -5,6 +5,7 @@
 #include <sys/tty.h>
 #include <sys/ttydev.h>
 #include <sys/errno.h>
+#include <sys/time.h>
 
 #include "ns.h"
 
@@ -165,6 +166,8 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 	unsigned int	 baud  = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_BAUD], 9600);
 	unsigned int	 div;
 	struct ns_softc* softc;
+	unsigned long	 limit = ticktime(100);
+	unsigned long	 start;
 
 	if(baud == 0) {
 		return -1;
@@ -195,12 +198,31 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 	bus_space_write8(&softc->space, NS_IIR, NS_FC_ITL_1 | NS_FC_CTFIFO | NS_FC_CRFIFO | NS_FC_EFIFO);
 	bus_space_write8(&softc->space, NS_MCR, NS_MC_L | NS_MC_O2 | NS_MC_O1 | NS_MC_RTS);
 
-	while(!(bus_space_read8(&softc->space, NS_LSR) & NS_LS_THRE));
+	start = ticks;
+	while(!(bus_space_read8(&softc->space, NS_LSR) & NS_LS_THRE)) {
+		if(ticks - start >= limit) {
+			/* serial is faulty */
+			bus_space_write8(&softc->space, NS_MCR, NS_MC_O2 | NS_MC_O1 | NS_MC_RTS | NS_MC_DTR);
+			free(softc);
+			return -1;
+		}
+	}
+
 	bus_space_write8(&softc->space, NS_DR, 0xae);
 
-	while(!(bus_space_read8(&softc->space, NS_LSR) & NS_LS_DR));
+	start = ticks;
+	while(!(bus_space_read8(&softc->space, NS_LSR) & NS_LS_DR)) {
+		if(ticks - start >= limit) {
+			/* serial is faulty */
+			bus_space_write8(&softc->space, NS_MCR, NS_MC_O2 | NS_MC_O1 | NS_MC_RTS | NS_MC_DTR);
+			free(softc);
+			return -1;
+		}
+	}
+
 	if(bus_space_read8(&softc->space, NS_DR) != 0xae) {
 		/* serial is faulty */
+		bus_space_write8(&softc->space, NS_MCR, NS_MC_O2 | NS_MC_O1 | NS_MC_RTS | NS_MC_DTR);
 		free(softc);
 		return -1;
 	}

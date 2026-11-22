@@ -2,6 +2,7 @@
 #include <sys/interrupt.h>
 #include <sys/bus.h>
 #include <sys/sched.h>
+#include <sys/time.h>
 
 #include "pit.h"
 
@@ -19,7 +20,7 @@ static int pit_match(struct device* parent, struct device_attach_args* args) {
 static int pit_attach(struct device* parent, struct device* self, struct device_attach_args* args) {
 	struct pit_softc* softc;
 	int		  clock = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_CLOCK], 1931816);
-	int		  speed = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_SPEED], 100);
+	int		  speed = DEVICE_LOCATOR_DEFAULT(args->locators[DEVICE_LOCATOR_SPEED], 100000);
 	int		  div;
 
 	if(speed == 0) {
@@ -41,6 +42,8 @@ static int pit_attach(struct device* parent, struct device* self, struct device_
 	bus_space_write8(&softc->space, PIT_MC, PIT_MC_CH0 | PIT_MC_LOHI | PIT_MC_MODE2 | PIT_MC_BIN);
 	bus_space_write8(&softc->space, PIT_CH0, (div >> 0) & 0xff);
 	bus_space_write8(&softc->space, PIT_CH0, (div >> 8) & 0xff);
+
+	hz = clock / div;
 
 	_intr_set(_intr_vector(args->locators[DEVICE_LOCATOR_IRQ]), _sched_intr);
 
