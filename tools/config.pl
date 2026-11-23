@@ -138,7 +138,6 @@ sub parse_config {
 }
 
 parse_config($ARGV[0]);
-parse_config("sys/dev/files.dev");
 
 if(!$ident){
 	print("ident is missing\n");
