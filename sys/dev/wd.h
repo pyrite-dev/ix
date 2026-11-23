@@ -36,7 +36,7 @@
 
 /* DHR */
 #define WD_DH_MASTER (0 << 4) /* Master Drive */
-#define WD_DH_SLAVE (0 << 4)  /* Slave Drive */
+#define WD_DH_SLAVE (1 << 4)  /* Slave Drive */
 #define WD_DH_ALWAYS ((1 << 7) | (1 << 6) | (1 << 5))
 
 /* SR */

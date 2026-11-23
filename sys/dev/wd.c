@@ -1,6 +1,7 @@
 #include <sys/device.h>
 #include <sys/bus.h>
 #include <sys/cons.h>
+#include <sys/time.h>
 
 #include "wd.h"
 
@@ -11,8 +12,22 @@ struct wd_softc {
 	bus_space_t space;
 };
 
-static void wait_drq(bus_space_t* space) {
-	while(!(bus_space_read8(space, WD_SR) & WD_S_DRQ));
+static int wait_drq(bus_space_t* space) {
+	unsigned long limit = ticktime(100);
+	unsigned long start = ticks;
+	unsigned char status;
+
+	while(1) {
+		status = bus_space_read8(space, WD_SR);
+
+		if(status & WD_S_BSY) {
+			if(ticks - start >= limit) return -1;
+			continue;
+		}
+		if(status & WD_S_ERR) return -1;
+		if(status & WD_S_DRQ) return 0;
+		if(ticks - start >= limit) return -1;
+	}
 }
 
 static int wd_match(struct device* parent, struct device_attach_args* args) {
@@ -42,9 +57,15 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 	bus_space_write8(&softc->space, WD_CR, WD_C_IDENTIFY);
 
 	status = bus_space_read8(&softc->space, WD_SR);
-	if(status == 0 || status == 0xff) return -1;
+	if(status == 0 || status == 0xff) {
+		free(softc);
+		return -1;
+	}
 
-	wait_drq(&softc->space);
+	if(wait_drq(&softc->space) != 0) {
+		free(softc);
+		return -1;
+	}
 
 	for(i = 0; i < 512; i += 2) {
 		unsigned short n = bus_space_read16(&softc->space, WD_DR);

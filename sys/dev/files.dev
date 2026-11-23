@@ -1,4 +1,3 @@
 file dev/pit.c	pit
 file dev/ns.c	ns
-file dev/wdc.c	wdc
 file dev/wd.c	wd
