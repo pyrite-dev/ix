@@ -72,6 +72,7 @@ struct device_driver {
 
 	int (*match)(struct device* parent, struct device_attach_args* args);
 	int (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
+	void (*enable_ints)(struct device* self);
 	void (*detach)(struct device* self);
 };
 
@@ -92,6 +93,7 @@ __BEGIN_EXTERN_C__
 extern struct device_config devices[];
 
 void device_init(void);
+void device_start(void);
 #endif
 
 __END_EXTERN_C__

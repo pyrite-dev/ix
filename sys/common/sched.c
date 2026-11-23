@@ -43,11 +43,20 @@ int thread_init(thread_t* thread, void* stack, size_t stack_size, void (*entry)(
 }
 
 void thread_exit(void) {
-	thread_t* thread = current_thread;
+	thread_t*    thread = current_thread;
+	intr_flags_t flags;
+
+	flags = _intr_save();
 
 	thread->state = THREAD_DEAD;
 
-	/* TODO: yield */
+	sched_block(flags);
+
+	while(1);
+}
+void thread_start(thread_t* thread) {
+	thread->entry(thread->arg);
+	thread_exit();
 
 	while(1);
 }

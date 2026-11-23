@@ -49,6 +49,8 @@ int thread_init(thread_t* thread, void* stack, size_t stack_size, void (*entry)(
 
 void thread_exit(void);
 
+void thread_start(thread_t* thread);
+
 int _thread_init(thread_t* thread);
 #endif
 

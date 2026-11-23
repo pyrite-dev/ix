@@ -20,6 +20,7 @@ static thread_t thread;
 static char	stack[2048];
 
 static void thread_main(void* arg) {
+	device_start();
 }
 
 void kmain(void) {

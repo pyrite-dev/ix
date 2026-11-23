@@ -183,3 +183,20 @@ void device_init(void) {
 		device_configure(root, &devices[i]);
 	}
 }
+
+static void device_start_walk(struct device* node) {
+	struct device* child;
+
+	if(node->driver != NULL && node->driver->enable_ints != NULL) node->driver->enable_ints(node);
+
+	child = node->first_child;
+	while(child != NULL) {
+		device_start_walk(child);
+
+		child = child->next;
+	}
+}
+
+void device_start(void) {
+	device_start_walk(root);
+}

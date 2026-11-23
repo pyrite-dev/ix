@@ -4,13 +4,6 @@
 
 #define THREAD_FRAME_SIZE 64
 
-static void thread_start(thread_t* thread) {
-	thread->entry(thread->arg);
-	thread_exit();
-
-	while(1);
-}
-
 int _thread_init(thread_t* thread) {
 	unsigned int  base;
 	unsigned int  limit;

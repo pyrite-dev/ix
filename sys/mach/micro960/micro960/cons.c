@@ -16,7 +16,7 @@ void cons_init(void) {
 	uart[NS_DHR] = (div >> 8) & 0xff;
 	uart[NS_DLR] = (div >> 0) & 0xff;
 	uart[NS_LCR] = NS_LC_PB_N | NS_LC_SB | NS_LC_DB_8;
-	uart[NS_IIR] = NS_FC_ITL_14 | NS_FC_CTFIFO | NS_FC_CRFIFO | NS_FC_EFIFO;
+	uart[NS_FCR] = NS_FC_ITL_14 | NS_FC_CTFIFO | NS_FC_CRFIFO | NS_FC_EFIFO;
 	uart[NS_MCR] = NS_MC_L | NS_MC_O2 | NS_MC_O1 | NS_MC_RTS;
 
 	while(!(uart[NS_LSR] & NS_LS_THRE));

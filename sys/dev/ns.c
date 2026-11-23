@@ -195,7 +195,7 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 	bus_space_write8(&softc->space, NS_DHR, (div >> 8) & 0xff);
 	bus_space_write8(&softc->space, NS_DLR, (div >> 0) & 0xff);
 	bus_space_write8(&softc->space, NS_LCR, NS_LC_PB_N | NS_LC_SB | NS_LC_DB_8);
-	bus_space_write8(&softc->space, NS_IIR, NS_FC_ITL_1 | NS_FC_CTFIFO | NS_FC_CRFIFO | NS_FC_EFIFO);
+	bus_space_write8(&softc->space, NS_FCR, NS_FC_ITL_1 | NS_FC_CTFIFO | NS_FC_CRFIFO | NS_FC_EFIFO);
 	bus_space_write8(&softc->space, NS_MCR, NS_MC_L | NS_MC_O2 | NS_MC_O1 | NS_MC_RTS);
 
 	start = ticks;
@@ -227,7 +227,7 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 		return -1;
 	}
 
-	softc->ier = NS_IE_RDA;
+	softc->ier = 0;
 	softc->mcr = NS_MC_O2 | NS_MC_O1 | NS_MC_RTS | NS_MC_DTR;
 
 	bus_space_write8(&softc->space, NS_MCR, softc->mcr);
@@ -238,12 +238,17 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 	}
 
 	softc->vector = _intr_vector(args->locators[DEVICE_LOCATOR_IRQ]);
+	return 0;
+}
+
+static void ns_enable_ints(struct device* self) {
+	struct ns_softc* softc = self->softc;
 
 	intr_register(softc->vector, ns_intr, self);
 	intr_enable(softc->vector);
 
+	softc->ier = NS_IE_RDA;
 	bus_space_write8(&softc->space, NS_IER, softc->ier);
-	return 0;
 }
 
 static void ns_detach(struct device* self) {
@@ -251,7 +256,8 @@ static void ns_detach(struct device* self) {
 
 	intr_disable(softc->vector);
 
-	bus_space_write8(&softc->space, NS_IER, 0);
+	softc->ier = 0;
+	bus_space_write8(&softc->space, NS_IER, softc->ier);
 
 	intr_unregister(softc->vector);
 
@@ -262,4 +268,5 @@ struct device_driver ns_driver = {
     "ns",
     ns_match,
     ns_attach,
+    ns_enable_ints,
     ns_detach};
