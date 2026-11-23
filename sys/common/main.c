@@ -20,7 +20,6 @@ static thread_t thread;
 static char	stack[2048];
 
 static void thread_main(void* arg) {
-	device_start();
 }
 
 void kmain(void) {
@@ -44,6 +43,7 @@ void kmain(void) {
 
 	flags = _intr_save();
 	kmem_use_spinlock();
+	device_start();
 	_intr_restore(flags);
 
 	sched_start();

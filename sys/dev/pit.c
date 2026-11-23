@@ -11,6 +11,8 @@
 
 struct pit_softc {
 	bus_space_t space;
+	
+	unsigned int vector;
 };
 
 static int pit_match(struct device* parent, struct device_attach_args* args) {
@@ -45,14 +47,20 @@ static int pit_attach(struct device* parent, struct device* self, struct device_
 
 	hz = clock / div;
 
-	_intr_set(_intr_vector(args->locators[DEVICE_LOCATOR_IRQ]), _sched_intr);
+	softc->vector = _intr_vector(args->locators[DEVICE_LOCATOR_IRQ]);
 
 	return 0;
+}
+
+static void pit_enable_ints(struct device* self){
+	struct pit_softc* softc = self->softc;
+
+	_intr_set(softc->vector, _sched_intr);
 }
 
 struct device_driver pit_driver = {
     "pit",
     pit_match,
     pit_attach,
-    NULL,
+    pit_enable_ints,
     NULL};
