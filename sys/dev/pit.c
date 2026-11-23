@@ -41,6 +41,7 @@ static int pit_attach(struct device* parent, struct device* self, struct device_
 	memset(softc, 0, sizeof(*softc));
 
 	bus_space_init(&softc->space, args->locators);
+
 	bus_space_write8(&softc->space, PIT_MC, PIT_MC_CH0 | PIT_MC_LOHI | PIT_MC_MODE2 | PIT_MC_BIN);
 	bus_space_write8(&softc->space, PIT_CH0, (div >> 0) & 0xff);
 	bus_space_write8(&softc->space, PIT_CH0, (div >> 8) & 0xff);

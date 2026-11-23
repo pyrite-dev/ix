@@ -22,6 +22,8 @@ static struct device* device_new(const char* name, int unit) {
 	dev->unit   = unit;
 	dev->driver = NULL;
 
+	memset(dev->desc, 0, sizeof(dev->desc));
+
 	dev->parent	 = NULL;
 	dev->prev	 = NULL;
 	dev->next	 = NULL;
@@ -136,6 +138,7 @@ static int device_attach(struct device* parent, struct device_config* config) {
 		kprintf(" %s ", locators[i * 2 + 0]);
 		kprintf(locators[i * 2 + 1], (long long)args.locators[i]);
 	}
+	if(strlen(dev->desc) > 0) kprintf(": %s", dev->desc);
 	kprintf("\r\n");
 
 	device_link(parent, dev);

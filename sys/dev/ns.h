@@ -1,5 +1,5 @@
-#ifndef __SYS_DEV_NS_H__
-#define __SYS_DEV_NS_H__
+#ifndef __NS_H__
+#define __NS_H__
 
 #define NS_BUFSZ 256
 

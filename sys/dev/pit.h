@@ -1,5 +1,5 @@
-#ifndef __SYS_DEV_PIT_H__
-#define __SYS_DEV_PIT_H__
+#ifndef __PIT_H__
+#define __PIT_H__
 
 #define PIT_CH0 0
 #define PIT_CH1 1

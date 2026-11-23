@@ -30,10 +30,6 @@ static unsigned int baud_to_div(int clock, int baud) {
 	return clock / (16 * baud);
 }
 
-static int ns_match(struct device* parent, struct device_attach_args* args) {
-	return 1;
-}
-
 static void ns_start(struct tty* tty) {
 	struct ns_softc* softc;
 	intr_flags_t	 flags;
@@ -159,6 +155,10 @@ static void ns_intr(unsigned int vector, struct iregs* iregs, void* arg) {
 			break;
 		}
 	}
+}
+
+static int ns_match(struct device* parent, struct device_attach_args* args) {
+	return 1;
 }
 
 static int ns_attach(struct device* parent, struct device* self, struct device_attach_args* args) {

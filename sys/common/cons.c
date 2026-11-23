@@ -83,6 +83,11 @@ void kprintf(const char* fmt, ...) {
 
 				break;
 			}
+			case 'c':
+			{
+				kputc(va_arg(va, char));
+				break;
+			}
 			case '%':
 			{
 				kputc('%');

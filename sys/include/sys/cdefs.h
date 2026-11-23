@@ -13,4 +13,10 @@
 
 #define __BARRIER__() __asm__ __volatile__("" ::: "memory");
 
+#if defined(__i960__)
+#ifndef __LITTLE_ENDIAN__
+#define __LITTLE_ENDIAN__
+#endif
+#endif
+
 #endif

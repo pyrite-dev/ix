@@ -53,6 +53,8 @@ struct device {
 	char*	     name;
 	unsigned int unit;
 
+	char desc[512];
+
 	struct device* parent;
 	struct device* prev;
 	struct device* next;
