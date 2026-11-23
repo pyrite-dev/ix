@@ -11,7 +11,7 @@
 
 struct pit_softc {
 	bus_space_t space;
-	
+
 	unsigned int vector;
 };
 
@@ -52,7 +52,7 @@ static int pit_attach(struct device* parent, struct device* self, struct device_
 	return 0;
 }
 
-static void pit_enable_ints(struct device* self){
+static void pit_enable_ints(struct device* self) {
 	struct pit_softc* softc = self->softc;
 
 	_intr_set(softc->vector, _sched_intr);

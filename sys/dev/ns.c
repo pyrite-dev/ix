@@ -168,6 +168,7 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 	struct ns_softc* softc;
 	unsigned long	 limit = ticktime(100);
 	unsigned long	 start;
+	int		 i;
 
 	if(baud == 0) {
 		return -1;
@@ -197,6 +198,12 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 	bus_space_write8(&softc->space, NS_LCR, NS_LC_PB_N | NS_LC_SB | NS_LC_DB_8);
 	bus_space_write8(&softc->space, NS_FCR, NS_FC_ITL_1 | NS_FC_CTFIFO | NS_FC_CRFIFO | NS_FC_EFIFO);
 	bus_space_write8(&softc->space, NS_MCR, NS_MC_L | NS_MC_O2 | NS_MC_O1 | NS_MC_RTS);
+
+	for(i = 0; i < 64; i++) {
+		if(!bus_space_read8(&softc->space, NS_LSR) & NS_LS_DR) break;
+
+		bus_space_read8(&softc->space, NS_DR);
+	}
 
 	start = ticks;
 	while(!(bus_space_read8(&softc->space, NS_LSR) & NS_LS_THRE)) {
