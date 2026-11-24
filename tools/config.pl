@@ -81,7 +81,6 @@ sub parse_config {
 		}elsif($tokens[0] eq "include"){
 			if(-f "sys/" . $tokens[1]){
 				parse_config("sys/" . $tokens[1]);
-				last;
 			}
 		}elsif($tokens[0] eq "file"){
 			if(!$tokens[2] or (grep /^$tokens[2]$/, @devices)){
