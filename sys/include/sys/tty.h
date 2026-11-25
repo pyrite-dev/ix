@@ -4,6 +4,7 @@
 struct tty_queue;
 struct tty_canrec;
 struct tty_canrec_queue;
+struct ttv_ops;
 struct tty;
 
 #define TTYQ_SIZE 1024
@@ -16,11 +17,11 @@ struct tty;
 
 #include <sys/cdefs.h>
 #include <sys/termios.h>
-#include <sys/ttydev.h>
 #include <sys/uio.h>
 #include <sys/spinlock.h>
 #include <sys/waiter.h>
 #include <sys/mutex.h>
+#include <sys/device.h>
 
 struct tty_queue {
 	unsigned char data[TTYQ_SIZE];
@@ -37,39 +38,47 @@ struct tty_canrec_queue {
 	unsigned int count;
 };
 
+struct tty_ops {
+	void (*start)(struct tty* tty);
+	int (*param)(struct tty* tty, const struct termios* termios);
+	void (*stop)(struct tty* tty, int flags);
+};
+
 struct tty {
-	struct tty_queue	t_rawq;
-	struct tty_queue	t_canq;
-	struct tty_canrec_queue t_canrecq;
-	struct tty_queue	t_outq;
+	struct device* device;
+	dev_t	       dev;
 
-	struct termios t_termios;
+	struct tty_queue	rawq;
+	struct tty_queue	canq;
+	struct tty_canrec_queue canrecq;
+	struct tty_queue	outq;
 
-	const struct ttydev_ops* t_devops;
-	void*			 t_devdata;
+	struct termios termios;
 
-	spinlock_t t_lock;
+	const struct tty_ops* ops;
 
-	waiter_t t_rwait;
-	waiter_t t_wwait;
+	spinlock_t lock;
 
-	mutex_t t_read_mutex;
-	mutex_t t_write_mutex;
-	mutex_t t_param_mutex;
+	waiter_t rwait;
+	waiter_t wwait;
 
-	unsigned int t_state;
-	unsigned int t_open_count;
+	mutex_t read_mutex;
+	mutex_t write_mutex;
+	mutex_t param_mutex;
 
-	unsigned int t_out_reserved;
+	unsigned int state;
+	unsigned int open_count;
+
+	unsigned int out_reserved;
 };
 
 __BEGIN_EXTERN_C__
 
 #ifdef __KERNEL__
-void tty_init(struct tty* tty, const struct ttydev_ops* ops, void* devdata);
+void tty_init(struct tty* tty, const struct tty_ops* ops);
 
-int  tty_open(struct tty* tty, int flags, int mode);
-void tty_close(struct tty* tty);
+int tty_open(struct tty* tty, int flags, int mode);
+int tty_close(struct tty* tty);
 
 int tty_read(struct tty* tty, struct uio* uio, int flags);
 int tty_write(struct tty* tty, struct uio* uio, int flags);

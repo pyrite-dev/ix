@@ -30,9 +30,7 @@ static int ttydev_close(dev_t dev, int flags, int mode) {
 	tty = ttydev_lookup(dev);
 	if(tty == NULL) return ENXIO;
 
-	tty_close(tty);
-
-	return 0;
+	return tty_close(tty);
 }
 
 static int ttydev_read(dev_t dev, struct uio* uio, int flags) {
@@ -69,17 +67,25 @@ struct cdevsw tty_cdevsw = {
     ttydev_write,
     ttydev_ioctl};
 
-int ttydev_init(struct device* device, const struct ttydev_ops* ops, speed_t baud) {
+dev_t ttydev_init(struct device* device, const struct tty_ops* ops, speed_t baud) {
 	struct tty* tty = device->softc;
 	int	    st;
 
-	tty_init(tty, ops, device->softc);
+	tty->device = device;
 
-	tty->t_termios.c_ispeed = baud;
-	tty->t_termios.c_ospeed = baud;
+	tty_init(tty, ops);
 
-	if((st = tty_param(tty, &tty->t_termios)) != 0) return st;
-	if(cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device) == DEVICE_ERROR) return -1;
+	tty->termios.c_ispeed = baud;
+	tty->termios.c_ospeed = baud;
 
-	return 0;
+	if((st = tty_param(tty, &tty->termios)) != 0) return st;
+	if((tty->dev = cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device)) == DEVICE_ERROR) return DEVICE_ERROR;
+
+	return tty->dev;
+}
+
+void ttydev_detach(struct device* device) {
+	struct tty* tty = device->softc;
+
+	cdev_unregister_device(tty->dev);
 }

@@ -2,6 +2,8 @@
 #include <sys/panic.h>
 #include <sys/cons.h>
 #include <sys/cdev.h>
+#include <sys/bdev.h>
+#include <sys/disk.h>
 
 #include <stddef.h>
 #include <string.h>
@@ -174,6 +176,7 @@ void device_init(void) {
 	int i;
 
 	cdev_init();
+	bdev_init();
 
 	root = device_new("root", 0); /* root needs to be unit 0 as config.pl takes missing unit number as 0 */
 

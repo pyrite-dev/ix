@@ -2,6 +2,8 @@
 #include <sys/bus.h>
 #include <sys/cons.h>
 #include <sys/time.h>
+#include <sys/disk.h>
+#include <sys/major.h>
 
 #include "wd.h"
 
@@ -9,6 +11,8 @@
 #include <stddef.h>
 
 struct wd_softc {
+	struct disk disk;
+
 	bus_space_t space;
 };
 
@@ -24,11 +28,67 @@ static int wait_drq(bus_space_t* space) {
 			if(ticks - start >= limit) return -1;
 			continue;
 		}
-		if(status & WD_S_ERR) return -1;
+		if(status & (WD_S_ERR | WD_S_DF)) return -1;
 		if(status & WD_S_DRQ) return 0;
 		if(ticks - start >= limit) return -1;
 	}
 }
+
+static int wait_bsy(bus_space_t* space) {
+	unsigned long limit = ticktime(100);
+	unsigned long start = ticks;
+	unsigned char status;
+
+	while(1) {
+		status = bus_space_read8(space, WD_SR);
+
+		if(status & (WD_S_ERR | WD_S_DF)) return -1;
+		if(!(status & WD_S_BSY)) return 0;
+		if(ticks - start >= limit) return -1;
+	}
+}
+
+static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int read) {
+	struct wd_softc* softc = disk->device->softc;
+	unsigned char*	 data  = data_;
+	int		 i;
+
+	if(wait_bsy(&softc->space) != 0) return -1;
+
+	bus_space_write8(&softc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS | ((sector >> 24) & 0x0f));
+	bus_space_write8(&softc->space, WD_SCR, 1);
+	bus_space_write8(&softc->space, WD_LBALR, (sector >> 0) & 0xff);
+	bus_space_write8(&softc->space, WD_LBAMR, (sector >> 8) & 0xff);
+	bus_space_write8(&softc->space, WD_LBAHR, (sector >> 16) & 0xff);
+
+	bus_space_write8(&softc->space, WD_CR, read ? WD_C_READ : WD_C_WRITE);
+
+	if(wait_drq(&softc->space) != 0) return -1;
+
+	if(read) {
+		for(i = 0; i < 512; i += 2) {
+			unsigned short n = bus_space_read16(&softc->space, WD_DR);
+
+			data[i + 0] = (n >> 8) & 0xff;
+			data[i + 1] = (n >> 0) & 0xff;
+		}
+
+		return 0;
+	}
+
+	for(i = 0; i < 512; i += 2) {
+		unsigned short n = ((unsigned short)data[i + 0] << 8) | data[i + 1];
+
+		bus_space_write16(&softc->space, WD_DR, n);
+	}
+
+	if(wait_bsy(&softc->space) != 0) return -1;
+
+	return 0;
+}
+
+static const struct disk_ops wd_disk_ops = {
+    wd_transfer};
 
 static int wd_match(struct device* parent, struct device_attach_args* args) {
 	return 1;
@@ -38,6 +98,7 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 	struct wd_softc* softc;
 	unsigned char	 status;
 	unsigned char	 buffer[512];
+	unsigned int	 nsectors;
 	int		 i;
 
 	self->softc = softc = malloc(sizeof(*softc));
@@ -74,6 +135,12 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 		buffer[i + 1] = (n >> 0) & 0xff;
 	}
 
+	nsectors = (((unsigned int)buffer[122] << 8 | buffer[123]) << 16) | ((unsigned int)buffer[120] << 8 | buffer[121]);
+	if(nsectors == 0 || nsectors > 0x0fffffff) {
+		free(softc);
+		return -1;
+	}
+
 	strcpy(self->desc, "<");
 	memcpy(self->desc + 1, buffer + 54, 40);
 	self->desc[41] = 0;
@@ -84,11 +151,20 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 
 	strcat(self->desc, ">");
 
+	softc->disk.nsectors = nsectors;
+
+	if(diskdev_init(self, &wd_disk_ops) == DEVICE_ERROR) {
+		free(softc);
+		return -1;
+	}
+
 	return 0;
 }
 
 static void wd_detach(struct device* self) {
 	struct wd_softc* softc = self->softc;
+
+	diskdev_detach(self);
 
 	free(softc);
 }

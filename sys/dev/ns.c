@@ -31,10 +31,8 @@ static unsigned int baud_to_div(int clock, int baud) {
 }
 
 static void ns_start(struct tty* tty) {
-	struct ns_softc* softc;
+	struct ns_softc* softc = tty->device->softc;
 	intr_flags_t	 flags;
-
-	softc = tty->t_devdata;
 
 	flags = spinlock_lock_irqsave(&softc->lock);
 
@@ -45,13 +43,11 @@ static void ns_start(struct tty* tty) {
 }
 
 static int ns_param(struct tty* tty, const struct termios* termios) {
-	struct ns_softc* softc;
+	struct ns_softc* softc = tty->device->softc;
 	unsigned long	 baud;
 	unsigned long	 div;
 	unsigned char	 lcr;
 	intr_flags_t	 flags;
-
-	softc = tty->t_devdata;
 
 	baud = termios->c_ospeed;
 
@@ -96,7 +92,7 @@ static int ns_param(struct tty* tty, const struct termios* termios) {
 	return 0;
 }
 
-static const struct ttydev_ops ns_tty_ops = {
+static const struct tty_ops ns_tty_ops = {
     ns_start,
     ns_param,
     NULL};
@@ -239,7 +235,7 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 
 	bus_space_write8(&softc->space, NS_MCR, softc->mcr);
 
-	if(ttydev_init(self, &ns_tty_ops, baud) != 0) {
+	if(ttydev_init(self, &ns_tty_ops, baud) == DEVICE_ERROR) {
 		free(softc);
 		return -1;
 	}
@@ -267,6 +263,8 @@ static void ns_detach(struct device* self) {
 	bus_space_write8(&softc->space, NS_IER, softc->ier);
 
 	intr_unregister(softc->vector);
+
+	ttydev_detach(self);
 
 	free(softc);
 }

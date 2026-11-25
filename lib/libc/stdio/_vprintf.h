@@ -31,14 +31,15 @@ static void helper(
 #ifdef STATIC
 static
 #endif
-int FUNCNAME(
+    int
+    FUNCNAME(
 #ifdef ARG1
-    ARG1TYPE ARG1,
+	ARG1TYPE ARG1,
 #endif
 #ifdef ARG2
-    ARG2TYPE ARG2,
+	ARG2TYPE ARG2,
 #endif
-    const char* format, va_list ap) {
+	const char* format, va_list ap) {
 	int	   i;
 	int	   j;
 	char	   typespec[32];

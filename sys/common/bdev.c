@@ -1,0 +1,71 @@
+#include <sys/bdev.h>
+#include <sys/types.h>
+#include <sys/device.h>
+#include <sys/major.h>
+#include <sys/diskdev.h>
+
+#include <dyntypes.h>
+
+struct bdevsw_map {
+	unsigned int   key;
+	struct bdevsw* value;
+};
+
+struct device_map {
+	dev_t	       key;
+	struct device* value;
+};
+
+static struct bdevsw_map* bdevsw_map;
+static struct device_map* device_map;
+
+void bdev_init(void) {
+	bdevsw_map = NULL;
+	hmdefault(bdevsw_map, NULL);
+
+	device_map = NULL;
+	hmdefault(device_map, NULL);
+
+	bdev_register(BDEV_MAJOR_DISK, &disk_bdevsw);
+}
+
+int bdev_register(unsigned int major, struct bdevsw* bdevsw) {
+	if(hmgeti(bdevsw_map, major) != -1) return -1;
+
+	hmput(bdevsw_map, major, bdevsw);
+
+	return 0;
+}
+
+void bdev_unregister(unsigned int major) {
+	hmdel(bdevsw_map, major);
+}
+
+struct bdevsw* bdev_lookup(unsigned int major) {
+	return hmget(bdevsw_map, major);
+}
+
+dev_t bdev_register_device(dev_t dev, struct device* device) {
+	if(DEVICE_MINOR(dev) == DEVICE_MINOR_ANY) {
+		unsigned int minor = 0;
+
+		do {
+			dev = DEVICE_MAKE(DEVICE_MAJOR(dev), minor);
+			minor++;
+		} while(minor != DEVICE_MINOR_ANY && hmgeti(device_map, dev) != -1);
+
+		if(hmgeti(device_map, dev) != -1) return DEVICE_ERROR;
+	}
+
+	hmput(device_map, dev, device);
+
+	return dev;
+}
+
+void bdev_unregister_device(dev_t dev) {
+	hmdel(device_map, dev);
+}
+
+struct device* bdev_lookup_device(dev_t dev) {
+	return hmget(device_map, dev);
+}

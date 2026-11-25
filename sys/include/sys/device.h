@@ -1,7 +1,6 @@
 #ifndef __SYS_DEVICE_H__
 #define __SYS_DEVICE_H__
 
-struct device_tty;
 struct device;
 struct device_attach_args;
 struct device_driver;
