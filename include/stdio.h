@@ -8,7 +8,16 @@
 
 typedef struct _iobuf FILE;
 
+struct _iobuf {
+	int todo;
+};
+
 __BEGIN_EXTERN_C__
+
+extern FILE  _iob[];
+extern FILE* stdin;
+extern FILE* stdout;
+extern FILE* stderr;
 
 int printf(const char* format, ...);
 int fprintf(FILE* stream, const char* format, ...);
