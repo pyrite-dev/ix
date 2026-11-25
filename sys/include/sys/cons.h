@@ -11,6 +11,8 @@ __BEGIN_EXTERN_C__
 void cons_init(void);
 void cons_putc(int c);
 int  cons_getc(void);
+void cons_output_register(void (*putc)(int c));
+void cons_input_register(int (*getc)(void));
 
 /* platform independent funcitons follows */
 void kprintf(const char* format, ...);

@@ -4,6 +4,9 @@
 
 static volatile unsigned short* uart = (unsigned short*)0x220000;
 
+static void uart_putc(int c);
+static int uart_getc(void);
+
 static unsigned short baud_to_div(int baud) {
 	return 10000000 / (16 * baud);
 }
@@ -26,14 +29,17 @@ void cons_init(void) {
 	if(uart[NS_DR] != 0xae) return; /* TODO: Serial is faulty */
 
 	uart[NS_MCR] = NS_MC_O2 | NS_MC_O1 | NS_MC_RTS | NS_MC_DTR;
+
+	cons_output_register(uart_putc);
+	cons_input_register(uart_getc);
 }
 
-void cons_putc(int c) {
+static void uart_putc(int c) {
 	while(!(uart[NS_LSR] & NS_LS_THRE));
 	uart[NS_DR] = c;
 }
 
-int cons_getc(void) {
+static int uart_getc(void) {
 	while(!(uart[NS_LSR] & NS_LS_DR));
 	return uart[NS_DR];
 }
