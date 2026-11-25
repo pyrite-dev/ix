@@ -18,8 +18,8 @@ enum DEVICE_LOCATOR {
 };
 
 #define DEVICE_LOCATORS { \
-    "addr", "%llx", \
-    "port", "%llx", \
+    "addr", "0x%llx", \
+    "port", "0x%llx", \
     "irq", "%lld", \
     "stride", "%lld", \
     "clock", "%lld", \

@@ -117,11 +117,6 @@ int FUNCNAME(
 
 						if(s) HELPER('-');
 
-						if(c == 'x') {
-							HELPER('0');
-							HELPER('x');
-						}
-
 						while(div > 0) {
 							HELPER(num[mag / div]);
 
