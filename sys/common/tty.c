@@ -28,6 +28,14 @@ static int ttyq_get(struct tty_queue* q, unsigned char* data) {
 	return 1;
 }
 
+static int ttyq_peek(struct tty_queue* q, unsigned char* data) {
+	if(q->count == 0) return 0;
+
+	*data = q->data[q->head];
+
+	return 1;
+}
+
 static int ttyq_unput(struct tty_queue* q) {
 	if(q->count == 0) return 0;
 
@@ -243,17 +251,21 @@ int tty_read(struct tty* tty, struct uio* uio, int flags) {
 		while(limit != 0 && uio->uio_resid != 0) {
 			irq = spinlock_lock_irqsave(&tty->t_lock);
 
-			if(!ttyq_get(q, &c)) {
+			if(!ttyq_peek(q, &c)) {
 				spinlock_unlock_irqrestore(&tty->t_lock, irq);
 				break;
 			}
-
-			if(canonical) ttyrec_consume(&tty->t_canrecq);
 
 			spinlock_unlock_irqrestore(&tty->t_lock, irq);
 
 			st = uiomove(&c, 1, uio);
 			if(st != 0) goto done;
+
+			irq = spinlock_lock_irqsave(&tty->t_lock);
+
+			if(ttyq_get(q, &c) && canonical) ttyrec_consume(&tty->t_canrecq);
+
+			spinlock_unlock_irqrestore(&tty->t_lock, irq);
 
 			limit--;
 		}
