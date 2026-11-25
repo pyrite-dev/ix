@@ -93,7 +93,6 @@ static int tty_commit_raw(struct tty* tty, int eof) {
 	}
 
 	if(ttyq_space(&tty->t_canq) < length || tty->t_canrecq.count >= TTYQ_SIZE) {
-		ttyq_clear(&tty->t_rawq);
 		return 0;
 	}
 
