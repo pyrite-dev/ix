@@ -26,6 +26,7 @@ _sat:
 .global	 _sysproc
 _sysproc:
 	.space	48
+	.word	__syscall_entry + 2
 
 .section .prcb
 .global  _prcb

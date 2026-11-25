@@ -11,7 +11,7 @@ void syscall_init(void);
 
 void syscall_dispatch(struct iregs* iregs);
 
-void	     _syscall_stub(void);
+unsigned int _syscall_entry(unsigned int number, unsigned int arg1, unsigned int arg2, unsigned int arg3, unsigned int arg4, unsigned int arg5);
 unsigned int _syscall_invoke(unsigned int number, unsigned int arg1, unsigned int arg2, unsigned int arg3, unsigned int arg4, unsigned int arg5);
 #endif
 
