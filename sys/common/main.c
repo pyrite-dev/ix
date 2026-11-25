@@ -62,7 +62,7 @@ void kmain(void) {
 	intr_init();
 	syscall_init();
 
-	kprintf("IX/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
+	kprintf("Marc/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
 	kprintf("Available memory = %ld KB\r\n", (long)kmem_avail / 1024);
 	kprintf("\r\n");
 
