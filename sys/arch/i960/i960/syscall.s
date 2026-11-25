@@ -123,14 +123,15 @@ __syscall_body:
 
 	ret
 
-__syscall_iac:
-	.word 0x400f0000
-	.word 0
-	.word 0
-	.word 0
-
 __syscall_invoke:
 	lda __syscall_iac, r4
 	ldconst 0xff000010, r5
 	synmovq r5, r4
 	ret
+
+.align 4
+__syscall_iac:
+	.word 0x400f0000
+	.word 0
+	.word 0
+	.word 0
