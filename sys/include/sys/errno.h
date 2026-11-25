@@ -75,6 +75,12 @@
 #define ELOOP 62
 #define ENAMETOOLONG 63
 
-#define ENOSYS 64
+#define ENOLCK 64
+#define ENOSYS 65
+
+/* SysV IPC */
+#define EIDRM 66
+#define ENOMSG 67
+#define EOVERFLOW 68
 
 #endif

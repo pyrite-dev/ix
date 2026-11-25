@@ -20,7 +20,7 @@ int uio_init(struct uio* uio, struct iovec* iov, int iovcnt, off_t offset, int r
 	resid = 0;
 
 	for(i = 0; i < iovcnt; i++) {
-		if(iov[i].iov_len > (size_t)-1 - resid) return EINVAL; /* TODO: replace this with overflow */
+		if(iov[i].iov_len > (size_t)-1 - resid) return EOVERFLOW;
 		resid += iov[i].iov_len;
 	}
 

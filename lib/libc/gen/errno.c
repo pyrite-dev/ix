@@ -76,5 +76,12 @@ const char* sys_errlist[] = {
 
     "Too many levels of symbolic links",
     "File name too long",
-    "Function not implemented"};
+
+    "No locks available",
+    "Function not implemented",
+
+    /* SysV IPC */
+    "Identifier removed",
+    "No message of desired type",
+    "Value too large to be stored in data type"};
 int sys_nerr = sizeof(sys_errlist) / sizeof(sys_errlist[0]);
