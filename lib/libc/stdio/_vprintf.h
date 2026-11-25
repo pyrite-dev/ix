@@ -124,13 +124,11 @@ static
 
 						while(mag / div >= (unsigned long long)b) div *= b;
 
-						if(s) HELPER('-');
-
 						oldmag = mag;
 						olddiv = div;
 
 						if(strlen(typearg) > 0) {
-							int  len  = 0;
+							int  len  = s;
 							char fill = ' ';
 
 							while(div > 0) {
@@ -149,11 +147,17 @@ static
 								len = atoi(typearg) - len;
 							}
 
+							if(fill != ' ' && s) HELPER('-');
+
 							while(len > 0) {
 								HELPER(fill);
 
 								len--;
 							}
+
+							if(fill == ' ' && s) HELPER('-');
+						}else{
+							if(s) HELPER('-');
 						}
 
 						div = olddiv;
