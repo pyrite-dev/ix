@@ -1,6 +1,9 @@
 #include <sys/disk.h>
 #include <sys/buf.h>
 #include <sys/errno.h>
+#include <sys/mutex.h>
+
+#include <string.h>
 
 void disk_init(struct disk* disk, const struct disk_ops* ops) {
 	memset(disk, 0, sizeof(*disk));
