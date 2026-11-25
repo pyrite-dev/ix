@@ -40,12 +40,6 @@ SECTIONS {
 		_bss_start = .;
 		*(.bss);
 		*(COMMON);
-	} > RAM
-
-	.int (NOLOAD) : {
-		. = ALIGN(4);
-		*(.int);
-		. = ALIGN(4);
 		_bss_end = .;
 	} > RAM
 

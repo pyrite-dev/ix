@@ -7,35 +7,41 @@
 .global __syscall_invoke
 
 __syscall_entry:
-	mov sp, r4
-	ldconst 80, r5
-	addo r5, sp, sp
+	mov sp, r3
+	ldconst 80, r4
+	addo r4, sp, sp
 
-	stq g0, 0(r4)
-	stq g4, 16(r4)
-	stq g8, 32(r4)
-	stt g12, 48(r4)
+	stq g0, 0(r3)
+	stq g4, 16(r3)
+	stq g8, 32(r3)
+	stt g12, 48(r3)
 
-	mov pfp, r5
-	st r5, 60(r4)
-	modac 0, 0, r5
-	st r5, 64(r4)
-	mov fp, r5
-	andnot 7, r5, r5
-	ld 8(r5), r5
-	st r5, 68(r4)
-	modpc 0, 0, r5
-	st r5, 72(r4)
-	modtc 0, 0, r5
-	st r5, 76(r4)
+	mov pfp, r4
+	st r4, 60(r3)
+	modac 0, 0, r4
+	st r4, 64(r3)
+	mov fp, r4
+	andnot 7, r4, r4
+	ld 8(r4), r4
+	st r4, 68(r3)
+	modpc 0, 0, r4
+	st r4, 72(r3)
+	modtc 0, 0, r4
+	st r4, 76(r3)
 
-	mov r4, g0
+	mov r3, g0
 	call _syscall_dispatch
 
-	ld (r4), g0
-	mov r4, sp
+	ld (r3), g0
+	mov r3, sp
 	ret
 
 __syscall_invoke:
 	calls 0
 	ret
+
+.section .bss
+.global __syscall_stack
+.align 4
+__syscall_stack:
+	.space 4096

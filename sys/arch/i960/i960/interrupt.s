@@ -116,11 +116,11 @@ __intr_set:
 
 	ret
 
-.section .int
+.section .bss
 .global _int
 .global _int_stack
+.align 4
 _int:
 	.space 1028
-	.space 12
 _int_stack:
 	.space 4096

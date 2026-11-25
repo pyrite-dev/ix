@@ -1,6 +1,7 @@
 .extern _start
 .extern _int
 .extern _int_stack
+.extern __syscall_stack
 
 .section .boot
 	.word	_sat
@@ -25,7 +26,9 @@ _sat:
 .section .sysproc
 .global	 _sysproc
 _sysproc:
-	.space	48
+	.space	12
+	.word	__syscall_stack
+	.space	32
 	.word	__syscall_entry + 2
 
 .section .prcb
