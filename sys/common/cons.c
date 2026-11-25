@@ -7,9 +7,6 @@ static void helper(char c) {
 	cons_putc(c);
 }
 
-#define FUNCNAME vkprintf
-#include "../../lib/libc/stdio/_vprintf.h"
-
 void kprintf(const char* format, ...) {
 	va_list ap;
 
@@ -17,3 +14,6 @@ void kprintf(const char* format, ...) {
 	vkprintf(format, ap);
 	va_end(ap);
 }
+
+#define FUNCNAME vkprintf
+#include "../../lib/libc/stdio/_vprintf.h"
