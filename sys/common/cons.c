@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 static void (*_cons_putc)(int c) = NULL;
-static int (*_cons_getc)(void) = NULL;
+static int (*_cons_getc)(void)	 = NULL;
 
 void cons_putc(int c) {
 	if(_cons_putc != NULL) _cons_putc(c);
@@ -15,11 +15,11 @@ int cons_getc(void) {
 	return 0;
 }
 
-void cons_output_register(void (*putc)(int c)){
+void cons_output_register(void (*putc)(int c)) {
 	_cons_putc = putc;
 }
 
-void cons_input_register(int (*getc)(void)){
+void cons_input_register(int (*getc)(void)) {
 	_cons_getc = getc;
 }
 

@@ -14,7 +14,16 @@ void syscall_dispatch(struct iregs* iregs) {
 
 	_syscall_args(iregs, &args);
 
-	kprintf("syscall: %d %d %d %d %d %d\r\n", args.number, args.arg1, args.arg2, args.arg3, args.arg4, args.arg5);
-
-	_syscall_return(iregs, ENOSYS);
+	switch(args.number) {
+	case SYS_syscall:
+	{
+		_syscall_return(iregs, args.arg1);
+		break;
+	}
+	defualt:
+	{
+		_syscall_return(iregs, ENOSYS);
+		break;
+	}
+	}
 }

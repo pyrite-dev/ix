@@ -3,6 +3,8 @@
 int errno;
 
 const char* sys_errlist[] = {
+    "Error 0",
+
     "Operation not permitted",
     "No such file or directory",
     "No such process",

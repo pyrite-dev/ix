@@ -11,6 +11,7 @@
 #include <sys/bdev.h>
 #include <sys/buf.h>
 #include <sys/major.h>
+#include <sys/errno.h>
 
 #include <string.h>
 
@@ -33,7 +34,7 @@ static void thread_main(void* arg) {
 	unsigned char  data[512];
 	int	       i;
 
-	kprintf("syscall test: %s\r\n", strerror(_syscall_invoke(0, 1, 2, 3, 4, 5)));
+	kprintf("syscall test: %s\r\n", strerror(_syscall_invoke(ENXIO, 0, 0, 0, 0, 0)));
 
 	memset(&b, 0, sizeof(b));
 	b.dev	 = dev;

@@ -5,7 +5,7 @@
 static volatile unsigned short* uart = (unsigned short*)0x220000;
 
 static void uart_putc(int c);
-static int uart_getc(void);
+static int  uart_getc(void);
 
 static unsigned short baud_to_div(int baud) {
 	return 10000000 / (16 * baud);
