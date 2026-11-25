@@ -3,6 +3,7 @@
 
 struct buf;
 
+#define BUF_WRITE 0x0000
 #define BUF_READ 0x0001
 #define BUF_DONE 0x0002
 #define BUF_ERROR 0x0004

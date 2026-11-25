@@ -7,6 +7,12 @@
 #include <sys/sched.h>
 #include <sys/thread.h>
 
+#include <sys/bdev.h>
+#include <sys/buf.h>
+#include <sys/major.h>
+
+#include <string.h>
+
 static thread_t idle_thread;
 static char	idle_stack[256];
 
@@ -20,6 +26,29 @@ static thread_t thread;
 static char	stack[2048];
 
 static void thread_main(void* arg) {
+	struct bdevsw* sw = bdev_lookup(BDEV_MAJOR_DISK);
+	dev_t dev = DEVICE_MAKE(BDEV_MAJOR_DISK, 0);
+	struct buf b;
+	unsigned char data[512];
+	int i;
+
+	memset(&b, 0, sizeof(b));
+	b.dev = dev;
+	b.blkno = 0;
+	b.data = data;
+	b.bcount = sizeof(data);
+	b.flags = BUF_READ;
+
+	sw->strategy(&b);
+
+	if(!(b.flags & BUF_ERROR)){
+		for(i = 0; i < 512; i++){
+			if(i > 0 && (i % 16) == 0) kprintf("\r\n");
+
+			kprintf("%x ", data[i]);
+		}
+		kprintf("\r\n");
+	}
 }
 
 void kmain(void) {
