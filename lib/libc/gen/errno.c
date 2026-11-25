@@ -75,5 +75,6 @@ const char* sys_errlist[] = {
     "Connection refused",
 
     "Too many levels of symbolic links",
-    "File name too long"};
+    "File name too long",
+    "Function not implemented"};
 int sys_nerr = sizeof(sys_errlist) / sizeof(sys_errlist[0]);

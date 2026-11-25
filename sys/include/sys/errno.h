@@ -75,4 +75,6 @@
 #define ELOOP 62
 #define ENAMETOOLONG 63
 
+#define ENOSYS 64
+
 #endif

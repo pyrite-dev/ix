@@ -9,7 +9,7 @@
 .global __intr_set
 
 .macro INTR_STUB n
-intr_\n:
+__intr_\n:
 	mov sp, r6
 	ldconst 80, r5
 	addo r5, sp, sp
@@ -70,7 +70,7 @@ INTR_STUB %vec
 .endr
 
 .macro INTR_REG n
-	lda intr_\n, r3
+	lda __intr_\n, r3
 	lda _int + (\n + 1) * 4, r4
 	st r3, (r4)
 .endm

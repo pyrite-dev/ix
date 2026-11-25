@@ -6,6 +6,7 @@
 #include <sys/device.h>
 #include <sys/sched.h>
 #include <sys/thread.h>
+#include <sys/syscall.h>
 
 #include <sys/bdev.h>
 #include <sys/buf.h>
@@ -26,23 +27,25 @@ static thread_t thread;
 static char	stack[2048];
 
 static void thread_main(void* arg) {
-	struct bdevsw* sw = bdev_lookup(BDEV_MAJOR_DISK);
-	dev_t dev = DEVICE_MAKE(BDEV_MAJOR_DISK, 0);
-	struct buf b;
-	unsigned char data[512];
-	int i;
+	struct bdevsw* sw  = bdev_lookup(BDEV_MAJOR_DISK);
+	dev_t	       dev = DEVICE_MAKE(BDEV_MAJOR_DISK, 0);
+	struct buf     b;
+	unsigned char  data[512];
+	int	       i;
+
+	kprintf("syscall test: %s\r\n", strerror(_syscall_invoke(0, 0, 0, 0, 0, 0)));
 
 	memset(&b, 0, sizeof(b));
-	b.dev = dev;
-	b.blkno = 0;
-	b.data = data;
+	b.dev	 = dev;
+	b.blkno	 = 0;
+	b.data	 = data;
 	b.bcount = sizeof(data);
-	b.flags = BUF_READ;
+	b.flags	 = BUF_READ;
 
 	sw->strategy(&b);
 
-	if(!(b.flags & BUF_ERROR)){
-		for(i = 0; i < 512; i++){
+	if(!(b.flags & BUF_ERROR)) {
+		for(i = 0; i < 512; i++) {
 			if(i > 0 && (i % 16) == 0) kprintf("\r\n");
 
 			kprintf("%x ", data[i]);
@@ -57,6 +60,7 @@ void kmain(void) {
 	machdep_init();
 	cons_init();
 	intr_init();
+	syscall_init();
 
 	kprintf("IX/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
 	kprintf("Available memory = %ld KB\r\n", (long)kmem_avail / 1024);
