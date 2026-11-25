@@ -24,6 +24,13 @@ static void thread_main(void* arg) {
 	const char* text = "Hello, Console!\n";
 
 	_syscall_invoke(SYS_write, 1, (reg_t)text, strlen(text), 0, 0);
+
+	while(1){
+		char c;
+
+		_syscall_invoke(SYS_read, 0, (reg_t)&c, 1, 0, 0);
+		_syscall_invoke(SYS_write, 1, (reg_t)&c, 1, 0, 0);
+	}
 }
 
 void kmain(void) {
