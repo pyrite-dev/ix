@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #ifdef ARG1
 #define ARG1CALL ARG1,
@@ -43,6 +44,7 @@ static
 	int	   i;
 	int	   j;
 	char	   typespec[32];
+	char	   typearg[32];
 	const char num[] = "0123456789abcdef";
 	int	   r	 = 0;
 
@@ -51,6 +53,7 @@ static
 			char c;
 
 			typespec[0] = 0;
+			typearg[0]  = 0;
 
 			while((c = format[++i]) != 0) {
 				int brk = 0;
@@ -116,10 +119,45 @@ static
 					case 'x':
 					{
 						unsigned long long div = 1;
+						unsigned long long oldmag;
+						unsigned long long olddiv;
 
 						while(mag / div >= (unsigned long long)b) div *= b;
 
 						if(s) HELPER('-');
+
+						oldmag = mag;
+						olddiv = div;
+
+						if(strlen(typearg) > 0) {
+							int  len  = 0;
+							char fill = ' ';
+
+							while(div > 0) {
+								len++;
+
+								mag %= div;
+								div /= b;
+							}
+
+							if(strlen(typearg) > 1) {
+								fill = typearg[0];
+								len  = atoi(typearg + 1) - len;
+
+								if(fill == '.') fill = '0';
+							} else {
+								len = atoi(typearg) - len;
+							}
+
+							while(len > 0) {
+								HELPER(fill);
+
+								len--;
+							}
+						}
+
+						div = olddiv;
+						mag = oldmag;
 
 						while(div > 0) {
 							HELPER(num[mag / div]);
@@ -137,6 +175,27 @@ static
 					}
 
 					brk = 1;
+					break;
+				}
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+				case '.':
+				{
+					int l = strlen(typearg);
+
+					if(l == (sizeof(typearg) - 1)) break;
+
+					typearg[l]     = c;
+					typearg[l + 1] = 0;
+
 					break;
 				}
 				}

@@ -33,7 +33,7 @@ static void thread_main(void* arg) {
 	unsigned char  data[512];
 	int	       i;
 
-	kprintf("syscall test: %s\r\n", strerror(_syscall_invoke(0, 0, 0, 0, 0, 0)));
+	kprintf("syscall test: %s\r\n", strerror(_syscall_invoke(0, 1, 2, 3, 4, 5)));
 
 	memset(&b, 0, sizeof(b));
 	b.dev	 = dev;
@@ -48,7 +48,7 @@ static void thread_main(void* arg) {
 		for(i = 0; i < 512; i++) {
 			if(i > 0 && (i % 16) == 0) kprintf("\r\n");
 
-			kprintf("%x ", data[i]);
+			kprintf("%02x ", data[i]);
 		}
 		kprintf("\r\n");
 	}

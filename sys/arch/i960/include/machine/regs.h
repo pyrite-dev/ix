@@ -1,28 +1,30 @@
 #ifndef __MACHINE_REGS_H__
 #define __MACHINE_REGS_H__
 
-struct iregs {
-	unsigned int g0;
-	unsigned int g1;
-	unsigned int g2;
-	unsigned int g3;
-	unsigned int g4;
-	unsigned int g5;
-	unsigned int g6;
-	unsigned int g7;
-	unsigned int g8;
-	unsigned int g9;
-	unsigned int g10;
-	unsigned int g11;
-	unsigned int g12;
-	unsigned int g13;
-	unsigned int g14;
-	unsigned int pfp;
+typedef unsigned int reg_t; /* biggest register */
 
-	unsigned int ac;
-	unsigned int rip;
-	unsigned int pc;
-	unsigned int tc;
+struct iregs {
+	reg_t g0;
+	reg_t g1;
+	reg_t g2;
+	reg_t g3;
+	reg_t g4;
+	reg_t g5;
+	reg_t g6;
+	reg_t g7;
+	reg_t g8;
+	reg_t g9;
+	reg_t g10;
+	reg_t g11;
+	reg_t g12;
+	reg_t g13;
+	reg_t g14;
+	reg_t pfp;
+
+	reg_t ac;
+	reg_t rip;
+	reg_t pc;
+	reg_t tc;
 };
 
 #endif

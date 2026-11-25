@@ -10,5 +10,11 @@ void syscall_init(void) {
 }
 
 void syscall_dispatch(struct iregs* iregs) {
-	iregs->g0 = ENOSYS;
+	struct syscall_args args;
+
+	_syscall_args(iregs, &args);
+
+	kprintf("syscall: %d %d %d %d %d %d\r\n", args.number, args.arg1, args.arg2, args.arg3, args.arg4, args.arg5);
+
+	_syscall_return(iregs, ENOSYS);
 }
