@@ -1,4 +1,4 @@
-# IX Operating System
+# Marc Operating System
 
 ## How to obtain toolchain
 
