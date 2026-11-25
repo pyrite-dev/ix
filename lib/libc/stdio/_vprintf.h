@@ -73,9 +73,11 @@ static
 				case 's':
 				{
 					char* v = va_arg(ap, char*);
-					int   l = atoi(typearg);
+					int   l;
 
 					if(v == NULL) v = "(null)";
+
+					l = atoi(typearg) - strlen(v);
 
 					while(l-- > 0) {
 						HELPER(' ');
