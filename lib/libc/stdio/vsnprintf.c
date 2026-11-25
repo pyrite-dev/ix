@@ -13,6 +13,7 @@ static void helper(struct vsnprintf_state* state, char c) {
 	state->len++;
 }
 
+#define STATIC
 #define FUNCNAME _vsnprintf
 #define ARG1 state
 #define ARG1TYPE struct vsnprintf_state*

@@ -28,6 +28,9 @@ static void helper(
 		r++; \
 	}
 
+#ifdef STATIC
+static
+#endif
 int FUNCNAME(
 #ifdef ARG1
     ARG1TYPE ARG1,
