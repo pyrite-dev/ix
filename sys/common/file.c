@@ -211,7 +211,7 @@ int sys_open(const char* path, int flags) {
 	error = copyinstr(name, path, sizeof(name), NULL);
 	if(error != 0) return -error;
 
-	if(name[0] != '/' || name[1] != 'd' || name[2] != 'e' || name[3] != 'v' || name[4] != '/') return -ENOENT;
+	if(strlen(name) < 5 || memcmp(name, "/dev/", 5) != 0) return -ENOENT;
 
 	if(cdev_find_device(name + 5, &dev) == 0) {
 		file = file_open_device(dev, 0, flags, &error);
