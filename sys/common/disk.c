@@ -3,6 +3,9 @@
 #include <sys/errno.h>
 
 void disk_init(struct disk* disk, const struct disk_ops* ops) {
+	memset(disk, 0, sizeof(*disk));
+
+	disk->ops = ops;
 }
 
 int disk_open(struct disk* disk, int flags, int mode) {
