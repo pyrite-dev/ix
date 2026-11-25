@@ -31,11 +31,12 @@ void syscall_init(void);
 void syscall_dispatch(struct iregs* iregs);
 
 reg_t _syscall_entry(reg_t number, reg_t arg1, reg_t arg2, reg_t arg3, reg_t arg4, reg_t arg5);
-reg_t _syscall_invoke(reg_t number, reg_t arg1, reg_t arg2, reg_t arg3, reg_t arg4, reg_t arg5);
 
 void _syscall_args(struct iregs* iregs, struct syscall_args* args);
 void _syscall_return(struct iregs* iregs, reg_t v);
 #endif
+
+reg_t _syscall(reg_t number, reg_t arg1, reg_t arg2, reg_t arg3, reg_t arg4, reg_t arg5);
 
 __END_EXTERN_C__
 

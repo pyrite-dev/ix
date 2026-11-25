@@ -5,4 +5,6 @@
 
 typedef unsigned int dev_t;
 
+typedef int ssize_t;
+
 #endif

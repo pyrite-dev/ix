@@ -8,6 +8,9 @@
 #include <sys/thread.h>
 #include <sys/syscall.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+
 static thread_t idle_thread;
 static char	idle_stack[256];
 
@@ -22,14 +25,15 @@ static char	stack[4096];
 
 static void thread_main(void* arg) {
 	const char* text = "Hello, Console!\n";
+	int	    fd	 = open("/dev/ns0", O_RDWR);
 
-	_syscall_invoke(SYS_write, 1, (reg_t)text, strlen(text), 0, 0);
+	write(fd, text, strlen(text));
 
-	while(1){
+	while(1) {
 		char c;
 
-		_syscall_invoke(SYS_read, 0, (reg_t)&c, 1, 0, 0);
-		_syscall_invoke(SYS_write, 1, (reg_t)&c, 1, 0, 0);
+		read(fd, &c, 1);
+		write(fd, &c, 1);
 	}
 }
 

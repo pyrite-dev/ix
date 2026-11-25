@@ -1,1 +1,1 @@
-CPPFLAGS += -I$(TOP)/sys/include -I$(TOP)/include
+CFLAGS += -O2

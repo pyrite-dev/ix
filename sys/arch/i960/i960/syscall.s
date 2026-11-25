@@ -1,11 +1,8 @@
-.altmacro
-
 .extern _syscall_dispatch
 .extern _thread_current
 
 .section .text
 .global __syscall_entry
-.global __syscall_invoke
 
 __syscall_entry:
 	mov sp, r3
@@ -57,10 +54,6 @@ __syscall_entry:
 	call _syscall_dispatch
 	ld (r4), g0
 	mov r3, sp
-	ret
-
-__syscall_invoke:
-	calls 0
 	ret
 
 .section .bss

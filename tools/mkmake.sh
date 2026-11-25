@@ -34,8 +34,11 @@ elif [ "$1" = "kernel" ]; then
 elif [ "$1" = "libc" ]; then
 	./tools/prelude.sh lib/libc "lib/libc.a"
 	(
+		LIBC="`ls -d lib/libc/* | grep -v Makefile | grep -v arch`"
+
 		eval find \
-			lib/libc \
+			$LIBC \
+			lib/libc/arch/$ARCH \
 			$MATCH
 	) | ./tools/makedep.sh lib/libc
 	cat lib/libc/Makefile.in
