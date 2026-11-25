@@ -84,7 +84,7 @@ int FUNCNAME(
 					int		   s = 0;
 					int		   b = c == 'x' ? 16 : 10;
 
-					if(c == 'u') {
+					if(c == 'u' || c == 'x') {
 						if(strcmp(typespec, "l") == 0) {
 							mag = va_arg(ap, unsigned long);
 						} else if(strcmp(typespec, "ll") == 0) {
