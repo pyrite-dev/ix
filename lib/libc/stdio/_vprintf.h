@@ -73,8 +73,13 @@ static
 				case 's':
 				{
 					char* v = va_arg(ap, char*);
+					int   l = atoi(typearg);
 
 					if(v == NULL) v = "(null)";
+
+					while(l-- > 0) {
+						HELPER(' ');
+					}
 
 					for(j = 0; v[j] != 0; j++) HELPER(v[j]);
 
@@ -119,49 +124,35 @@ static
 					case 'x':
 					{
 						unsigned long long div = 1;
-						unsigned long long oldmag;
-						unsigned long long olddiv;
+						unsigned long long tmp;
+						int		   len	= 1;
+						int		   pad	= 0;
+						char		   fill = ' ';
 
 						while(mag / div >= (unsigned long long)b) div *= b;
 
-						oldmag = mag;
-						olddiv = div;
+						for(tmp = mag; tmp >= (unsigned long long)b; tmp /= b) len++;
 
-						if(strlen(typearg) > 0) {
-							int  len  = s;
-							char fill = ' ';
+						if(typearg[0] == '.') {
+							fill = '0';
+							pad  = atoi(typearg + 1) - len;
+						} else if(typearg[0] != 0) {
+							if(typearg[0] == '0') fill = '0';
 
-							while(div > 0) {
-								len++;
-
-								mag %= div;
-								div /= b;
-							}
-
-							if(strlen(typearg) > 1) {
-								fill = typearg[0];
-								len  = atoi(typearg + 1) - len;
-
-								if(fill == '.') fill = '0';
-							} else {
-								len = atoi(typearg) - len;
-							}
-
-							if(fill != ' ' && s) HELPER('-');
-
-							while(len > 0) {
-								HELPER(fill);
-
-								len--;
-							}
-
-							if(fill == ' ' && s) HELPER('-');
-						}else{
-							if(s) HELPER('-');
+							pad = atoi(typearg) - len - s;
 						}
 
-						div = olddiv;
-						mag = oldmag;
+						if(pad < 0) pad = 0;
+
+						if(fill == ' ') {
+							while(pad-- > 0) HELPER(' ');
+						}
+
+						if(s) HELPER('-');
+
+						if(fill != ' ') {
+							while(pad-- > 0) HELPER(fill);
+						}
 
 						while(div > 0) {
 							HELPER(num[mag / div]);
