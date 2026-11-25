@@ -1,0 +1,27 @@
+#ifndef __STDIO_H__
+#define __STDIO_H__
+
+#include <sys/cdefs.h>
+
+#include <stddef.h>
+#include <stdarg.h>
+
+typedef struct _iobuf FILE;
+
+__BEGIN_EXTERN_C__
+
+int printf(const char* format, ...);
+int fprintf(FILE* stream, const char* format, ...);
+int dprintf(int fd, const char* format, ...);
+int sprintf(char* str, const char* format, ...);
+int snprintf(char* str, size_t size, const char* format, ...);
+
+int vprintf(const char* format, va_list ap);
+int vfprintf(FILE* stream, const char* format, va_list ap);
+int vdprintf(int fd, const char* format, va_list ap);
+int vsprintf(char* str, const char* format, va_list ap);
+int vsnprintf(char* str, size_t size, const char* format, va_list ap);
+
+__END_EXTERN_C__
+
+#endif
