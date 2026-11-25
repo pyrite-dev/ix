@@ -10,10 +10,10 @@ static void helper(char c) {
 #define FUNCNAME vkprintf
 #include "../../lib/libc/stdio/_vprintf.h"
 
-void kprintf(const char* fmt, ...) {
-	va_list va;
+void kprintf(const char* format, ...) {
+	va_list ap;
 
-	va_start(va, fmt);
-	vkprintf(fmt, va);
-	va_end(va);
+	va_start(ap, format);
+	vkprintf(format, ap);
+	va_end(ap);
 }

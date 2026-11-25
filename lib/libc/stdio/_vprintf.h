@@ -18,11 +18,15 @@ static void helper(
     ARG1TYPE ARG1,
 #endif
 #ifdef ARG2
-    ARG1TYPE ARG2,
+    ARG2TYPE ARG2,
 #endif
     char c);
 
-#define HELPER(x) helper(ARG1CALL ARG2CALL(x))
+#define HELPER(x) \
+	{ \
+		helper(ARG1CALL ARG2CALL(x)); \
+		r++; \
+	}
 
 int FUNCNAME(
 #ifdef ARG1
@@ -36,6 +40,7 @@ int FUNCNAME(
 	int	   j;
 	char	   typespec[32];
 	const char num[] = "0123456789abcdef";
+	int	   r	 = 0;
 
 	for(i = 0; format[i] != 0; i++) {
 		if(format[i] == '%') {
@@ -143,6 +148,8 @@ int FUNCNAME(
 			HELPER(format[i]);
 		}
 	}
+
+	return r;
 }
 
 #undef ARG2CALL
