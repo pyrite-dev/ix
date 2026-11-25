@@ -30,7 +30,7 @@ void kmain(void) {
 	intr_init();
 
 	kprintf("IX/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
-	kprintf("avail mem = %ld KB\r\n", (long)kmem_avail / 1024);
+	kprintf("Available memory = %ld KB\r\n", (long)kmem_avail / 1024);
 	kprintf("\r\n");
 
 	thread_init(&idle_thread, idle_stack, sizeof(idle_stack), idle_entry, NULL);

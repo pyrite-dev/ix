@@ -150,5 +150,6 @@ int FUNCNAME(
 	return r;
 }
 
+#undef HELPER
 #undef ARG2CALL
 #undef ARG1CALL
