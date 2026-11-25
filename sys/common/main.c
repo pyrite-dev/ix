@@ -8,13 +8,6 @@
 #include <sys/thread.h>
 #include <sys/syscall.h>
 
-#include <sys/bdev.h>
-#include <sys/buf.h>
-#include <sys/major.h>
-#include <sys/errno.h>
-
-#include <string.h>
-
 static thread_t idle_thread;
 static char	idle_stack[256];
 
@@ -25,34 +18,12 @@ static void idle_entry(void* arg) {
 }
 
 static thread_t thread;
-static char	stack[2048];
+static char	stack[4096];
 
 static void thread_main(void* arg) {
-	struct bdevsw* sw  = bdev_lookup(BDEV_MAJOR_DISK);
-	dev_t	       dev = DEVICE_MAKE(BDEV_MAJOR_DISK, 0);
-	struct buf     b;
-	unsigned char  data[512];
-	int	       i;
+	const char* text = "Hello, Console!\n";
 
-	kprintf("syscall test: %s\r\n", strerror(_syscall_invoke(ENXIO, 0, 0, 0, 0, 0)));
-
-	memset(&b, 0, sizeof(b));
-	b.dev	 = dev;
-	b.blkno	 = 0;
-	b.data	 = data;
-	b.bcount = sizeof(data);
-	b.flags	 = BUF_READ;
-
-	sw->strategy(&b);
-
-	if(!(b.flags & BUF_ERROR)) {
-		for(i = 0; i < 512; i++) {
-			if(i > 0 && (i % 16) == 0) kprintf("\r\n");
-
-			kprintf("%02x ", data[i]);
-		}
-		kprintf("\r\n");
-	}
+	_syscall_invoke(SYS_write, 1, (reg_t)text, strlen(text), 0, 0);
 }
 
 void kmain(void) {
@@ -79,6 +50,8 @@ void kmain(void) {
 	kmem_use_spinlock();
 	device_start();
 	_intr_restore(flags);
+
+	file_init();
 
 	sched_start();
 }

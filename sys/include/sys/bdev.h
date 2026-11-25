@@ -29,6 +29,7 @@ dev_t bdev_register_device(dev_t dev, struct device* device);
 void  bdev_unregister_device(dev_t dev);
 
 struct device* bdev_lookup_device(dev_t dev);
+int	       bdev_find_device(const char* name, dev_t* result);
 #endif
 
 __END_EXTERN_C__

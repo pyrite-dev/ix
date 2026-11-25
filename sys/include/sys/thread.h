@@ -14,6 +14,7 @@ enum THREAD_STATE {
 
 #include <sys/cdefs.h>
 #include <sys/waiter.h>
+#include <sys/file.h>
 #include <machine/thread.h>
 
 #include <stddef.h>
@@ -38,6 +39,9 @@ struct thread {
 	unsigned int quantum;
 
 	thread_context_t context;
+
+	struct file* files[NFILE];
+	int	     files_inited;
 };
 
 __BEGIN_EXTERN_C__

@@ -4,6 +4,9 @@
 #include <sys/major.h>
 #include <sys/ttydev.h>
 
+#include <stdio.h>
+#include <string.h>
+
 #include <dyntypes.h>
 
 struct cdevsw_map {
@@ -68,4 +71,35 @@ void cdev_unregister_device(dev_t dev) {
 
 struct device* cdev_lookup_device(dev_t dev) {
 	return hmget(device_map, dev);
+}
+
+int cdev_find_device(const char* name, dev_t* result) {
+	char	     buf[32];
+	unsigned int i;
+
+	for(i = 0; i < hmlen(device_map); i++) {
+		struct device* device = device_map[i].value;
+
+		snprintf(buf, sizeof(buf), "%s%u", device->name, device->unit);
+
+		if(strcmp(buf, name) == 0) {
+			*result = device_map[i].key;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+int cdev_first_device(unsigned int major, dev_t* result) {
+	unsigned int i;
+
+	for(i = 0; i < hmlen(device_map); i++) {
+		if(DEVICE_MAJOR(device_map[i].key) == major) {
+			*result = device_map[i].key;
+			return 0;
+		}
+	}
+
+	return -1;
 }

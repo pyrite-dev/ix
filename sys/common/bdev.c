@@ -4,6 +4,9 @@
 #include <sys/major.h>
 #include <sys/diskdev.h>
 
+#include <stdio.h>
+#include <string.h>
+
 #include <dyntypes.h>
 
 struct bdevsw_map {
@@ -68,4 +71,22 @@ void bdev_unregister_device(dev_t dev) {
 
 struct device* bdev_lookup_device(dev_t dev) {
 	return hmget(device_map, dev);
+}
+
+int bdev_find_device(const char* name, dev_t* result) {
+	char	     buf[32];
+	unsigned int i;
+
+	for(i = 0; i < hmlen(device_map); i++) {
+		struct device* device = device_map[i].value;
+
+		snprintf(buf, sizeof(buf), "%s%u", device->name, device->unit);
+
+		if(strcmp(buf, name) == 0) {
+			*result = device_map[i].key;
+			return 0;
+		}
+	}
+
+	return -1;
 }

@@ -1,5 +1,5 @@
-#ifndef __SYS_CONS_H__
-#define __SYS_CONS_H__
+#ifndef __SYS_CDEV_H__
+#define __SYS_CDEV_H__
 
 struct cdevsw;
 
@@ -30,6 +30,8 @@ dev_t cdev_register_device(dev_t dev, struct device* device);
 void  cdev_unregister_device(dev_t dev);
 
 struct device* cdev_lookup_device(dev_t dev);
+int	       cdev_find_device(const char* name, dev_t* result);
+int	       cdev_first_device(unsigned int major, dev_t* result);
 #endif
 
 __END_EXTERN_C__
