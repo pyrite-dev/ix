@@ -2,6 +2,9 @@
 #include <sys/buf.h>
 #include <sys/errno.h>
 
+void disk_init(struct disk* disk, const struct disk_ops* ops) {
+}
+
 int disk_open(struct disk* disk, int flags, int mode) {
 	return 0;
 }

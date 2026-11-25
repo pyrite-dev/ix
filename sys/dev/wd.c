@@ -3,6 +3,7 @@
 #include <sys/cons.h>
 #include <sys/time.h>
 #include <sys/disk.h>
+#include <sys/diskdev.h>
 #include <sys/major.h>
 
 #include "wd.h"
@@ -151,9 +152,7 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 
 	strcat(self->desc, ">");
 
-	softc->disk.nsectors = nsectors;
-
-	if(diskdev_init(self, &wd_disk_ops) == DEVICE_ERROR) {
+	if(diskdev_init(self, &wd_disk_ops, nsectors) == DEVICE_ERROR) {
 		free(softc);
 		return -1;
 	}

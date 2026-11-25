@@ -63,10 +63,13 @@ struct bdevsw disk_bdevsw = {
     diskdev_strategy,
     diskdev_ioctl};
 
-dev_t diskdev_init(struct device* device) {
+dev_t diskdev_init(struct device* device, const struct disk_ops* ops, unsigned int nsectors) {
 	struct disk* disk = device->softc;
 
-	disk->device = device;
+	disk_init(disk, ops);
+
+	disk->device   = device;
+	disk->nsectors = nsectors;
 
 	mutex_init(&disk->lock);
 

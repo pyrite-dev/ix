@@ -27,6 +27,8 @@ struct disk {
 __BEGIN_EXTERN_C__
 
 #ifdef __KERNEL__
+void disk_init(struct disk* disk, const struct disk_ops* ops);
+
 int  disk_open(struct disk* disk, int flags, int mode);
 int  disk_close(struct disk* disk, int flags, int mode);
 void disk_strategy(struct disk* disk, struct buf* buf);

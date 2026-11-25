@@ -12,5 +12,5 @@ int memcmp(const void* s1, const void* s2, size_t n) {
 		n--;
 	}
 
-	return *(unsigned char*)p1 - *(unsigned char*)p2;
+	return 0;
 }

@@ -71,9 +71,9 @@ dev_t ttydev_init(struct device* device, const struct tty_ops* ops, speed_t baud
 	struct tty* tty = device->softc;
 	int	    st;
 
-	tty->device = device;
-
 	tty_init(tty, ops);
+
+	tty->device = device;
 
 	tty->termios.c_ispeed = baud;
 	tty->termios.c_ospeed = baud;
