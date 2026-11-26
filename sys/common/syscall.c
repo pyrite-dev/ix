@@ -41,6 +41,8 @@ static int syscall_call(struct syscall_args* args) {
 		return sys_open((const char*)args->arg1, (int)args->arg2);
 	case SYS_close:
 		return sys_close((int)args->arg1);
+	case SYS_getdents:
+		return sys_getdents((int)args->arg1, (void*)args->arg2, (size_t)args->arg3);
 	default:
 		return -ENOSYS;
 	}

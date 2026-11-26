@@ -7,9 +7,11 @@
 #include <sys/sched.h>
 #include <sys/thread.h>
 #include <sys/syscall.h>
+#include <sys/vfs.h>
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 
 static thread_t idle_thread;
 static char	idle_stack[256];
@@ -26,6 +28,16 @@ static char	stack[4096];
 static void thread_main(void* arg) {
 	const char* text = "Hello, Console!\n";
 	int	    fd	 = open("/dev/ns0", O_RDWR);
+	DIR*	    dir	 = opendir("/dev");
+
+	if(dir != NULL) {
+		struct dirent* d;
+
+		while((d = readdir(dir)) != NULL) {
+			write(fd, d->d_name, strlen(d->d_name));
+			write(fd, "\n", 1);
+		}
+	}
 
 	write(fd, text, strlen(text));
 
@@ -62,6 +74,7 @@ void kmain(void) {
 	device_start();
 	_intr_restore(flags);
 
+	vfs_init();
 	file_init();
 
 	sched_start();

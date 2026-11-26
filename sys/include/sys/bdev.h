@@ -8,6 +8,8 @@ struct bdevsw;
 #include <sys/buf.h>
 #include <sys/device.h>
 
+#include <stddef.h>
+
 struct bdevsw {
 	int (*open)(dev_t dev, int flags, int mode);
 	int (*close)(dev_t dev, int flags, int mode);
@@ -30,6 +32,8 @@ void  bdev_unregister_device(dev_t dev);
 
 struct device* bdev_lookup_device(dev_t dev);
 int	       bdev_find_device(const char* name, dev_t* result);
+unsigned int   bdev_device_count(void);
+int	       bdev_device_at(unsigned int index, dev_t* dev, char* name, size_t name_size);
 #endif
 
 __END_EXTERN_C__

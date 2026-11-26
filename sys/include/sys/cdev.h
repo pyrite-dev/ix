@@ -8,6 +8,8 @@ struct cdevsw;
 #include <sys/uio.h>
 #include <sys/device.h>
 
+#include <stddef.h>
+
 struct cdevsw {
 	int (*open)(dev_t dev, int flags, int mode);
 	int (*close)(dev_t dev, int flags, int mode);
@@ -32,6 +34,8 @@ void  cdev_unregister_device(dev_t dev);
 struct device* cdev_lookup_device(dev_t dev);
 int	       cdev_find_device(const char* name, dev_t* result);
 int	       cdev_first_device(unsigned int major, dev_t* result);
+unsigned int   cdev_device_count(void);
+int	       cdev_device_at(unsigned int index, dev_t* dev, char* name, size_t name_size);
 #endif
 
 __END_EXTERN_C__

@@ -91,6 +91,24 @@ int cdev_find_device(const char* name, dev_t* result) {
 	return -1;
 }
 
+unsigned int cdev_device_count(void) {
+	return hmlen(device_map);
+}
+
+int cdev_device_at(unsigned int index, dev_t* dev, char* name, size_t name_size) {
+	struct device* device;
+
+	if(index >= hmlen(device_map)) return -1;
+
+	device = device_map[index].value;
+
+	snprintf(name, name_size, "%s%u", device->name, device->unit);
+
+	*dev = device_map[index].key;
+
+	return 0;
+}
+
 int cdev_first_device(unsigned int major, dev_t* result) {
 	unsigned int i;
 

@@ -9,6 +9,8 @@
 #include <sys/thread.h>
 #include <sys/uaccess.h>
 #include <sys/uio.h>
+#include <sys/vfs.h>
+#include <sys/dirent.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -21,6 +23,8 @@ struct file {
 	int	     is_block;
 	unsigned int ref;
 	off_t	     offset;
+
+	struct vnode* vnode;
 
 	off_t	      cache_blkno;
 	int	      cache_valid;
@@ -129,7 +133,9 @@ static int file_block_fill(struct file* file, off_t blkno) {
 static void file_release(struct file* file) {
 	if(file->ref != 0) return;
 
-	if(file->is_block) {
+	if(file->vnode != NULL && file->vnode->type == VNODE_DIR) {
+		/* nothing to close */
+	} else if(file->is_block) {
 		struct bdevsw* sw = bdev_lookup(DEVICE_MAJOR(file->dev));
 
 		file_block_flush(file);
@@ -140,6 +146,8 @@ static void file_release(struct file* file) {
 
 		if(sw != NULL && sw->close != NULL) sw->close(file->dev, file->flags, 0);
 	}
+
+	if(file->vnode != NULL) vnode_put(file->vnode);
 
 	free(file);
 }
@@ -164,13 +172,13 @@ static struct file* file_open_device(dev_t dev, int is_block, int flags, int* er
 	struct file* file;
 	int	     err;
 
-	file = (struct file*)malloc(sizeof(struct file));
+	file = malloc(sizeof(*file));
 	if(file == NULL) {
 		*error = ENOMEM;
 		return NULL;
 	}
 
-	memset(file, 0, sizeof(struct file));
+	memset(file, 0, sizeof(*file));
 	file->dev      = dev;
 	file->flags    = flags;
 	file->is_block = is_block;
@@ -199,29 +207,57 @@ void file_init(void) {
 	file_std_valid = cdev_first_device(CDEV_MAJOR_TTY, &file_std_dev) == 0;
 }
 
-int sys_open(const char* path, int flags) {
-	char	     name[128];
-	dev_t	     dev;
+static struct file* file_open_vnode(struct vnode* vnode, int flags, int* error) {
 	struct file* file;
-	int	     error;
-	int	     fd;
+
+	if(vnode->type == VNODE_DIR) {
+		file = malloc(sizeof(*file));
+		if(file == NULL) {
+			*error = ENOMEM;
+			return NULL;
+		}
+
+		memset(file, 0, sizeof(*file));
+		file->flags = flags;
+		file->ref   = 1;
+		file->vnode = vnode;
+
+		return file;
+	}
+
+	if(vnode->type != VNODE_CHR && vnode->type != VNODE_BLK) {
+		*error = ENXIO;
+		return NULL;
+	}
+
+	file = file_open_device(vnode->data.dev, vnode->type == VNODE_BLK, flags, error);
+	if(file == NULL) return NULL;
+
+	file->vnode = vnode;
+
+	return file;
+}
+
+int sys_open(const char* path, int flags) {
+	char	      name[128];
+	struct vnode* vnode;
+	struct file*  file;
+	int	      error;
+	int	      fd;
 
 	if((flags & 3) == 3) return -EINVAL;
 
 	error = copyinstr(name, path, sizeof(name), NULL);
 	if(error != 0) return -error;
 
-	if(strlen(name) < 5 || memcmp(name, "/dev/", 5) != 0) return -ENOENT;
+	error = vfs_lookup(name, &vnode);
+	if(error != 0) return -error;
 
-	if(cdev_find_device(name + 5, &dev) == 0) {
-		file = file_open_device(dev, 0, flags, &error);
-	} else if(bdev_find_device(name + 5, &dev) == 0) {
-		file = file_open_device(dev, 1, flags, &error);
-	} else {
-		return -ENOENT;
+	file = file_open_vnode(vnode, flags, &error);
+	if(file == NULL) {
+		vnode_put(vnode);
+		return -error;
 	}
-
-	if(file == NULL) return -error;
 
 	fd = file_fdalloc(file);
 	if(fd < 0) {
@@ -256,6 +292,11 @@ int sys_read(int fd, void* buffer, size_t count) {
 	int	     result;
 
 	if(file == NULL) return -EBADF;
+
+	if(file->vnode != NULL && file->vnode->type == VNODE_DIR) {
+		file_put(file);
+		return -EISDIR;
+	}
 
 	if((file->flags & 3) == O_WRONLY) {
 		file_put(file);
@@ -334,6 +375,11 @@ int sys_write(int fd, const void* buffer, size_t count) {
 
 	if(file == NULL) return -EBADF;
 
+	if(file->vnode != NULL && file->vnode->type == VNODE_DIR) {
+		file_put(file);
+		return -EISDIR;
+	}
+
 	if((file->flags & 3) == O_RDONLY) {
 		file_put(file);
 		return -EBADF;
@@ -409,4 +455,41 @@ int sys_write(int fd, const void* buffer, size_t count) {
 	file_put(file);
 
 	return result;
+}
+
+int sys_getdents(int fd, void* buffer, size_t count) {
+	struct file*  file = file_get(fd);
+	struct dirent entry;
+	size_t	      done  = 0;
+	int	      error = 0;
+
+	if(file == NULL) return -EBADF;
+
+	if(file->vnode == NULL || file->vnode->type != VNODE_DIR || file->vnode->ops == NULL || file->vnode->ops->readdir == NULL) {
+		file_put(file);
+		return -ENOTDIR;
+	}
+
+	while(done + sizeof(entry) <= count) {
+		memset(&entry, 0, sizeof(entry));
+
+		error = file->vnode->ops->readdir(file->vnode, file->offset, &entry.d_ino, entry.d_name, sizeof(entry.d_name));
+		if(error != 0) break;
+
+		error = copyout((char*)buffer + done, &entry, sizeof(entry));
+		if(error != 0) break;
+
+		done += sizeof(entry);
+		file->offset++;
+	}
+
+	file_put(file);
+
+	if(done > 0) return (int)done;
+
+	if(error == ENOENT) return 0;
+
+	if(error != 0) return -error;
+
+	return -EINVAL;
 }

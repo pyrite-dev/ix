@@ -10,6 +10,7 @@ struct syscall_args;
 #define SYS_write 4
 #define SYS_open 5
 #define SYS_close 6
+#define SYS_getdents 7
 
 #include <sys/cdefs.h>
 #include <machine/regs.h>
