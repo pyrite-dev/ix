@@ -1,11 +1,13 @@
 #ifndef __PIT_H__
 #define __PIT_H__
 
+/* Registers */
 #define PIT_CH0 0
 #define PIT_CH1 1
 #define PIT_CH2 2
 #define PIT_MC 3
 
+/* Mode/Command */
 #define PIT_MC_CH (3 << 6)
 #define PIT_MC_CH0 (0 << 6)
 #define PIT_MC_CH1 (1 << 6)

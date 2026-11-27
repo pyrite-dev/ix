@@ -63,6 +63,7 @@ void thread_exit(void) {
 
 	while(1);
 }
+
 void thread_start(thread_t* thread) {
 	thread->entry(thread->arg);
 	thread_exit();

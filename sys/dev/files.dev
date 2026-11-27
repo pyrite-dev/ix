@@ -1,3 +1,4 @@
 file dev/pit.c	pit
 file dev/ns.c	ns
+file dev/vdp.c	vdp
 file dev/wd.c	wd
