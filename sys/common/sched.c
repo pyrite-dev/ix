@@ -2,7 +2,16 @@
 #include <sys/thread.h>
 #include <sys/interrupt.h>
 
+#include <stdlib.h>
 #include <string.h>
+
+static char	idle_stack[512];
+
+static void idle_entry(void* arg) {
+	/* TODO: Do not use busy loop here!!! */
+
+	while(1);
+}
 
 static thread_t* current_thread;
 static thread_t* ready_head;
@@ -101,20 +110,22 @@ static thread_t* ready_get(void) {
 	return thread;
 }
 
-void sched_init(thread_t* idle) {
+void sched_init(void) {
 	current_thread = NULL;
 	ready_head     = NULL;
 	ready_tail     = NULL;
 
-	idle_thread	= idle;
+	idle_thread = malloc(sizeof(*idle_thread));
+	thread_init(idle_thread, idle_stack, sizeof(idle_stack), idle_entry, NULL);
+
 	resched_pending = 0;
 	sched_started	= 0;
 
-	idle->state	 = THREAD_READY;
-	idle->quantum	 = SCHED_QUANTUM;
-	idle->preempt	 = 0;
-	idle->sched_prev = NULL;
-	idle->sched_next = NULL;
+	idle_thread->state	 = THREAD_READY;
+	idle_thread->quantum	 = SCHED_QUANTUM;
+	idle_thread->preempt	 = 0;
+	idle_thread->sched_prev = NULL;
+	idle_thread->sched_next = NULL;
 }
 
 void sched_start(void) {

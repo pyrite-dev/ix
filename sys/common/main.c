@@ -13,15 +13,6 @@
 #include <unistd.h>
 #include <dirent.h>
 
-static thread_t idle_thread;
-static char	idle_stack[256];
-
-static void idle_entry(void* arg) {
-	/* TODO: Do not use busy loop here!!! */
-
-	while(1);
-}
-
 static thread_t thread;
 static char	stack[4096];
 
@@ -56,14 +47,11 @@ void kmain(void) {
 	cons_init();
 	intr_init();
 	syscall_init();
+	sched_init();
 
 	kprintf("Marc/%s %s (%s): %s\r\n", os_machine, os_version, os_ident, os_date);
 	kprintf("Available memory = %ld KB\r\n", (long)kmem_avail / 1024);
 	kprintf("\r\n");
-
-	thread_init(&idle_thread, idle_stack, sizeof(idle_stack), idle_entry, NULL);
-
-	sched_init(&idle_thread);
 	device_init();
 
 	thread_init(&thread, stack, sizeof(stack), thread_main, NULL);

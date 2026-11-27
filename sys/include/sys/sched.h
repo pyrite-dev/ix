@@ -12,7 +12,7 @@ __BEGIN_EXTERN_C__
 #ifdef __KERNEL__
 extern int sched_started;
 
-void sched_init(thread_t* idle);
+void sched_init(void);
 void sched_add(thread_t* thread);
 void sched_remove(thread_t* thread);
 
