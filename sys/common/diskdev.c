@@ -170,8 +170,7 @@ void diskdev_partition_detach(dev_t dev) {
 	}
 }
 
-void diskdev_partition_reset(struct device* device) {
-	struct disk* disk = device->softc;
+void diskdev_partition_reset(struct disk* disk) {
 	struct disk* view;
 	struct disk* next;
 
@@ -182,10 +181,8 @@ void diskdev_partition_reset(struct device* device) {
 	}
 }
 
-void diskdev_detach(struct device* device) {
-	struct disk* disk = device->softc;
-
-	diskdev_partition_reset(device);
+void diskdev_detach(struct disk* disk) {
+	diskdev_partition_reset(disk);
 
 	bdev_unregister_device(disk->dev);
 }

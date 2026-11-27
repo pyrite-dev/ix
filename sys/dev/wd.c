@@ -163,7 +163,7 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 static void wd_detach(struct device* self) {
 	struct wd_softc* softc = self->softc;
 
-	diskdev_detach(self);
+	diskdev_detach(&softc->disk);
 
 	free(softc);
 }
