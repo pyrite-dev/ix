@@ -22,7 +22,7 @@ __BEGIN_EXTERN_C__
 #ifdef __KERNEL__
 void bdev_init(void);
 
-int  bdev_register(unsigned int major, struct bdevsw* bdevsw);
+int  bdev_register(unsigned int major, struct bdevsw* sw);
 void bdev_unregister(unsigned int major);
 
 struct bdevsw* bdev_lookup(unsigned int dev);
@@ -34,6 +34,7 @@ struct device* bdev_lookup_device(dev_t dev);
 int	       bdev_find_device(const char* name, dev_t* result);
 unsigned int   bdev_device_count(void);
 int	       bdev_device_at(unsigned int index, dev_t* dev, char* name, size_t name_size);
+char*	       bdev_device_name(dev_t dev);
 #endif
 
 __END_EXTERN_C__

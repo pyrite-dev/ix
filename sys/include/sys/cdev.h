@@ -23,7 +23,7 @@ __BEGIN_EXTERN_C__
 #ifdef __KERNEL__
 void cdev_init(void);
 
-int  cdev_register(unsigned int major, struct cdevsw* cdevsw);
+int  cdev_register(unsigned int major, struct cdevsw* sw);
 void cdev_unregister(unsigned int major);
 
 struct cdevsw* cdev_lookup(unsigned int dev);

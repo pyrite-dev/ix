@@ -17,6 +17,10 @@
 #ifndef __LITTLE_ENDIAN__
 #define __LITTLE_ENDIAN__
 #endif
+#else
+#ifndef __BIG_ENDIAN__
+#define __BIG_ENDIAN__
+#endif
 #endif
 
 #endif

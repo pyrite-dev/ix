@@ -10,7 +10,7 @@
 
 #include <dyntypes.h>
 
-struct cdevsw_map {
+struct sw_map {
 	unsigned int   key;
 	struct cdevsw* value;
 };
@@ -25,12 +25,12 @@ struct device_map {
 	struct device_entry* value;
 };
 
-static struct cdevsw_map* cdevsw_map;
+static struct sw_map*	  sw_map;
 static struct device_map* device_map;
 
 void cdev_init(void) {
-	cdevsw_map = NULL;
-	hmdefault(cdevsw_map, NULL);
+	sw_map = NULL;
+	hmdefault(sw_map, NULL);
 
 	device_map = NULL;
 	hmdefault(device_map, NULL);
@@ -38,20 +38,20 @@ void cdev_init(void) {
 	cdev_register(CDEV_MAJOR_TTY, &tty_cdevsw);
 }
 
-int cdev_register(unsigned int major, struct cdevsw* cdevsw) {
-	if(hmgeti(cdevsw_map, major) != -1) return -1;
+int cdev_register(unsigned int major, struct cdevsw* sw) {
+	if(hmgeti(sw_map, major) != -1) return -1;
 
-	hmput(cdevsw_map, major, cdevsw);
+	hmput(sw_map, major, sw);
 
 	return 0;
 }
 
 void cdev_unregister(unsigned int major) {
-	hmdel(cdevsw_map, major);
+	hmdel(sw_map, major);
 }
 
 struct cdevsw* cdev_lookup(unsigned int major) {
-	return hmget(cdevsw_map, major);
+	return hmget(sw_map, major);
 }
 
 dev_t cdev_register_device(dev_t dev, struct device* device, const char* name) {

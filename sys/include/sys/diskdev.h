@@ -16,6 +16,8 @@ dev_t diskdev_partition_init(struct disk* disk, const char* name, unsigned int s
 void  diskdev_partition_detach(dev_t dev);
 void  diskdev_partition_reset(struct device* device);
 void  diskdev_detach(struct device* device);
+
+int diskdev_try_mbr(dev_t dev);
 #endif
 
 __END_EXTERN_C__

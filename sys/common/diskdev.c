@@ -1,3 +1,4 @@
+#include <sys/diskdev.h>
 #include <sys/disk.h>
 #include <sys/bdev.h>
 #include <sys/buf.h>
@@ -87,6 +88,8 @@ dev_t diskdev_init(struct device* device, const char* name, const struct disk_op
 
 	if((disk->dev = bdev_register_device(DEVICE_MAKE(BDEV_MAJOR_DISK, DEVICE_MINOR_ANY), device, name)) == DEVICE_ERROR) return DEVICE_ERROR;
 
+	diskdev_try_mbr(disk->dev);
+
 	return disk->dev;
 }
 
@@ -111,10 +114,12 @@ dev_t diskdev_partition_init(struct disk* disk, const char* name, unsigned int s
 	mutex_init(&view->lock);
 
 	if(name == NULL) {
+		char* base = bdev_device_name(disk->dev);
+
 		for(alpha = 'a'; alpha <= 'z'; alpha++) {
 			dev_t d;
 
-			snprintf(devname, sizeof(devname), "%s%d%c", disk->device->name, disk->device->unit, alpha);
+			snprintf(devname, sizeof(devname), "%s%c", base, alpha);
 
 			if(bdev_find_device(devname, &d) == 0) continue;
 

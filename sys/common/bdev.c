@@ -10,7 +10,7 @@
 
 #include <dyntypes.h>
 
-struct bdevsw_map {
+struct sw_map {
 	unsigned int   key;
 	struct bdevsw* value;
 };
@@ -25,12 +25,12 @@ struct device_map {
 	struct device_entry* value;
 };
 
-static struct bdevsw_map* bdevsw_map;
+static struct sw_map*	  sw_map;
 static struct device_map* device_map;
 
 void bdev_init(void) {
-	bdevsw_map = NULL;
-	hmdefault(bdevsw_map, NULL);
+	sw_map = NULL;
+	hmdefault(sw_map, NULL);
 
 	device_map = NULL;
 	hmdefault(device_map, NULL);
@@ -38,20 +38,20 @@ void bdev_init(void) {
 	bdev_register(BDEV_MAJOR_DISK, &disk_bdevsw);
 }
 
-int bdev_register(unsigned int major, struct bdevsw* bdevsw) {
-	if(hmgeti(bdevsw_map, major) != -1) return -1;
+int bdev_register(unsigned int major, struct bdevsw* sw) {
+	if(hmgeti(sw_map, major) != -1) return -1;
 
-	hmput(bdevsw_map, major, bdevsw);
+	hmput(sw_map, major, sw);
 
 	return 0;
 }
 
 void bdev_unregister(unsigned int major) {
-	hmdel(bdevsw_map, major);
+	hmdel(sw_map, major);
 }
 
 struct bdevsw* bdev_lookup(unsigned int major) {
-	return hmget(bdevsw_map, major);
+	return hmget(sw_map, major);
 }
 
 dev_t bdev_register_device(dev_t dev, struct device* device, const char* name) {
@@ -130,4 +130,12 @@ int bdev_device_at(unsigned int index, dev_t* dev, char* name, size_t name_size)
 	*dev = device_map[index].key;
 
 	return 0;
+}
+
+char* bdev_device_name(dev_t dev) {
+	struct device_entry* entry = hmget(device_map, dev);
+
+	if(entry == NULL) return NULL;
+
+	return entry->name;
 }
