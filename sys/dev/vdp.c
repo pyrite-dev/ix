@@ -3,6 +3,7 @@
 #include <sys/bus.h>
 #include <sys/spinlock.h>
 #include <sys/thread.h>
+#include <sys/waiter.h>
 #include <sys/sched.h>
 #include <sys/tty.h>
 #include <sys/ttydev.h>
@@ -30,6 +31,9 @@ struct vdp_softc {
 
 	spinlock_t lock;
 
+	waiter_t   waiter;
+	spinlock_t waiter_lock;
+
 	thread_t      thread;
 	unsigned char stack[4096];
 
@@ -40,6 +44,15 @@ struct vdp_softc {
 static void vdp_addr(bus_space_t* space, unsigned short addr, int w) {
 	bus_space_write8(space, VDP_ADDR, (addr >> 0) & 0xff);
 	bus_space_write8(space, VDP_ADDR, (w ? 0x40 : 0) | ((addr >> 8) & 0xff));
+}
+
+static void vdp_start(struct tty* tty) {
+	struct vdp_softc* softc = tty->device->softc;
+	intr_flags_t	  flags;
+
+	flags = spinlock_lock_irqsave(&softc->waiter_lock);
+	waiter_wakeup_one(&softc->waiter);
+	spinlock_unlock_irqrestore(&softc->waiter_lock, flags);
 }
 
 static void vdp_putc(struct tty* tty, int c) {
@@ -83,7 +96,7 @@ static void vdp_putc(struct tty* tty, int c) {
 }
 
 static const struct tty_ops vdp_tty_ops = {
-    NULL,
+    vdp_start,
     NULL,
     NULL,
     vdp_putc};
@@ -98,7 +111,9 @@ static void vdp_thread(void* arg) {
 	int		  i;
 
 	while(1) {
-		if(!tty_output_getc(&softc->tty, &data)) continue;
+		intr_flags_t flags = spinlock_lock_irqsave(&softc->waiter_lock);
+		while(!tty_output_getc(&softc->tty, &data)) waiter_sleep(&softc->waiter, &softc->waiter_lock, flags);
+		spinlock_unlock_irqrestore(&softc->waiter_lock, flags);
 
 		vdp_putc(&softc->tty, data);
 	}
@@ -117,6 +132,9 @@ static int vdp_attach(struct device* parent, struct device* self, struct device_
 	bus_space_init(&softc->space, args->locators);
 
 	spinlock_init(&softc->lock);
+
+	waiter_init(&softc->waiter);
+	spinlock_init(&softc->waiter_lock);
 
 	vdp_addr(&softc->space, 0, 1);
 	bus_space_write8(&softc->space, VDP_DATA, 0xae);
