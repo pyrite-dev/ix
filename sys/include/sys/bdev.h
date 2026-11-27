@@ -27,7 +27,7 @@ void bdev_unregister(unsigned int major);
 
 struct bdevsw* bdev_lookup(unsigned int dev);
 
-dev_t bdev_register_device(dev_t dev, struct device* device);
+dev_t bdev_register_device(dev_t dev, struct device* device, const char* name);
 void  bdev_unregister_device(dev_t dev);
 
 struct device* bdev_lookup_device(dev_t dev);

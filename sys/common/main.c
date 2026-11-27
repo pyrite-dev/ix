@@ -27,8 +27,10 @@ static char	stack[4096];
 
 static void thread_main(void* arg) {
 	const char* text = "Hello, Console!\n";
-	int	    fd	 = open("/dev/ns0", O_RDWR);
+	int	    fd	 = open("/dev/tty0", O_RDWR);
 	DIR*	    dir	 = opendir("/dev");
+
+	write(fd, text, strlen(text));
 
 	if(dir != NULL) {
 		struct dirent* d;
@@ -38,8 +40,6 @@ static void thread_main(void* arg) {
 			write(fd, "\n", 1);
 		}
 	}
-
-	write(fd, text, strlen(text));
 
 	while(1) {
 		char c;

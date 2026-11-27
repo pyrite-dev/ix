@@ -152,7 +152,7 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 
 	strcat(self->desc, ">");
 
-	if(diskdev_init(self, &wd_disk_ops, nsectors) == DEVICE_ERROR) {
+	if(diskdev_init(self, NULL, &wd_disk_ops, nsectors) == DEVICE_ERROR) {
 		free(softc);
 		return -1;
 	}

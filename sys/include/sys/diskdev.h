@@ -11,7 +11,7 @@ __BEGIN_EXTERN_C__
 #ifdef __KERNEL__
 extern struct bdevsw disk_bdevsw;
 
-dev_t diskdev_init(struct device* device, const struct disk_ops* ops, unsigned int nsectors);
+dev_t diskdev_init(struct device* device, const char* name, const struct disk_ops* ops, unsigned int nsectors);
 void  diskdev_detach(struct device* device);
 #endif
 

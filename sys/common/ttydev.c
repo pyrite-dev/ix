@@ -67,7 +67,7 @@ struct cdevsw tty_cdevsw = {
     ttydev_write,
     ttydev_ioctl};
 
-dev_t ttydev_init(struct device* device, const struct tty_ops* ops, speed_t baud) {
+dev_t ttydev_init(struct device* device, const char* name, const struct tty_ops* ops, speed_t baud) {
 	struct tty* tty = device->softc;
 	int	    st;
 
@@ -79,7 +79,7 @@ dev_t ttydev_init(struct device* device, const struct tty_ops* ops, speed_t baud
 	tty->termios.c_ospeed = baud;
 
 	if((st = tty_param(tty, &tty->termios)) != 0) return st;
-	if((tty->dev = cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device)) == DEVICE_ERROR) return DEVICE_ERROR;
+	if((tty->dev = cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device, name == NULL ? "tty%d" : name)) == DEVICE_ERROR) return DEVICE_ERROR;
 
 	return tty->dev;
 }

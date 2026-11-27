@@ -235,7 +235,7 @@ static int ns_attach(struct device* parent, struct device* self, struct device_a
 
 	bus_space_write8(&softc->space, NS_MCR, softc->mcr);
 
-	if(ttydev_init(self, &ns_tty_ops, baud) == DEVICE_ERROR) {
+	if(ttydev_init(self, NULL, &ns_tty_ops, baud) == DEVICE_ERROR) {
 		free(softc);
 		return -1;
 	}

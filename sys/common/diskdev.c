@@ -63,7 +63,7 @@ struct bdevsw disk_bdevsw = {
     diskdev_strategy,
     diskdev_ioctl};
 
-dev_t diskdev_init(struct device* device, const struct disk_ops* ops, unsigned int nsectors) {
+dev_t diskdev_init(struct device* device, const char* name, const struct disk_ops* ops, unsigned int nsectors) {
 	struct disk* disk = device->softc;
 
 	disk_init(disk, ops);
@@ -73,7 +73,7 @@ dev_t diskdev_init(struct device* device, const struct disk_ops* ops, unsigned i
 
 	mutex_init(&disk->lock);
 
-	if((disk->dev = bdev_register_device(DEVICE_MAKE(BDEV_MAJOR_DISK, DEVICE_MINOR_ANY), device)) == DEVICE_ERROR) return DEVICE_ERROR;
+	if((disk->dev = bdev_register_device(DEVICE_MAKE(BDEV_MAJOR_DISK, DEVICE_MINOR_ANY), device, name)) == DEVICE_ERROR) return DEVICE_ERROR;
 
 	return disk->dev;
 }

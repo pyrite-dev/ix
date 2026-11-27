@@ -5,6 +5,7 @@
 #include <sys/diskdev.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <dyntypes.h>
@@ -14,9 +15,14 @@ struct bdevsw_map {
 	struct bdevsw* value;
 };
 
+struct device_entry {
+	struct device* device;
+	char	       name[32];
+};
+
 struct device_map {
-	dev_t	       key;
-	struct device* value;
+	dev_t		     key;
+	struct device_entry* value;
 };
 
 static struct bdevsw_map* bdevsw_map;
@@ -48,7 +54,9 @@ struct bdevsw* bdev_lookup(unsigned int major) {
 	return hmget(bdevsw_map, major);
 }
 
-dev_t bdev_register_device(dev_t dev, struct device* device) {
+dev_t bdev_register_device(dev_t dev, struct device* device, const char* name) {
+	struct device_entry* entry;
+
 	if(DEVICE_MINOR(dev) == DEVICE_MINOR_ANY) {
 		unsigned int minor = 0;
 
@@ -60,29 +68,48 @@ dev_t bdev_register_device(dev_t dev, struct device* device) {
 		if(hmgeti(device_map, dev) != -1) return DEVICE_ERROR;
 	}
 
-	hmput(device_map, dev, device);
+	entry = malloc(sizeof(*entry));
+	if(entry == NULL) return DEVICE_ERROR;
+
+	entry->device = device;
+
+	if(name == NULL) {
+		snprintf(entry->name, sizeof(entry->name), "%s%u", device->name, device->unit);
+	} else {
+		if(strlen(name) == 0 || strlen(name) >= sizeof(entry->name)) {
+			free(entry);
+			return DEVICE_ERROR;
+		}
+
+		snprintf(entry->name, sizeof(entry->name), name, DEVICE_MINOR(dev));
+	}
+
+	hmput(device_map, dev, entry);
 
 	return dev;
 }
 
 void bdev_unregister_device(dev_t dev) {
+	struct device_entry* entry = hmget(device_map, dev);
+
+	if(entry != NULL) free(entry);
+
 	hmdel(device_map, dev);
 }
 
 struct device* bdev_lookup_device(dev_t dev) {
-	return hmget(device_map, dev);
+	struct device_entry* entry = hmget(device_map, dev);
+
+	if(entry == NULL) return NULL;
+
+	return entry->device;
 }
 
 int bdev_find_device(const char* name, dev_t* result) {
-	char	     buf[32];
 	unsigned int i;
 
 	for(i = 0; i < hmlen(device_map); i++) {
-		struct device* device = device_map[i].value;
-
-		snprintf(buf, sizeof(buf), "%s%u", device->name, device->unit);
-
-		if(strcmp(buf, name) == 0) {
+		if(strcmp(device_map[i].value->name, name) == 0) {
 			*result = device_map[i].key;
 			return 0;
 		}
@@ -96,13 +123,9 @@ unsigned int bdev_device_count(void) {
 }
 
 int bdev_device_at(unsigned int index, dev_t* dev, char* name, size_t name_size) {
-	struct device* device;
-
 	if(index >= hmlen(device_map)) return -1;
 
-	device = device_map[index].value;
-
-	snprintf(name, name_size, "%s%u", device->name, device->unit);
+	snprintf(name, name_size, "%s", device_map[index].value->name);
 
 	*dev = device_map[index].key;
 
