@@ -27,10 +27,11 @@ static void thread_main(void* arg) {
 	write(fd, text, strlen(text));
 
 	read(d, buf, 512);
-	for(i = 0; i < 512; i++){
+	for(i = 0; i < 512; i += 4){
 		if(i > 0 && (i % 16) == 0) write(fd, "\n", 1);
-		dprintf(fd, "%02x ", (unsigned int)buf[i]);
+		dprintf(fd, "%02x %02x %02x %02x ", (unsigned int)buf[i + 0], (unsigned int)buf[i + 1], (unsigned int)buf[i + 2], (unsigned int)buf[i + 3], (unsigned int)buf[i + 4]);
 	}
+	write(fd, "\n", 1);
 	close(d);
 
 	if(dir != NULL) {
