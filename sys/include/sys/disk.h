@@ -22,6 +22,8 @@ struct disk {
 
 	struct disk* parent;
 	unsigned int start;
+	struct disk* partitions;
+	struct disk* next;
 
 	unsigned int nsectors;
 	mutex_t	     lock;

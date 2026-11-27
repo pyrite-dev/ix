@@ -461,6 +461,13 @@ int sys_write(int fd, const void* buffer, size_t count) {
 int sys_lseek(int fd, off_t offset, int whence) {
 	struct file* file = file_get(fd);
 
+	if(file == NULL) return -EBADF;
+
+	if(file->vnode != NULL && file->vnode->type == VNODE_DIR) {
+		file_put(file);
+		return -EISDIR;
+	}
+
 	switch(whence) {
 	case SEEK_SET:
 	{
@@ -474,6 +481,7 @@ int sys_lseek(int fd, off_t offset, int whence) {
 	}
 	case SEEK_END:
 	{
+		/* TODO */
 		file->offset = offset;
 		break;
 	}

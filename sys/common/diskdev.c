@@ -6,26 +6,23 @@
 
 #include <stdlib.h>
 
-#include <dyntypes.h>
-
-struct view_map {
-	dev_t	     key;
-	struct disk* value;
-};
-
-static struct view_map* view_map;
-
 static struct disk* diskdev_lookup(dev_t dev) {
+	struct disk*   disk;
 	struct disk*   view;
 	struct device* device;
-
-	view = hmget(view_map, dev);
-	if(view != NULL) return view;
 
 	device = bdev_lookup_device(dev);
 	if(device == NULL) return NULL;
 
-	return (struct disk*)device->softc;
+	disk = (struct disk*)device->softc;
+
+	if(disk->dev == dev) return disk;
+
+	for(view = disk->partitions; view != NULL; view = view->next) {
+		if(view->dev == dev) return view;
+	}
+
+	return NULL;
 }
 
 static int diskdev_open(dev_t dev, int flags, int mode) {
@@ -137,35 +134,46 @@ dev_t diskdev_partition_init(struct disk* disk, const char* name, unsigned int s
 		return DEVICE_ERROR;
 	}
 
-	view->dev = dev;
-
-	hmput(view_map, dev, view);
+	view->dev	 = dev;
+	view->next	 = disk->partitions;
+	disk->partitions = view;
 
 	return dev;
 }
 
 void diskdev_partition_detach(dev_t dev) {
-	struct disk* view;
+	struct device* device;
+	struct disk*   disk;
+	struct disk**  link;
+	struct disk*   view;
 
-	view = hmget(view_map, dev);
-	if(view == NULL) return;
+	device = bdev_lookup_device(dev);
+	if(device == NULL) return;
 
-	hmdel(view_map, dev);
+	disk = (struct disk*)device->softc;
 
-	bdev_unregister_device(dev);
+	for(link = &disk->partitions; (view = *link) != NULL; link = &view->next) {
+		if(view->dev == dev) {
+			*link = view->next;
 
-	free(view);
+			bdev_unregister_device(dev);
+
+			free(view);
+
+			return;
+		}
+	}
 }
 
 void diskdev_partition_reset(struct device* device) {
 	struct disk* disk = device->softc;
-	int	     i;
+	struct disk* view;
+	struct disk* next;
 
-	for(i = 0; i < hmlen(view_map); i++) {
-		if(view_map[i].value->device == device) {
-			diskdev_partition_detach(view_map[i].key);
-			i--;
-		}
+	for(view = disk->partitions; view != NULL; view = next) {
+		next = view->next;
+
+		diskdev_partition_detach(view->dev);
 	}
 }
 
