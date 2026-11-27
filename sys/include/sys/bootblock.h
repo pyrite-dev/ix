@@ -12,7 +12,7 @@ struct mbr_sector;
 struct mbr_chs {
 	unsigned char head;
 	unsigned char cyl_sector;
-	unsigned char sector;
+	unsigned char cyl;
 } __packed;
 
 struct mbr_partition {

@@ -1,7 +1,6 @@
 #include <sys/diskdev.h>
 #include <sys/bootblock.h>
 #include <sys/device.h>
-#include <sys/diskdev.h>
 #include <sys/disk.h>
 #include <sys/bdev.h>
 #include <sys/buf.h>
