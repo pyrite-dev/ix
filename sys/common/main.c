@@ -20,8 +20,18 @@ static void thread_main(void* arg) {
 	const char* text = "Hello, Console!\n";
 	int	    fd	 = open("/dev/tty0", O_RDWR);
 	DIR*	    dir	 = opendir("/dev");
+	int d = open("/dev/wd0", O_RDONLY);
+	unsigned char buf[512];
+	int i;
 
 	write(fd, text, strlen(text));
+
+	read(d, buf, 512);
+	for(i = 0; i < 512; i++){
+		if(i > 0 && (i % 16) == 0) write(fd, "\n", 1);
+		dprintf(fd, "%02x ", (unsigned int)buf[i]);
+	}
+	close(d);
 
 	if(dir != NULL) {
 		struct dirent* d;
@@ -54,9 +64,6 @@ void kmain(void) {
 	kprintf("\r\n");
 	device_init();
 
-	thread_init(&thread, stack, sizeof(stack), thread_main, NULL);
-	sched_add(&thread);
-
 	flags = _intr_save();
 	kmem_use_spinlock();
 	device_start();
@@ -64,6 +71,9 @@ void kmain(void) {
 
 	vfs_init();
 	file_init();
+
+	thread_init(&thread, stack, sizeof(stack), thread_main, NULL);
+	sched_add(&thread);
 
 	sched_start();
 }
