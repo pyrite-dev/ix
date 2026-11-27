@@ -27,13 +27,9 @@ static void flush(struct vdprintf_state* state){
 }
 
 static void helper(struct vdprintf_state* state, char c) {
-	int r;
-
 	state->buf[state->len++] = c;
 
 	if(state->len == sizeof(state->buf)) flush(state);
-
-	return 0;
 }
 
 #define STATIC
