@@ -12,7 +12,7 @@ __BEGIN_EXTERN_C__
 #ifdef __KERNEL__
 extern struct cdevsw tty_cdevsw;
 
-dev_t ttydev_init(struct device* device, const char* name, const struct tty_ops* ops, speed_t baud);
+dev_t ttydev_init(struct device* device, struct tty* tty, const char* name, const struct tty_ops* ops, speed_t baud);
 void  ttydev_detach(struct device* device);
 #endif
 

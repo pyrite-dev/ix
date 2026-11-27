@@ -47,6 +47,7 @@ struct tty_ops {
 struct tty {
 	struct device* device;
 	dev_t	       dev;
+	struct tty*    next;
 
 	struct tty_queue	rawq;
 	struct tty_queue	canq;

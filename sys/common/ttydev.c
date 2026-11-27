@@ -8,11 +8,16 @@
 
 static struct tty* ttydev_lookup(dev_t dev) {
 	struct device* device;
+	struct tty*    tty;
 
 	device = cdev_lookup_device(dev);
 	if(device == NULL) return NULL;
 
-	return (struct tty*)device->softc;
+	for(tty = device->softc; tty != NULL; tty = tty->next) {
+		if(tty->dev == dev) return tty;
+	}
+
+	return NULL;
 }
 
 static int ttydev_open(dev_t dev, int flags, int mode) {
@@ -67,8 +72,8 @@ struct cdevsw tty_cdevsw = {
     ttydev_write,
     ttydev_ioctl};
 
-dev_t ttydev_init(struct device* device, const char* name, const struct tty_ops* ops, speed_t baud) {
-	struct tty* tty = device->softc;
+dev_t ttydev_init(struct device* device, struct tty* tty, const char* name, const struct tty_ops* ops, speed_t baud) {
+	struct tty* anchor = device->softc;
 	int	    st;
 
 	tty_init(tty, ops);
@@ -81,11 +86,18 @@ dev_t ttydev_init(struct device* device, const char* name, const struct tty_ops*
 	if((st = tty_param(tty, &tty->termios)) != 0) return st;
 	if((tty->dev = cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device, name == NULL ? "tty%d" : name)) == DEVICE_ERROR) return DEVICE_ERROR;
 
+	if(tty != anchor) {
+		tty->next    = anchor->next;
+		anchor->next = tty;
+	}
+
 	return tty->dev;
 }
 
 void ttydev_detach(struct device* device) {
-	struct tty* tty = device->softc;
+	struct tty* tty;
 
-	cdev_unregister_device(tty->dev);
+	for(tty = (struct tty*)device->softc; tty != NULL; tty = tty->next) {
+		cdev_unregister_device(tty->dev);
+	}
 }
