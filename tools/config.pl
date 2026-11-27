@@ -70,8 +70,10 @@ sub parse_config {
 		}
 
 		if(($tokens[0] eq "options") or ($tokens[0] eq "makeoptions")){
-			my $key = substr($tokens[1], 0, -1);
+			my $key = $tokens[1];
 			my $value = $tokens[2];
+
+			$key =~ s/=$//;
 	
 			if($tokens[0] eq "options"){
 				$options{$key} = $value;
@@ -156,6 +158,13 @@ if(!grep /^mainbus$/, @devices){
 open(MKCFG, ">", "compile/Makefile.config");
 foreach my $makeoption (sort { $a cmp $b } keys(%makeoptions)){
 	print(MKCFG "$makeoption = $makeoptions{$makeoption}\n");
+}
+foreach my $option (sort { $a cmp $b } keys(%options)){
+	print(MKCFG "KCFLAGS += -D$option");
+	if($options{$option}){
+		print(MKCFG "=$options{$option}");
+	}
+	print(MKCFG "\n");
 }
 close(MKCFG);
 
