@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char	idle_stack[512];
+static char idle_stack[512];
 
 static void idle_entry(void* arg) {
 	/* TODO: Do not use busy loop here!!! */
@@ -121,9 +121,9 @@ void sched_init(void) {
 	resched_pending = 0;
 	sched_started	= 0;
 
-	idle_thread->state	 = THREAD_READY;
-	idle_thread->quantum	 = SCHED_QUANTUM;
-	idle_thread->preempt	 = 0;
+	idle_thread->state	= THREAD_READY;
+	idle_thread->quantum	= SCHED_QUANTUM;
+	idle_thread->preempt	= 0;
 	idle_thread->sched_prev = NULL;
 	idle_thread->sched_next = NULL;
 }

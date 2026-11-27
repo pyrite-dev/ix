@@ -20,6 +20,7 @@ int disk_close(struct disk* disk, int flags, int mode) {
 }
 
 void disk_strategy(struct disk* disk, struct buf* buf) {
+	struct disk*   phys = disk->parent != NULL ? disk->parent : disk;
 	unsigned int   nsec;
 	unsigned int   i;
 	unsigned char* data;
@@ -28,18 +29,18 @@ void disk_strategy(struct disk* disk, struct buf* buf) {
 	buf->resid = buf->bcount;
 	buf->flags &= ~(BUF_DONE | BUF_ERROR);
 
-	mutex_lock(&disk->lock);
+	mutex_lock(&phys->lock);
 
 	if(buf->bcount == 0) {
 		buf->flags |= BUF_DONE;
-		mutex_unlock(&disk->lock);
+		mutex_unlock(&phys->lock);
 		return;
 	}
 
 	if(buf->bcount % 512 != 0 || buf->blkno >= disk->nsectors || buf->bcount / 512 > disk->nsectors - buf->blkno) {
 		buf->error = EINVAL;
 		buf->flags |= BUF_ERROR | BUF_DONE;
-		mutex_unlock(&disk->lock);
+		mutex_unlock(&phys->lock);
 		return;
 	}
 
@@ -47,7 +48,7 @@ void disk_strategy(struct disk* disk, struct buf* buf) {
 	data = buf->data;
 
 	for(i = 0; i < nsec; i++) {
-		if(disk->ops->transfer(disk, buf->blkno + i, data + i * 512, buf->flags & BUF_READ) != 0) {
+		if(phys->ops->transfer(phys, disk->start + buf->blkno + i, data + i * 512, buf->flags & BUF_READ) != 0) {
 			buf->error = EIO;
 			buf->flags |= BUF_ERROR;
 			break;
@@ -58,7 +59,7 @@ void disk_strategy(struct disk* disk, struct buf* buf) {
 
 	buf->flags |= BUF_DONE;
 
-	mutex_unlock(&disk->lock);
+	mutex_unlock(&phys->lock);
 }
 
 int disk_ioctl(struct disk* disk, unsigned long cmd, void* data, int flags) {

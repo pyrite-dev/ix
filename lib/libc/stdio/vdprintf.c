@@ -3,19 +3,19 @@
 #include <unistd.h>
 
 struct vdprintf_state {
-	int fd;
+	int  fd;
 	char buf[128];
-	int len;
-	int err;
+	int  len;
+	int  err;
 };
 
-static void flush(struct vdprintf_state* state){
+static void flush(struct vdprintf_state* state) {
 	int done = 0;
 
-	while(!state->err && done < state->len){
+	while(!state->err && done < state->len) {
 		int r = write(state->fd, state->buf + done, state->len - done);
 
-		if(r <= 0){
+		if(r <= 0) {
 			state->err = 1;
 			break;
 		}
@@ -38,11 +38,11 @@ static void helper(struct vdprintf_state* state, char c) {
 #define ARG1TYPE struct vdprintf_state*
 #include "_vprintf.h"
 
-int vdprintf(int fd, const char* format, va_list ap){
+int vdprintf(int fd, const char* format, va_list ap) {
 	struct vdprintf_state state;
-	int		       r;
+	int		      r;
 
-	state.fd = fd;
+	state.fd  = fd;
 	state.len = 0;
 	state.err = 0;
 

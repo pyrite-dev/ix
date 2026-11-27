@@ -20,7 +20,10 @@ struct disk {
 
 	const struct disk_ops* ops;
 
-	unsigned int nsectors; /* capacity in 512-byte sectors */
+	struct disk* parent;
+	unsigned int start;
+
+	unsigned int nsectors;
 	mutex_t	     lock;
 };
 

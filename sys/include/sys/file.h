@@ -19,6 +19,7 @@ int sys_open(const char* path, int flags);
 int sys_close(int fd);
 int sys_read(int fd, void* buffer, size_t count);
 int sys_write(int fd, const void* buffer, size_t count);
+int sys_lseek(int fd, off_t offset, int whence);
 int sys_getdents(int fd, void* buffer, size_t count);
 #endif
 

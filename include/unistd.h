@@ -3,10 +3,9 @@
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
+#include <sys/unistd.h>
 
 #include <stddef.h>
-
-#define _POSIX_VDISABLE 0
 
 __BEGIN_EXTERN_C__
 
@@ -16,6 +15,7 @@ int close(int fd);
 
 ssize_t read(int fd, void* buf, size_t count);
 ssize_t write(int fd, const void* buf, size_t count);
+off_t	lseek(int fd, off_t offset, int whence);
 
 __END_EXTERN_C__
 

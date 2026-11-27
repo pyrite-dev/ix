@@ -17,22 +17,25 @@ static thread_t thread;
 static char	stack[4096];
 
 static void thread_main(void* arg) {
-	const char* text = "Hello, Console!\n";
-	int	    fd	 = open("/dev/tty0", O_RDWR);
-	DIR*	    dir	 = opendir("/dev");
-	int d = open("/dev/wd0", O_RDONLY);
+	const char*   text = "Hello, Console!\n";
+	int	      fd   = open("/dev/tty0", O_RDWR);
+	DIR*	      dir  = opendir("/dev");
+	int	      d	   = open("/dev/wd0a", O_RDONLY);
 	unsigned char buf[512];
-	int i;
+	int	      i;
 
 	write(fd, text, strlen(text));
 
-	read(d, buf, 512);
-	for(i = 0; i < 512; i += 4){
-		if(i > 0 && (i % 16) == 0) write(fd, "\n", 1);
-		dprintf(fd, "%02x %02x %02x %02x ", (unsigned int)buf[i + 0], (unsigned int)buf[i + 1], (unsigned int)buf[i + 2], (unsigned int)buf[i + 3]);
+	if(d >= 0) {
+		lseek(d, 512, SEEK_SET);
+		read(d, buf, 512);
+		for(i = 0; i < 64; i += 4) {
+			if(i > 0 && (i % 16) == 0) write(fd, "\n", 1);
+			dprintf(fd, "%02x %02x %02x %02x ", (unsigned int)buf[i + 0], (unsigned int)buf[i + 1], (unsigned int)buf[i + 2], (unsigned int)buf[i + 3]);
+		}
+		write(fd, "\n", 1);
+		close(d);
 	}
-	write(fd, "\n", 1);
-	close(d);
 
 	if(dir != NULL) {
 		struct dirent* d;

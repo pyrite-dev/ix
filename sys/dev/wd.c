@@ -157,6 +157,8 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 		return -1;
 	}
 
+	diskdev_partition_init(&softc->disk, NULL, 2048, 129024);
+
 	return 0;
 }
 

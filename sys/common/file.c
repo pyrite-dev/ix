@@ -11,6 +11,7 @@
 #include <sys/uio.h>
 #include <sys/vfs.h>
 #include <sys/dirent.h>
+#include <sys/unistd.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -455,6 +456,32 @@ int sys_write(int fd, const void* buffer, size_t count) {
 	file_put(file);
 
 	return result;
+}
+
+int sys_lseek(int fd, off_t offset, int whence) {
+	struct file* file = file_get(fd);
+
+	switch(whence) {
+	case SEEK_SET:
+	{
+		file->offset = offset;
+		break;
+	}
+	case SEEK_CUR:
+	{
+		file->offset += offset;
+		break;
+	}
+	case SEEK_END:
+	{
+		file->offset = offset;
+		break;
+	}
+	}
+
+	file_put(file);
+
+	return file->offset;
 }
 
 int sys_getdents(int fd, void* buffer, size_t count) {

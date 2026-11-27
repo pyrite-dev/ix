@@ -1,13 +1,13 @@
 #include <string.h>
 
-char *strstr(const char *haystack, const char *needle){
+char* strstr(const char* haystack, const char* needle) {
 	const char* p1 = haystack;
 	const char* p2;
 
-	while(*haystack){
+	while(*haystack) {
 		p2 = needle;
 
-		while(*p2 && (*p1 == *p2)){
+		while(*p2 && (*p1 == *p2)) {
 			++p1;
 			++p2;
 		}
