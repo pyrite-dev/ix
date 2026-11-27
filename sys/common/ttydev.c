@@ -3,8 +3,16 @@
 #include <sys/termios.h>
 #include <sys/errno.h>
 #include <sys/cdev.h>
+#include <sys/cons.h>
+#include <sys/msgbuf.h>
 #include <sys/device.h>
 #include <sys/major.h>
+
+static struct tty* ttydev_cons_tty;
+
+static void ttydev_cons_putc(int c) {
+	ttydev_cons_tty->ops->putc(ttydev_cons_tty, c);
+}
 
 static struct tty* ttydev_lookup(dev_t dev) {
 	struct device* device;
@@ -85,6 +93,16 @@ dev_t ttydev_init(struct device* device, struct tty* tty, const char* name, cons
 
 	if((st = tty_param(tty, &tty->termios)) != 0) return st;
 	if((tty->dev = cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_TTY, DEVICE_MINOR_ANY), device, name == NULL ? "tty%d" : name)) == DEVICE_ERROR) return DEVICE_ERROR;
+
+	if(DEVICE_MINOR(tty->dev) == 0 && ops->putc != NULL) {
+		unsigned int pos = 0;
+		int	     c;
+
+		ttydev_cons_tty = tty;
+		cons_output_register(ttydev_cons_putc);
+
+		while((c = msgbuf_peek(&pos)) >= 0) cons_putc(c);
+	}
 
 	if(tty != anchor) {
 		tty->next    = anchor->next;

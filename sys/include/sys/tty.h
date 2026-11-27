@@ -42,6 +42,11 @@ struct tty_ops {
 	void (*start)(struct tty* tty);
 	int (*param)(struct tty* tty, const struct termios* termios);
 	void (*stop)(struct tty* tty, int flags);
+	void (*putc)(struct tty* tty, int c);
+	/* ^^^ MAY be NULL. Called in any context including interrupt handlers and panic.
+	   This means, it MUST NOT sleep (no mutex, waiter, or tty calls).
+	   It also MUST NOT call kprintf, and MAY only use spinlocks (only ones that would
+	   not cause deadlock). */
 };
 
 struct tty {

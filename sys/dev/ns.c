@@ -92,10 +92,18 @@ static int ns_param(struct tty* tty, const struct termios* termios) {
 	return 0;
 }
 
+static void ns_putc(struct tty* tty, int c) {
+	struct ns_softc* softc = tty->device->softc;
+
+	while(!(bus_space_read8(&softc->space, NS_LSR) & NS_LS_THRE));
+	bus_space_write8(&softc->space, NS_DR, c);
+}
+
 static const struct tty_ops ns_tty_ops = {
     ns_start,
     ns_param,
-    NULL};
+    NULL,
+    ns_putc};
 
 static void ns_rx_intr(struct ns_softc* softc) {
 	while(1) {
