@@ -5,6 +5,7 @@
 #include <sys/major.h>
 #include <sys/uio.h>
 #include <sys/errno.h>
+#include <sys/ioctl.h>
 #include <sys/mutex.h>
 
 #include "scsi.h"
@@ -121,8 +122,24 @@ static int cd_write(dev_t dev, struct uio* uio, int flags) {
 	return EROFS;
 }
 
-static int cd_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
+static int cd_ioctl_impl(struct device* device, unsigned long cmd, void* data) {
+	struct cd_softc* softc;
+
+	if(device == NULL) return ENXIO;
+
+	softc = device->softc;
+
+	switch(cmd) {
+	case DIOCGSIZE:
+		*(off_t*)data = (off_t)softc->nblocks * CD_BLOCK_SIZE;
+		return 0;
+	}
+
 	return ENOTTY;
+}
+
+static int cd_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
+	return cd_ioctl_impl(cdev_lookup_device(dev), cmd, data);
 }
 
 struct cdevsw cd_cdevsw = {
@@ -208,7 +225,7 @@ static void cd_bdev_strategy(struct buf* buf) {
 }
 
 static int cd_bdev_ioctl(dev_t dev, unsigned long cmd, void* data, int flags) {
-	return ENOTTY;
+	return cd_ioctl_impl(bdev_lookup_device(dev), cmd, data);
 }
 
 static struct bdevsw cd_bdevsw = {

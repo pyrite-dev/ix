@@ -5,6 +5,7 @@
 #include <sys/device.h>
 #include <sys/errno.h>
 #include <sys/fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/major.h>
 #include <sys/thread.h>
 #include <sys/uaccess.h>
@@ -362,7 +363,8 @@ int sys_read(int fd, void* buffer, size_t count) {
 			return -error;
 		}
 
-		result = (int)(count - uio.uio_resid);
+		file->offset = uio.uio_offset;
+		result	     = (int)(count - uio.uio_resid);
 	}
 
 	file_put(file);
@@ -450,7 +452,8 @@ int sys_write(int fd, const void* buffer, size_t count) {
 			return -error;
 		}
 
-		result = (int)(count - uio.uio_resid);
+		file->offset = uio.uio_offset;
+		result	     = (int)(count - uio.uio_resid);
 	}
 
 	file_put(file);
@@ -458,8 +461,26 @@ int sys_write(int fd, const void* buffer, size_t count) {
 	return result;
 }
 
+static int file_device_size(struct file* file, off_t* size) {
+	if(file->is_block) {
+		struct bdevsw* sw = bdev_lookup(DEVICE_MAJOR(file->dev));
+
+		if(sw == NULL || sw->ioctl == NULL) return ENOTTY;
+
+		return sw->ioctl(file->dev, DIOCGSIZE, size, file->flags);
+	} else {
+		struct cdevsw* sw = cdev_lookup(DEVICE_MAJOR(file->dev));
+
+		if(sw == NULL || sw->ioctl == NULL) return ENOTTY;
+
+		return sw->ioctl(file->dev, DIOCGSIZE, size, file->flags);
+	}
+}
+
 int sys_lseek(int fd, off_t offset, int whence) {
 	struct file* file = file_get(fd);
+	off_t	     size;
+	off_t	     new_offset;
 
 	if(file == NULL) return -EBADF;
 
@@ -468,28 +489,36 @@ int sys_lseek(int fd, off_t offset, int whence) {
 		return -EISDIR;
 	}
 
+	if(file_device_size(file, &size) != 0) {
+		file_put(file);
+		return -ESPIPE;
+	}
+
 	switch(whence) {
 	case SEEK_SET:
-	{
-		file->offset = offset;
+		new_offset = offset;
 		break;
-	}
 	case SEEK_CUR:
-	{
-		file->offset += offset;
+		new_offset = file->offset + offset;
 		break;
-	}
 	case SEEK_END:
-	{
-		/* TODO */
-		file->offset = offset;
+		new_offset = size + offset;
 		break;
+	default:
+		file_put(file);
+		return -EINVAL;
 	}
+
+	if(new_offset < 0) {
+		file_put(file);
+		return -EINVAL;
 	}
+
+	file->offset = new_offset;
 
 	file_put(file);
 
-	return file->offset;
+	return new_offset;
 }
 
 int sys_getdents(int fd, void* buffer, size_t count) {

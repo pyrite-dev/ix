@@ -1,6 +1,7 @@
 #include <sys/disk.h>
 #include <sys/buf.h>
 #include <sys/errno.h>
+#include <sys/ioctl.h>
 #include <sys/mutex.h>
 
 #include <string.h>
@@ -63,5 +64,11 @@ void disk_strategy(struct disk* disk, struct buf* buf) {
 }
 
 int disk_ioctl(struct disk* disk, unsigned long cmd, void* data, int flags) {
-	return 0;
+	switch(cmd) {
+	case DIOCGSIZE:
+		*(off_t*)data = (off_t)disk->nsectors * 512;
+		return 0;
+	}
+
+	return ENOTTY;
 }
