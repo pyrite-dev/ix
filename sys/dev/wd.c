@@ -16,6 +16,8 @@ struct wd_softc {
 	struct disk disk;
 
 	struct wdc_softc* wdc;
+
+	int drive;
 };
 
 static int wait_drq(bus_space_t* space) {
@@ -61,7 +63,7 @@ static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int 
 		return -1;
 	}
 
-	bus_space_write8(&softc->wdc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS | ((sector >> 24) & 0x0f));
+	bus_space_write8(&softc->wdc->space, WD_DHR, softc->drive | WD_DH_ALWAYS | ((sector >> 24) & 0x0f));
 	bus_space_write8(&softc->wdc->space, WD_SCR, 1);
 	bus_space_write8(&softc->wdc->space, WD_LBALR, (sector >> 0) & 0xff);
 	bus_space_write8(&softc->wdc->space, WD_LBAMR, (sector >> 8) & 0xff);
@@ -121,9 +123,10 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 	memset(softc, 0, sizeof(*softc));
 
 	softc->wdc = parent->softc;
+	softc->drive = args->locators[DEVICE_LOCATOR_DRIVE] ? WD_DH_SLAVE : WD_DH_MASTER;
 
 	spinlock_lock(&softc->wdc->lock);
-	bus_space_write8(&softc->wdc->space, WD_DHR, (args->locators[DEVICE_LOCATOR_DRIVE] ? WD_DH_SLAVE : WD_DH_MASTER) | WD_DH_ALWAYS);
+	bus_space_write8(&softc->wdc->space, WD_DHR, softc->drive | WD_DH_ALWAYS);
 
 	bus_space_write8(&softc->wdc->space, WD_SCR, 0);
 	bus_space_write8(&softc->wdc->space, WD_LBALR, 0);
