@@ -81,7 +81,7 @@ static void scsibus_scan(struct device* self) {
 		locators[DEVICE_LOCATOR_TARGET] = target;
 		locators[DEVICE_LOCATOR_LUN]	= 0;
 
-		device_attach_any(self, locators);
+		device_attach_any(self, "sd", locators);
 	}
 }
 

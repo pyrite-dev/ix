@@ -15,6 +15,7 @@ enum DEVICE_LOCATOR {
 	DEVICE_LOCATOR_BAUD,
 	DEVICE_LOCATOR_TARGET,
 	DEVICE_LOCATOR_LUN,
+	DEVICE_LOCATOR_DRIVE,
 	DEVICE_LOCATOR_COUNT
 };
 
@@ -27,7 +28,8 @@ enum DEVICE_LOCATOR {
     "speed", "%lld", \
     "baud", "%lld", \
     "target", "%lld", \
-    "lun", "%lld"}
+    "lun", "%lld", \
+    "drive", "%lld"}
 
 #define DEVICE_LOCATOR_UNSET ((paddr_t) - 1)
 #define DEVICE_LOCATOR_ANY ((paddr_t) - 2)
@@ -94,7 +96,7 @@ extern struct device_config devices[];
 
 void device_init(void);
 void device_start(void);
-int  device_attach_any(struct device* parent, paddr_t* locators);
+int  device_attach_any(struct device* parent, const char* name, paddr_t* locators);
 #endif
 
 __END_EXTERN_C__

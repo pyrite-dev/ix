@@ -1,4 +1,4 @@
-wd0		at wdc0
+wd*		at wdc? drive ?
 
 scsibus*	at ncr?
 sd*		at scsibus? target ? lun ?
