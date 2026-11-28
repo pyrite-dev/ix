@@ -56,7 +56,7 @@ static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int 
 	int		 i;
 
 	spinlock_lock(&softc->wdc->lock);
-	if(wait_bsy(&softc->wdc->space) != 0){
+	if(wait_bsy(&softc->wdc->space) != 0) {
 		spinlock_unlock(&softc->wdc->lock);
 		return -1;
 	}
@@ -69,7 +69,7 @@ static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int 
 
 	bus_space_write8(&softc->wdc->space, WD_CR, read ? WD_C_READ : WD_C_WRITE);
 
-	if(wait_drq(&softc->wdc->space) != 0){
+	if(wait_drq(&softc->wdc->space) != 0) {
 		spinlock_unlock(&softc->wdc->lock);
 		return -1;
 	}
@@ -92,7 +92,7 @@ static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int 
 		bus_space_write16(&softc->wdc->space, WD_DR, n);
 	}
 
-	if(wait_bsy(&softc->wdc->space) != 0){
+	if(wait_bsy(&softc->wdc->space) != 0) {
 		spinlock_unlock(&softc->wdc->lock);
 		return -1;
 	}

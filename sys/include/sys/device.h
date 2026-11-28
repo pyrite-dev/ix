@@ -13,6 +13,8 @@ enum DEVICE_LOCATOR {
 	DEVICE_LOCATOR_CLOCK,
 	DEVICE_LOCATOR_SPEED,
 	DEVICE_LOCATOR_BAUD,
+	DEVICE_LOCATOR_TARGET,
+	DEVICE_LOCATOR_LUN,
 	DEVICE_LOCATOR_COUNT
 };
 
@@ -24,8 +26,8 @@ enum DEVICE_LOCATOR {
     "clock", "%lld", \
     "speed", "%lld", \
     "baud", "%lld", \
-"target", "%lld", \
-"lun", "%lld"}
+    "target", "%lld", \
+    "lun", "%lld"}
 
 #define DEVICE_LOCATOR_UNSET ((paddr_t) - 1)
 #define DEVICE_LOCATOR_DEFAULT(loc, def) ((loc) == DEVICE_LOCATOR_UNSET ? (def) : (loc))

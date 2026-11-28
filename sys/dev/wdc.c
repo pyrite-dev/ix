@@ -25,7 +25,7 @@ static int wdc_attach(struct device* parent, struct device* self, struct device_
 	return 0;
 }
 
-static void wdc_detach(struct device* self){
+static void wdc_detach(struct device* self) {
 	struct wdc_softc* softc = self->softc;
 
 	free(softc);
