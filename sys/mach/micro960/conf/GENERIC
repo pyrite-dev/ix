@@ -30,6 +30,7 @@ pit0		at mainbus0 addr 0x200000 stride 2 irq 1 speed 100000 clock 10000000
 vdp0		at mainbus0 addr 0x260000 stride 2
 ns0		at mainbus0 addr 0x220000 stride 2 irq 2 baud 9600 clock 10000000
 wdc0		at mainbus0 addr 0x240000 stride 2
+ncr0		at mainbus0 addr 0x280000 stride 2
 
 include "mach/micro960/conf/files.micro960"
 include "dev/files.dev"

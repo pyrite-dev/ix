@@ -1,7 +1,12 @@
 wd0		at wdc0
+scsibus0	at ncr0
+sd0		at scsibus0
 
 file dev/pit.c	pit
 file dev/ns.c	ns
 file dev/vdp.c	vdp
 file dev/wdc.c	wdc
 file dev/wd.c	wd
+file dev/ncr.c	ncr
+file dev/scsibus.c	scsibus
+file dev/sd.c	sd
