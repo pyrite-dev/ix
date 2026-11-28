@@ -1,4 +1,7 @@
+wd0		at wdc0
+
 file dev/pit.c	pit
 file dev/ns.c	ns
 file dev/vdp.c	vdp
+file dev/wdc.c	wdc
 file dev/wd.c	wd

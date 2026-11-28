@@ -23,7 +23,9 @@ enum DEVICE_LOCATOR {
     "stride", "%lld", \
     "clock", "%lld", \
     "speed", "%lld", \
-    "baud", "%lld"}
+    "baud", "%lld", \
+"target", "%lld", \
+"lun", "%lld"}
 
 #define DEVICE_LOCATOR_UNSET ((paddr_t) - 1)
 #define DEVICE_LOCATOR_DEFAULT(loc, def) ((loc) == DEVICE_LOCATOR_UNSET ? (def) : (loc))
@@ -47,6 +49,8 @@ enum DEVICE_LOCATOR {
 /* locator: clock */
 /* locator: speed */
 /* locator: baud */
+/* locator: target */
+/* locator: lun */
 
 struct device {
 	char*	     name;

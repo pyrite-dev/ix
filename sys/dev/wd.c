@@ -7,6 +7,7 @@
 #include <sys/major.h>
 
 #include "wd.h"
+#include "wdc.h"
 
 #include <stdlib.h>
 #include <stddef.h>
@@ -14,7 +15,7 @@
 struct wd_softc {
 	struct disk disk;
 
-	bus_space_t space;
+	struct wdc_softc* wdc;
 };
 
 static int wait_drq(bus_space_t* space) {
@@ -54,25 +55,33 @@ static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int 
 	unsigned char*	 data  = data_;
 	int		 i;
 
-	if(wait_bsy(&softc->space) != 0) return -1;
+	spinlock_lock(&softc->wdc->lock);
+	if(wait_bsy(&softc->wdc->space) != 0){
+		spinlock_unlock(&softc->wdc->lock);
+		return -1;
+	}
 
-	bus_space_write8(&softc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS | ((sector >> 24) & 0x0f));
-	bus_space_write8(&softc->space, WD_SCR, 1);
-	bus_space_write8(&softc->space, WD_LBALR, (sector >> 0) & 0xff);
-	bus_space_write8(&softc->space, WD_LBAMR, (sector >> 8) & 0xff);
-	bus_space_write8(&softc->space, WD_LBAHR, (sector >> 16) & 0xff);
+	bus_space_write8(&softc->wdc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS | ((sector >> 24) & 0x0f));
+	bus_space_write8(&softc->wdc->space, WD_SCR, 1);
+	bus_space_write8(&softc->wdc->space, WD_LBALR, (sector >> 0) & 0xff);
+	bus_space_write8(&softc->wdc->space, WD_LBAMR, (sector >> 8) & 0xff);
+	bus_space_write8(&softc->wdc->space, WD_LBAHR, (sector >> 16) & 0xff);
 
-	bus_space_write8(&softc->space, WD_CR, read ? WD_C_READ : WD_C_WRITE);
+	bus_space_write8(&softc->wdc->space, WD_CR, read ? WD_C_READ : WD_C_WRITE);
 
-	if(wait_drq(&softc->space) != 0) return -1;
+	if(wait_drq(&softc->wdc->space) != 0){
+		spinlock_unlock(&softc->wdc->lock);
+		return -1;
+	}
 
 	if(read) {
 		for(i = 0; i < 512; i += 2) {
-			unsigned short n = bus_space_read16(&softc->space, WD_DR);
+			unsigned short n = bus_space_read16(&softc->wdc->space, WD_DR);
 
 			data[i + 0] = (n >> 8) & 0xff;
 			data[i + 1] = (n >> 0) & 0xff;
 		}
+		spinlock_unlock(&softc->wdc->lock);
 
 		return 0;
 	}
@@ -80,10 +89,14 @@ static int wd_transfer(struct disk* disk, unsigned int sector, void* data_, int 
 	for(i = 0; i < 512; i += 2) {
 		unsigned short n = ((unsigned short)data[i + 0] << 8) | data[i + 1];
 
-		bus_space_write16(&softc->space, WD_DR, n);
+		bus_space_write16(&softc->wdc->space, WD_DR, n);
 	}
 
-	if(wait_bsy(&softc->space) != 0) return -1;
+	if(wait_bsy(&softc->wdc->space) != 0){
+		spinlock_unlock(&softc->wdc->lock);
+		return -1;
+	}
+	spinlock_unlock(&softc->wdc->lock);
 
 	return 0;
 }
@@ -107,30 +120,33 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 
 	memset(softc, 0, sizeof(*softc));
 
-	bus_space_init(&softc->space, args->locators);
+	softc->wdc = parent->softc;
 
-	bus_space_write8(&softc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS);
+	spinlock_lock(&softc->wdc->lock);
+	bus_space_write8(&softc->wdc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS);
 
-	bus_space_write8(&softc->space, WD_SCR, 0);
-	bus_space_write8(&softc->space, WD_LBALR, 0);
-	bus_space_write8(&softc->space, WD_LBAMR, 0);
-	bus_space_write8(&softc->space, WD_LBAHR, 0);
+	bus_space_write8(&softc->wdc->space, WD_SCR, 0);
+	bus_space_write8(&softc->wdc->space, WD_LBALR, 0);
+	bus_space_write8(&softc->wdc->space, WD_LBAMR, 0);
+	bus_space_write8(&softc->wdc->space, WD_LBAHR, 0);
 
-	bus_space_write8(&softc->space, WD_CR, WD_C_IDENTIFY);
+	bus_space_write8(&softc->wdc->space, WD_CR, WD_C_IDENTIFY);
 
-	status = bus_space_read8(&softc->space, WD_SR);
+	status = bus_space_read8(&softc->wdc->space, WD_SR);
 	if(status == 0 || status == 0xff) {
+		spinlock_unlock(&softc->wdc->lock);
 		free(softc);
 		return -1;
 	}
 
-	if(wait_drq(&softc->space) != 0) {
+	if(wait_drq(&softc->wdc->space) != 0) {
+		spinlock_unlock(&softc->wdc->lock);
 		free(softc);
 		return -1;
 	}
 
 	for(i = 0; i < 512; i += 2) {
-		unsigned short n = bus_space_read16(&softc->space, WD_DR);
+		unsigned short n = bus_space_read16(&softc->wdc->space, WD_DR);
 
 		buffer[i + 0] = (n >> 8) & 0xff;
 		buffer[i + 1] = (n >> 0) & 0xff;
@@ -138,9 +154,11 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 
 	nsectors = (((unsigned int)buffer[122] << 8 | buffer[123]) << 16) | ((unsigned int)buffer[120] << 8 | buffer[121]);
 	if(nsectors == 0 || nsectors > 0x0fffffff) {
+		spinlock_unlock(&softc->wdc->lock);
 		free(softc);
 		return -1;
 	}
+	spinlock_unlock(&softc->wdc->lock);
 
 	strcpy(self->desc, "<");
 	memcpy(self->desc + 1, buffer + 54, 40);
