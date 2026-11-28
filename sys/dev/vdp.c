@@ -214,4 +214,5 @@ struct device_driver vdp_driver = {
     vdp_match,
     vdp_attach,
     vdp_enable_ints,
-    vdp_detach};
+    vdp_detach,
+    NULL};

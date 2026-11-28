@@ -166,4 +166,5 @@ struct device_driver ncr_driver = {
     ncr_match,
     ncr_attach,
     NULL,
-    ncr_detach};
+    ncr_detach,
+    NULL};

@@ -191,4 +191,5 @@ struct device_driver wd_driver = {
     wd_match,
     wd_attach,
     NULL,
-    wd_detach};
+    wd_detach,
+    NULL};

@@ -30,6 +30,7 @@ enum DEVICE_LOCATOR {
     "lun", "%lld"}
 
 #define DEVICE_LOCATOR_UNSET ((paddr_t) - 1)
+#define DEVICE_LOCATOR_ANY ((paddr_t) - 2)
 #define DEVICE_LOCATOR_DEFAULT(loc, def) ((loc) == DEVICE_LOCATOR_UNSET ? (def) : (loc))
 
 #define DEVICE_UNIT_ANY (-1)
@@ -56,6 +57,8 @@ struct device {
 
 	struct device_driver* driver;
 
+	paddr_t locators[DEVICE_LOCATOR_COUNT];
+
 	void* softc;
 };
 
@@ -70,6 +73,7 @@ struct device_driver {
 	int (*attach)(struct device* parent, struct device* self, struct device_attach_args* args);
 	void (*enable_ints)(struct device* self);
 	void (*detach)(struct device* self);
+	void (*scan)(struct device* self);
 };
 
 struct device_config {
@@ -90,6 +94,7 @@ extern struct device_config devices[];
 
 void device_init(void);
 void device_start(void);
+int  device_attach_any(struct device* parent, paddr_t* locators);
 #endif
 
 __END_EXTERN_C__

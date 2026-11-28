@@ -14,8 +14,11 @@ static const char*    locators[] = DEVICE_LOCATORS;
 
 static struct device* device_new(const char* name, int unit) {
 	struct device* dev = malloc(sizeof(*dev));
+	int	       i;
 
 	if(dev == NULL) return NULL;
+
+	for(i = 0; i < DEVICE_LOCATOR_COUNT; i++) dev->locators[i] = DEVICE_LOCATOR_UNSET;
 
 	if((dev->name = strdup(name)) == NULL) {
 		free(dev);
@@ -128,6 +131,8 @@ static int device_attach(struct device* parent, struct device_config* config) {
 	}
 	dev->driver = driver;
 
+	memcpy(dev->locators, args.locators, sizeof(dev->locators));
+
 	if(driver->attach(parent, dev, &args) != 0) {
 		free(dev->name);
 		free(dev);
@@ -172,6 +177,57 @@ static int device_configure(struct device* node, struct device_config* config) {
 	return count;
 }
 
+static int device_config_is_template(struct device_config* config) {
+	int i;
+
+	for(i = 0; i < DEVICE_LOCATOR_COUNT; i++) {
+		if(config->locators[i] == DEVICE_LOCATOR_ANY) return 1;
+	}
+
+	return 0;
+}
+
+int device_attach_any(struct device* parent, paddr_t* locators) {
+	int i;
+	int j;
+	int count = 0;
+
+	for(i = 0; devices[i].name != NULL; i++) {
+		struct device_config config = devices[i];
+
+		if(config.unit != DEVICE_UNIT_ANY) continue;
+		if(!device_config_is_template(&config)) continue;
+		if(!device_parent_match(parent, &config)) continue;
+
+		for(j = 0; j < DEVICE_LOCATOR_COUNT; j++) {
+			if(config.locators[j] == DEVICE_LOCATOR_ANY) {
+				if(locators[j] == DEVICE_LOCATOR_UNSET) break;
+				config.locators[j] = locators[j];
+			}
+		}
+		if(j < DEVICE_LOCATOR_COUNT) continue;
+
+		count += device_attach(parent, &config);
+	}
+
+	return count;
+}
+
+static void device_scan_walk(struct device* node) {
+	struct device* child;
+
+	if(node->driver != NULL && node->driver->scan != NULL) node->driver->scan(node);
+
+	child = node->first_child;
+	while(child != NULL) {
+		struct device* next = child->next;
+
+		device_scan_walk(child);
+
+		child = next;
+	}
+}
+
 void device_init(void) {
 	int i;
 
@@ -186,8 +242,12 @@ void device_init(void) {
 	}
 
 	for(i = 0; devices[i].name != NULL; i++) {
+		if(device_config_is_template(&devices[i])) continue;
+
 		device_configure(root, &devices[i]);
 	}
+
+	device_scan_walk(root);
 }
 
 static void device_start_walk(struct device* node) {

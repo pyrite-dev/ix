@@ -98,12 +98,24 @@ sub parse_config {
 			$machine = $tokens[1];
 		}elsif($tokens[1] eq "at"){
 			my $dev = $tokens[0];
-			$dev =~ s/([0-9]+)$//;
-			my $unit = $1;
+			my $unit;
+			if($dev =~ s/\*$//){
+				$unit = "DEVICE_UNIT_ANY";
+			}elsif($dev =~ s/([0-9]+)$//){
+				$unit = $1;
+			}else{
+				$unit = 0;
+			}
 
 			my $parent = $tokens[2];
-			$parent =~ s/([0-9]+)$//;
-			my $parent_unit = $1;
+			my $parent_unit;
+			if($parent =~ s/\?$//){
+				$parent_unit = "DEVICE_UNIT_ANY";
+			}elsif($parent =~ s/([0-9]+)$//){
+				$parent_unit = $1;
+			}else{
+				$parent_unit = 0;
+			}
 
 			if(!(grep /^$dev$/, @devices)){
 				push(@devices, $dev);
@@ -123,7 +135,7 @@ sub parse_config {
 							last;
 						}
 					}
-					$dev_locators[$index] = $tokens[$i + 1];
+					$dev_locators[$index] = ($tokens[$i + 1] eq "?") ? "DEVICE_LOCATOR_ANY" : $tokens[$i + 1];
 					$i++;
 					next;
 				}
@@ -198,7 +210,7 @@ foreach my $device (@devhashes){
 	print(IOCONF "		&$device->{dev}_driver,\n");
 	print(IOCONF "		{\n");
 	foreach my $locator (@{$device->{locators}}){
-		if($locator eq "DEVICE_LOCATOR_UNSET"){
+		if($locator eq "DEVICE_LOCATOR_UNSET" || $locator eq "DEVICE_LOCATOR_ANY"){
 			print(IOCONF "			$locator,\n");
 		}else{
 			print(IOCONF "			PADDR_C($locator),\n");

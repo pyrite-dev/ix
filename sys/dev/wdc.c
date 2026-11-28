@@ -36,4 +36,5 @@ struct device_driver wdc_driver = {
     wdc_match,
     wdc_attach,
     NULL,
-    wdc_detach};
+    wdc_detach,
+    NULL};

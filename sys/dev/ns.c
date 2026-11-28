@@ -282,4 +282,5 @@ struct device_driver ns_driver = {
     ns_match,
     ns_attach,
     ns_enable_ints,
-    ns_detach};
+    ns_detach,
+    NULL};

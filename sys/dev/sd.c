@@ -142,4 +142,5 @@ struct device_driver sd_driver = {
     sd_match,
     sd_attach,
     NULL,
-    sd_detach};
+    sd_detach,
+    NULL};

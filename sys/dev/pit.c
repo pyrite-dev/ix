@@ -64,4 +64,5 @@ struct device_driver pit_driver = {
     pit_match,
     pit_attach,
     pit_enable_ints,
+    NULL,
     NULL};
