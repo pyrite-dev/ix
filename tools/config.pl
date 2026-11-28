@@ -35,8 +35,12 @@ open(IN, "<", "sys/include/sys/device.h");
 while(my $l = <IN>){
 	$l =~ s/\r?\n//g;
 
-	if($l =~ /locator: ([^ ]+)/){
-		push(@locators, $1);
+	if($l =~ /^[ \t]+"([^ ]+)", "/){
+		my $loc = $1;
+
+		if(!($loc eq "count")){
+			push(@locators, $loc);
+		}
 	}
 }
 close(IN);

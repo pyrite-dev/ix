@@ -43,17 +43,6 @@ enum DEVICE_LOCATOR {
 #include <sys/cdefs.h>
 #include <sys/types.h>
 
-/* DO NOT REMOVE THE COMMENTS BELOW! */
-/* locator: addr */
-/* locator: port */
-/* locator: irq */
-/* locator: stride */
-/* locator: clock */
-/* locator: speed */
-/* locator: baud */
-/* locator: target */
-/* locator: lun */
-
 struct device {
 	char*	     name;
 	unsigned int unit;
