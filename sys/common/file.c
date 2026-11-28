@@ -521,6 +521,72 @@ int sys_lseek(int fd, off_t offset, int whence) {
 	return new_offset;
 }
 
+int sys_ioctl(int fd, unsigned long cmd, void* data) {
+	struct file*  file = file_get(fd);
+	unsigned long dir;
+	size_t	      plen;
+	char	      buffer[128];
+	char*	      kbuffer = buffer;
+	void*	      kdata   = data;
+	int	      error   = 0;
+
+	if(file == NULL) return -EBADF;
+
+	if(file->vnode != NULL && file->vnode->type == VNODE_DIR) {
+		file_put(file);
+		return -ENOTTY;
+	}
+
+	dir  = IOC_DIR(cmd);
+	plen = IOC_PLEN(cmd);
+
+	if(dir != IOC_VOID && plen > 0) {
+		if(plen > sizeof(buffer)) {
+			kbuffer = malloc(plen);
+			if(kbuffer == NULL) {
+				file_put(file);
+				return -ENOMEM;
+			}
+		}
+
+		kdata = kbuffer;
+
+		if((dir & IOC_IN) != 0) {
+			error = copyin(kdata, data, plen);
+			if(error != 0) goto out;
+		} else {
+			memset(kdata, 0, plen);
+		}
+	}
+
+	if(file->is_block) {
+		struct bdevsw* sw = bdev_lookup(DEVICE_MAJOR(file->dev));
+
+		if(sw == NULL || sw->ioctl == NULL) {
+			error = ENOTTY;
+		} else {
+			error = sw->ioctl(file->dev, cmd, kdata, file->flags);
+		}
+	} else {
+		struct cdevsw* sw = cdev_lookup(DEVICE_MAJOR(file->dev));
+
+		if(sw == NULL || sw->ioctl == NULL) {
+			error = ENOTTY;
+		} else {
+			error = sw->ioctl(file->dev, cmd, kdata, file->flags);
+		}
+	}
+
+	if(error == 0 && (dir & IOC_OUT) != 0 && kdata != data) error = copyout(data, kdata, plen);
+
+out:
+	if(kbuffer != buffer) free(kbuffer);
+
+	file_put(file);
+
+	return -error;
+}
+
 int sys_getdents(int fd, void* buffer, size_t count) {
 	struct file*  file = file_get(fd);
 	struct dirent entry;

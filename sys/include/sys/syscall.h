@@ -9,9 +9,10 @@ struct syscall_args;
 #define SYS_read 3
 #define SYS_write 4
 #define SYS_lseek 5
-#define SYS_open 6
-#define SYS_close 7
-#define SYS_getdents 8
+#define SYS_ioctl 6
+#define SYS_open 7
+#define SYS_close 8
+#define SYS_getdents 9
 
 #include <sys/cdefs.h>
 #include <machine/regs.h>

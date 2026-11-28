@@ -39,6 +39,8 @@ static int syscall_call(struct syscall_args* args) {
 		return sys_write((int)args->arg1, (const void*)args->arg2, (size_t)args->arg3);
 	case SYS_lseek:
 		return sys_lseek((int)args->arg1, (off_t)args->arg2, (int)args->arg3);
+	case SYS_ioctl:
+		return sys_ioctl((int)args->arg1, (unsigned long)args->arg2, (void*)args->arg3);
 	case SYS_open:
 		return sys_open((const char*)args->arg1, (int)args->arg2);
 	case SYS_close:

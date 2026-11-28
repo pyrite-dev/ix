@@ -18,7 +18,7 @@
 #define IOC_OUT 0x80000000UL /* Kernel -> Userland */
 #define IOC_INOUT (IOC_IN | IOC_OUT)
 
-#define IOC_DIR(cmd) (((cmd) >> IOC_DIRSHIFT) & IOC_DIRMASK)
+#define IOC_DIR(cmd) ((cmd) & IOC_DIRMASK)
 #define IOC_PLEN(cmd) (((cmd) >> IOC_PLENSHIFT) & IOC_PLENMASK)
 #define IOC_GRP(cmd) (((cmd) >> IOC_GRPSHIFT) & IOC_GRPMASK)
 #define IOC_NUM(cmd) (((cmd) >> IOC_NUMSHIFT) & IOC_NUMMASK)
@@ -39,5 +39,12 @@
 
 #include <sys/termios.h>
 #include <sys/types.h>
+#include <sys/cdefs.h>
+
+__BEGIN_EXTERN_C__
+
+int ioctl(int fd, unsigned long cmd, ...);
+
+__END_EXTERN_C__
 
 #endif

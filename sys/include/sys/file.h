@@ -20,6 +20,7 @@ int sys_close(int fd);
 int sys_read(int fd, void* buffer, size_t count);
 int sys_write(int fd, const void* buffer, size_t count);
 int sys_lseek(int fd, off_t offset, int whence);
+int sys_ioctl(int fd, unsigned long cmd, void* data);
 int sys_getdents(int fd, void* buffer, size_t count);
 #endif
 
