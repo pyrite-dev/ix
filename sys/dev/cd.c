@@ -131,7 +131,7 @@ struct cdevsw cd_cdevsw = {
     cd_read,
     cd_write,
     cd_ioctl};
-static int cd_cdev_registered = 0;
+static int cd_cdevs = 0;
 
 static int cd_bdev_open(dev_t dev, int flags, int mode) {
 	if(bdev_lookup_device(dev) == NULL) return ENXIO;
@@ -216,7 +216,7 @@ static struct bdevsw cd_bdevsw = {
     cd_bdev_close,
     cd_bdev_strategy,
     cd_bdev_ioctl};
-static int cd_bdev_registered = 0;
+static int cd_bdevs = 0;
 
 static int cd_match(struct device* parent, struct device_attach_args* args) {
 	return 1;
@@ -289,23 +289,21 @@ static int cd_attach(struct device* parent, struct device* self, struct device_a
 	*p++ = '>';
 	*p   = 0;
 
-	if(!cd_cdev_registered) {
+	if(cd_cdevs == 0) {
 		if(cdev_register(CDEV_MAJOR_CDROM, &cd_cdevsw) != 0) {
 			free(softc);
 			return -1;
 		}
-
-		cd_cdev_registered = 1;
 	}
+	cd_cdevs++;
 
-	if(!cd_bdev_registered) {
+	if(cd_bdevs == 0) {
 		if(bdev_register(BDEV_MAJOR_CDROM, &cd_bdevsw) != 0) {
 			free(softc);
 			return -1;
 		}
-
-		cd_bdev_registered = 1;
 	}
+	cd_bdevs++;
 
 	if((softc->cdev = cdev_register_device(DEVICE_MAKE(CDEV_MAJOR_CDROM, DEVICE_MINOR_ANY), self, "rcd%d")) == DEVICE_ERROR) {
 		free(softc);
@@ -326,6 +324,12 @@ static void cd_detach(struct device* self) {
 
 	bdev_unregister_device(softc->bdev);
 	cdev_unregister_device(softc->cdev);
+
+	cd_bdevs--;
+	if(cd_bdevs == 0) bdev_unregister(BDEV_MAJOR_CDROM);
+
+	cd_cdevs--;
+	if(cd_cdevs == 0) cdev_unregister(CDEV_MAJOR_CDROM);
 
 	free(softc);
 }

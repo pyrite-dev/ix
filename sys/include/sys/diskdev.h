@@ -10,6 +10,7 @@ __BEGIN_EXTERN_C__
 
 #ifdef __KERNEL__
 extern struct bdevsw disk_bdevsw;
+extern struct cdevsw disk_cdevsw;
 
 dev_t diskdev_init(struct device* device, const char* name, const struct disk_ops* ops, unsigned int nsectors);
 dev_t diskdev_partition_init(struct disk* disk, const char* name, unsigned int start, unsigned int nsectors);

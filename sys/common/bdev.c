@@ -57,6 +57,8 @@ struct bdevsw* bdev_lookup(unsigned int major) {
 dev_t bdev_register_device(dev_t dev, struct device* device, const char* name) {
 	struct device_entry* entry;
 
+	if(bdev_lookup(DEVICE_MAJOR(dev)) == NULL) return DEVICE_ERROR;
+
 	if(DEVICE_MINOR(dev) == DEVICE_MINOR_ANY) {
 		unsigned int minor = 0;
 

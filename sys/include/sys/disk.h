@@ -17,6 +17,7 @@ struct disk_ops {
 struct disk {
 	struct device* device;
 	dev_t	       dev;
+	dev_t	       rdev;
 
 	const struct disk_ops* ops;
 
@@ -27,6 +28,8 @@ struct disk {
 
 	unsigned int nsectors;
 	mutex_t	     lock;
+
+	unsigned char bounce[512];
 };
 
 __BEGIN_EXTERN_C__

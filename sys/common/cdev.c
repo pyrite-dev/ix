@@ -3,6 +3,7 @@
 #include <sys/device.h>
 #include <sys/major.h>
 #include <sys/ttydev.h>
+#include <sys/diskdev.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,6 +37,7 @@ void cdev_init(void) {
 	hmdefault(device_map, NULL);
 
 	cdev_register(CDEV_MAJOR_TTY, &tty_cdevsw);
+	cdev_register(CDEV_MAJOR_DISK, &disk_cdevsw);
 }
 
 int cdev_register(unsigned int major, struct cdevsw* sw) {
@@ -56,6 +58,8 @@ struct cdevsw* cdev_lookup(unsigned int major) {
 
 dev_t cdev_register_device(dev_t dev, struct device* device, const char* name) {
 	struct device_entry* entry;
+
+	if(cdev_lookup(DEVICE_MAJOR(dev)) == NULL) return DEVICE_ERROR;
 
 	if(DEVICE_MINOR(dev) == DEVICE_MINOR_ANY) {
 		unsigned int minor = 0;
