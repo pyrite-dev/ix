@@ -15,7 +15,7 @@ struct ncr_softc {
 	spinlock_t  lock;
 };
 
-#define NCR_SELECT_TIMEOUT 100000
+#define NCR_SELECT_TIMEOUT 1000
 #define NCR_PHASE_GUARD 10000
 
 static void ncr_reset(struct ncr_softc* softc) {

@@ -3,6 +3,7 @@
 #include <sys/spinlock.h>
 
 #include "wdc.h"
+#include "wd.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -31,10 +32,36 @@ static void wdc_detach(struct device* self) {
 	free(softc);
 }
 
+static int wdc_occupied(struct device* self, unsigned int drive) {
+	struct device* child = self->first_child;
+
+	while(child != NULL) {
+		if(child->locators[DEVICE_LOCATOR_DRIVE] == drive) return 1;
+
+		child = child->next;
+	}
+
+	return 0;
+}
+
+static void wdc_scan(struct device* self) {
+	int drive;
+
+	for(drive = 0; drive < 2; drive++) {
+		paddr_t locators[DEVICE_LOCATOR_COUNT];
+
+		if(wdc_occupied(self, drive)) continue;
+
+		locators[DEVICE_LOCATOR_DRIVE] = drive;
+
+		device_attach_any(self, "wd", locators);
+	}
+}
+
 struct device_driver wdc_driver = {
     "wdc",
     wdc_match,
     wdc_attach,
     NULL,
     wdc_detach,
-    NULL};
+    wdc_scan};

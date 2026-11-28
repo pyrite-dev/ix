@@ -187,7 +187,7 @@ static int device_config_is_template(struct device_config* config) {
 	return 0;
 }
 
-int device_attach_any(struct device* parent, paddr_t* locators) {
+int device_attach_any(struct device* parent, const char* name, paddr_t* locators) {
 	int i;
 	int j;
 	int count = 0;
@@ -198,6 +198,7 @@ int device_attach_any(struct device* parent, paddr_t* locators) {
 		if(config.unit != DEVICE_UNIT_ANY) continue;
 		if(!device_config_is_template(&config)) continue;
 		if(!device_parent_match(parent, &config)) continue;
+		if(name != NULL && strcmp(config.name, name) != 0) continue;
 
 		for(j = 0; j < DEVICE_LOCATOR_COUNT; j++) {
 			if(config.locators[j] == DEVICE_LOCATOR_ANY) {

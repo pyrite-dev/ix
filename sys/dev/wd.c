@@ -123,7 +123,7 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 	softc->wdc = parent->softc;
 
 	spinlock_lock(&softc->wdc->lock);
-	bus_space_write8(&softc->wdc->space, WD_DHR, WD_DH_MASTER | WD_DH_ALWAYS);
+	bus_space_write8(&softc->wdc->space, WD_DHR, (args->locators[DEVICE_LOCATOR_DRIVE] ? WD_DH_SLAVE : WD_DH_MASTER) | WD_DH_ALWAYS);
 
 	bus_space_write8(&softc->wdc->space, WD_SCR, 0);
 	bus_space_write8(&softc->wdc->space, WD_LBALR, 0);
