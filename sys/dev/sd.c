@@ -112,7 +112,7 @@ static int sd_attach(struct device* parent, struct device* self, struct device_a
 		return -1;
 	}
 
-	p = self->desc;
+	p    = self->desc;
 	*p++ = '<';
 	p    = sd_copy_field(p, inquiry + 8, 8);
 	if(p[-1] != '<') *p++ = ' ';

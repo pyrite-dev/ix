@@ -31,8 +31,8 @@ static void ncr_ack(struct ncr_softc* softc) {
 static int ncr_probe(struct ncr_softc* softc) {
 	static const unsigned char tcr_patterns[]  = {0x05, 0x0a};
 	static const unsigned char mode_patterns[] = {0x24, 0x18};
-	unsigned int		     i;
-	int			     ok = 1;
+	unsigned int		   i;
+	int			   ok = 1;
 
 	for(i = 0; i < sizeof(tcr_patterns) && ok; i++) {
 		bus_space_write8(&softc->space, NCR_TCR, tcr_patterns[i]);

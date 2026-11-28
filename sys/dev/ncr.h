@@ -2,12 +2,12 @@
 #define __NCR_H__
 
 /* Registers */
-#define NCR_DATA 0 /* R: Current Data Bus, W: Output Data */
-#define NCR_ICR 1  /* Initiator Command Register */
-#define NCR_MODE 2 /* Mode Register */
-#define NCR_TCR 3  /* Target Command Register */
-#define NCR_CSR 4  /* R: Current SCSI control, W: Select Enable */
-#define NCR_BSR 5  /* R: Bus and Status, W: Start DMA Send */
+#define NCR_DATA 0  /* R: Current Data Bus, W: Output Data */
+#define NCR_ICR 1   /* Initiator Command Register */
+#define NCR_MODE 2  /* Mode Register */
+#define NCR_TCR 3   /* Target Command Register */
+#define NCR_CSR 4   /* R: Current SCSI control, W: Select Enable */
+#define NCR_BSR 5   /* R: Bus and Status, W: Start DMA Send */
 #define NCR_IDATA 6 /* R: Input Data, W: Start DMA Target Receive */
 #define NCR_RESET 7 /* R: Reset interrupt, W: Start DMA Initiator Receive */
 
