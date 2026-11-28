@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
 struct wd_softc {
 	struct disk disk;
@@ -191,5 +192,4 @@ struct device_driver wd_driver = {
     wd_match,
     wd_attach,
     NULL,
-    wd_detach,
-    NULL};
+    wd_detach};

@@ -10,6 +10,8 @@
 #define SCSI_OP_WRITE6 0x0a
 #define SCSI_OP_INQUIRY 0x12
 #define SCSI_OP_READ_CAPACITY 0x25
+#define SCSI_OP_READ10 0x28
+#define SCSI_OP_WRITE10 0x2a
 
 /* Status codes */
 #define SCSI_STATUS_GOOD 0x00

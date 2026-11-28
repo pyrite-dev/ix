@@ -26,6 +26,7 @@ struct disk {
 	struct disk* next;
 
 	unsigned int nsectors;
+	int	     readonly;
 	mutex_t	     lock;
 };
 

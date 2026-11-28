@@ -49,35 +49,39 @@ static int scsibus_occupied(struct device* self, unsigned int target, unsigned i
 static void scsibus_scan(struct device* self) {
 	unsigned char inquiry[36];
 	unsigned int  target;
-	unsigned int  lun;
 
+	/*
+	 * Probe LUN 0 only. Some devices answer every LUN even though they have
+	 * only one, which would create duplicate disks; multi-LUN devices can
+	 * still be configured explicitly.
+	 */
 	for(target = 0; target < 8; target++) {
+		unsigned char cdb[6];
+		paddr_t	      locators[DEVICE_LOCATOR_COUNT];
+		unsigned int  type;
+		int	      i;
+
 		if(target == 7) continue;
 
-		for(lun = 0; lun < 8; lun++) {
-			unsigned char cdb[6];
-			paddr_t	      locators[DEVICE_LOCATOR_COUNT];
-			int	      i;
+		cdb[0] = SCSI_OP_INQUIRY;
+		cdb[1] = 0;
+		cdb[2] = 0;
+		cdb[3] = 0;
+		cdb[4] = sizeof(inquiry);
+		cdb[5] = 0;
 
-			cdb[0] = SCSI_OP_INQUIRY;
-			cdb[1] = (lun & 7) << 5;
-			cdb[2] = 0;
-			cdb[3] = 0;
-			cdb[4] = sizeof(inquiry);
-			cdb[5] = 0;
+		if(scsibus_exec(self, target, 0, cdb, sizeof(cdb), inquiry, sizeof(inquiry), 1) != SCSI_STATUS_GOOD) continue;
 
-			if(scsibus_exec(self, target, lun, cdb, sizeof(cdb), inquiry, sizeof(inquiry), 1) != SCSI_STATUS_GOOD) break;
+		type = inquiry[0] & 0x1f;
+		if(type != 0 && type != 5) continue;
 
-			if((inquiry[0] & 0x1f) != 0) continue;
+		if(scsibus_occupied(self, target, 0)) continue;
 
-			if(scsibus_occupied(self, target, lun)) continue;
+		for(i = 0; i < DEVICE_LOCATOR_COUNT; i++) locators[i] = DEVICE_LOCATOR_UNSET;
+		locators[DEVICE_LOCATOR_TARGET] = target;
+		locators[DEVICE_LOCATOR_LUN]	= 0;
 
-			for(i = 0; i < DEVICE_LOCATOR_COUNT; i++) locators[i] = DEVICE_LOCATOR_UNSET;
-			locators[DEVICE_LOCATOR_TARGET] = target;
-			locators[DEVICE_LOCATOR_LUN]	= lun;
-
-			device_attach_any(self, locators);
-		}
+		device_attach_any(self, locators);
 	}
 }
 

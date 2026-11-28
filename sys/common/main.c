@@ -15,6 +15,14 @@
 #include <string.h>
 #include <stdio.h>
 
+/* TODO: machine-specific defines */
+#ifdef __i960__
+#define DRIVE "/dev/wd0a"
+#else
+/* apm isn't implemented yet so do full disk instead */
+#define DRIVE "/dev/sd0"
+#endif
+
 static thread_t thread;
 static char	stack[4096];
 
@@ -23,7 +31,7 @@ static void thread_main(void* arg) {
 	int	      fd   = open("/dev/tty0", O_RDWR);
 	int	      infd = open("/dev/tty1", O_RDWR);
 	DIR*	      dir  = opendir("/dev");
-	int	      d	   = open("/dev/wd0a", O_RDONLY);
+	int	      d	   = open(DRIVE, O_RDONLY);
 	unsigned char buf[512];
 	int	      i;
 

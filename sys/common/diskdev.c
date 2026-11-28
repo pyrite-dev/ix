@@ -111,6 +111,7 @@ dev_t diskdev_partition_init(struct disk* disk, const char* name, unsigned int s
 	view->parent   = disk;
 	view->start    = start;
 	view->nsectors = nsectors;
+	view->readonly = disk->readonly;
 
 	mutex_init(&view->lock);
 

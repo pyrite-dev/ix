@@ -1,6 +1,7 @@
 #include <sys/disk.h>
 #include <sys/buf.h>
 #include <sys/errno.h>
+#include <sys/fcntl.h>
 #include <sys/mutex.h>
 
 #include <string.h>
@@ -12,6 +13,8 @@ void disk_init(struct disk* disk, const struct disk_ops* ops) {
 }
 
 int disk_open(struct disk* disk, int flags, int mode) {
+	if(disk->readonly && (flags & 3) != O_RDONLY) return EROFS;
+
 	return 0;
 }
 
@@ -39,6 +42,13 @@ void disk_strategy(struct disk* disk, struct buf* buf) {
 
 	if(buf->bcount % 512 != 0 || buf->blkno >= disk->nsectors || buf->bcount / 512 > disk->nsectors - buf->blkno) {
 		buf->error = EINVAL;
+		buf->flags |= BUF_ERROR | BUF_DONE;
+		mutex_unlock(&phys->lock);
+		return;
+	}
+
+	if(disk->readonly && !(buf->flags & BUF_READ)) {
+		buf->error = EROFS;
 		buf->flags |= BUF_ERROR | BUF_DONE;
 		mutex_unlock(&phys->lock);
 		return;

@@ -13,11 +13,16 @@
 
 /* ICR */
 #define NCR_ICR_RST (1 << 7)
+#define NCR_ICR_AIP (1 << 6)
+#define NCR_ICR_LA (1 << 5)
 #define NCR_ICR_ACK (1 << 4)
 #define NCR_ICR_BSY (1 << 3)
 #define NCR_ICR_SEL (1 << 2)
 #define NCR_ICR_ATN (1 << 1)
 #define NCR_ICR_DATA (1 << 0)
+
+/* Mode */
+#define NCR_MODE_ARBITRATE (1 << 0)
 
 /* CSR */
 #define NCR_CSR_RST (1 << 7)

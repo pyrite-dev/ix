@@ -252,6 +252,10 @@ static int scc_attach(struct device* parent, struct device* self, struct device_
 	bus_space_init(&softc->rspace, args->locators);
 	bus_space_init(&softc->wspace, args->locators);
 
+	/* memory-mapped device: the port locator names the write window */
+	softc->rspace.port = DEVICE_LOCATOR_UNSET;
+	softc->wspace.port = DEVICE_LOCATOR_UNSET;
+
 	softc->wspace.addr = args->locators[DEVICE_LOCATOR_PORT] == DEVICE_LOCATOR_UNSET
 				 ? 0xbffff9
 				 : args->locators[DEVICE_LOCATOR_PORT];

@@ -1,5 +1,6 @@
 #include <sys/bus.h>
 #include <sys/io.h>
+#include <machine/io.h>
 
 #include <stdlib.h>
 
@@ -30,12 +31,26 @@ static int bus_space_index(bus_space_t* space, int def) {
 	return (space->addr % stride) / def;
 }
 
+#ifdef HAS_IO
+#define BUS_IO_READ(sz) \
+	if(space->port != DEVICE_LOCATOR_UNSET) { \
+		return in##sz(space->port + offset); \
+	}
+#define BUS_IO_WRITE(sz, value) \
+	if(space->port != DEVICE_LOCATOR_UNSET) { \
+		out##sz(space->port + offset, value); \
+\
+		return; \
+	}
+#else
+#define BUS_IO_READ(sz)
+#define BUS_IO_WRITE(sz, value)
+#endif
+
 #define BUS(type, sz, n) \
 	type bus_space_read##n(bus_space_t* space, paddr_t offset) { \
 		volatile type* ptr; \
-		if(space->port != DEVICE_LOCATOR_UNSET) { \
-			return in##sz(space->port + offset); \
-		} \
+		BUS_IO_READ(sz) \
 \
 		ptr = (volatile type*)bus_space_addr(space, offset, sizeof(type)); \
 \
@@ -44,11 +59,7 @@ static int bus_space_index(bus_space_t* space, int def) {
 \
 	void bus_space_write##n(bus_space_t* space, paddr_t offset, type value) { \
 		volatile type* ptr; \
-		if(space->port != DEVICE_LOCATOR_UNSET) { \
-			out##sz(space->port + offset, value); \
-\
-			return; \
-		} \
+		BUS_IO_WRITE(sz, value) \
 \
 		ptr = (volatile type*)bus_space_addr(space, offset, sizeof(type)); \
 \
