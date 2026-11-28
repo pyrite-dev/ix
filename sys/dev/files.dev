@@ -9,6 +9,8 @@ file dev/vdp.c		vdp
 file dev/wdc.c		wdc
 file dev/wd.c		wd
 file dev/via.c		via
+file dev/scc.c		scc
+file dev/macfb.c	macfb
 file dev/ncr.c		ncr
 file dev/scsibus.c	scsibus
 file dev/sd.c		sd
