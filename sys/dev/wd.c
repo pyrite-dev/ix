@@ -122,7 +122,7 @@ static int wd_attach(struct device* parent, struct device* self, struct device_a
 
 	memset(softc, 0, sizeof(*softc));
 
-	softc->wdc = parent->softc;
+	softc->wdc   = parent->softc;
 	softc->drive = args->locators[DEVICE_LOCATOR_DRIVE] ? WD_DH_SLAVE : WD_DH_MASTER;
 
 	spinlock_lock(&softc->wdc->lock);

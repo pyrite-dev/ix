@@ -15,22 +15,22 @@
 
 static thread_t thread;
 static char	stack[4096];
+unsigned char	buf[512];
 
 static void thread_main(void* arg) {
-	const char*   text = "Hello, Console!\n";
-	int	      fd   = open("/dev/tty0", O_RDWR);
-	int	      infd = open("/dev/tty1", O_RDWR);
-	DIR*	      dir  = opendir("/dev");
-	int	      d	   = open("/dev/wd0a", O_RDONLY);
-	unsigned char buf[512];
-	int	      i;
+	const char* text = "Hello, Console!\n";
+	int	    fd	 = open("/dev/tty0", O_RDWR);
+	int	    infd = open("/dev/tty1", O_RDWR);
+	DIR*	    dir	 = opendir("/dev");
+	int	    d	 = open("/dev/cd0", O_RDONLY);
+	int	    i;
 
 	if(infd < 0) infd = fd;
 
 	write(fd, text, strlen(text));
 
 	if(d >= 0) {
-		lseek(d, 512, SEEK_SET);
+		lseek(d, 32768, SEEK_SET);
 		read(d, buf, 512);
 		for(i = 0; i < 8; i += 4) {
 			if(i > 0 && (i % 16) == 0) write(fd, "\n", 1);

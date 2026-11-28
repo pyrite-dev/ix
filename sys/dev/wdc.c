@@ -54,7 +54,7 @@ static void wdc_scan(struct device* self) {
 
 		locators[DEVICE_LOCATOR_DRIVE] = drive;
 
-		device_attach_any(self, "wd", locators);
+		if(device_attach_any(self, "wd", locators) == 0) device_attach_any(self, "atapi", locators);
 	}
 }
 

@@ -6,11 +6,19 @@
 #include <string.h>
 
 struct scsibus_softc {
+	struct scsi_transport transport;
+
 	struct device*	     hba;
 	struct scsi_adapter* adapter;
 };
 
 int scsibus_exec(struct device* bus, unsigned int target, unsigned int lun, const unsigned char* cdb, unsigned int cdb_len, unsigned char* data, unsigned int data_len, int data_read) {
+	struct scsibus_softc* softc = bus->softc;
+
+	return softc->adapter->exec(softc->hba, target, lun, cdb, cdb_len, data, data_len, data_read);
+}
+
+int scsibus_transport_exec(struct device* bus, unsigned int target, unsigned int lun, const unsigned char* cdb, unsigned int cdb_len, unsigned char* data, unsigned int data_len, int data_read) {
 	struct scsibus_softc* softc = bus->softc;
 
 	return softc->adapter->exec(softc->hba, target, lun, cdb, cdb_len, data, data_len, data_read);
@@ -28,8 +36,9 @@ static int scsibus_attach(struct device* parent, struct device* self, struct dev
 
 	memset(softc, 0, sizeof(*softc));
 
-	softc->hba     = parent;
-	softc->adapter = (struct scsi_adapter*)parent->softc;
+	softc->transport.exec = scsibus_transport_exec;
+	softc->hba	      = parent;
+	softc->adapter	      = parent->softc;
 
 	return 0;
 }
@@ -57,6 +66,7 @@ static void scsibus_scan(struct device* self) {
 		for(lun = 0; lun < 8; lun++) {
 			unsigned char cdb[6];
 			paddr_t	      locators[DEVICE_LOCATOR_COUNT];
+			const char*   name;
 			int	      i;
 
 			cdb[0] = SCSI_OP_INQUIRY;
@@ -68,7 +78,16 @@ static void scsibus_scan(struct device* self) {
 
 			if(scsibus_exec(self, target, lun, cdb, sizeof(cdb), inquiry, sizeof(inquiry), 1) != SCSI_STATUS_GOOD) break;
 
-			if((inquiry[0] & 0x1f) != 0) continue;
+			switch(inquiry[0] & 0x1f) {
+			case 0:
+				name = "sd";
+				break;
+			case 5:
+				name = "cd";
+				break;
+			default:
+				continue;
+			}
 
 			if(scsibus_occupied(self, target, lun)) continue;
 
@@ -76,7 +95,7 @@ static void scsibus_scan(struct device* self) {
 			locators[DEVICE_LOCATOR_TARGET] = target;
 			locators[DEVICE_LOCATOR_LUN]	= lun;
 
-			device_attach_any(self, "sd", locators);
+			device_attach_any(self, name, locators);
 		}
 	}
 }

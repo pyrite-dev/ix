@@ -10,6 +10,7 @@
 #define SCSI_OP_WRITE6 0x0a
 #define SCSI_OP_INQUIRY 0x12
 #define SCSI_OP_READ_CAPACITY 0x25
+#define SCSI_OP_READ10 0x28
 
 /* Status codes */
 #define SCSI_STATUS_GOOD 0x00
@@ -20,5 +21,11 @@ struct scsi_adapter {
 };
 
 int scsibus_exec(struct device* bus, unsigned int target, unsigned int lun, const unsigned char* cdb, unsigned int cdb_len, unsigned char* data, unsigned int data_len, int data_read);
+
+struct scsi_transport {
+	int (*exec)(struct device* bus, unsigned int target, unsigned int lun, const unsigned char* cdb, unsigned int cdb_len, unsigned char* data, unsigned int data_len, int data_read);
+};
+
+int scsibus_transport_exec(struct device* bus, unsigned int target, unsigned int lun, const unsigned char* cdb, unsigned int cdb_len, unsigned char* data, unsigned int data_len, int data_read);
 
 #endif

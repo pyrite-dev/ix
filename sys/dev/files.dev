@@ -1,7 +1,11 @@
 wd*		at wdc? drive ?
+atapi*		at wdc? drive ?
+cd*		at atapi? target ? lun ?
 
 scsibus*	at ncr?
+
 sd*		at scsibus? target ? lun ?
+cd*		at scsibus? target ? lun ?
 
 file dev/pit.c		pit
 file dev/ns.c		ns
@@ -11,3 +15,5 @@ file dev/wd.c		wd
 file dev/ncr.c		ncr
 file dev/scsibus.c	scsibus
 file dev/sd.c		sd
+file dev/atapi.c	atapi
+file dev/cd.c		cd
